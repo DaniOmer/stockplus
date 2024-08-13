@@ -1,0 +1,15 @@
+venv
+.venv
+.pyenv
+*.pyc
+*/*.pyc
+*/__pycache__/
+*/__pycache__/*
+*/*.pyc
+*/*/*.pyc
+*/*/__pycache__/
+*/*/__pycache__/*
+backups
+media/
+
+.DS_Store
