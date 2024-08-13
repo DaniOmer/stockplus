@@ -16,5 +16,5 @@
 #### 3. Environment variables settings
 
 ```bash
-    source configuration/environment/dev
+    source configuration/environments/development
 ```

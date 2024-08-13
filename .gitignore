@@ -11,5 +11,6 @@ venv
 */*/__pycache__/*
 backups
 media/
+db.sqlite3
 
 .DS_Store

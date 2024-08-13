@@ -1,0 +1,15 @@
+ENV="DEVELOPMENT"
+DATABASE="postgresql"
+
+DB_NAME="stockplus"
+DB_USER="stockplus"
+DB_PASSWORD="stockplus"
+DB_HOST="localhost"
+DB_PORT="5432"
+
+SENDER_NAME="contact"
+SENDER_EMAIL="contact@stockplus.io"
+REPLY_NAME="noreply"
+REPLY_EMAIL="noreply@stockplus.io"
+
+ALLOWED_HOSTS="*"
