@@ -1,3 +1,5 @@
 djangorestframework
 django-decouple
 psycopg2
+django-ckeditor-5
+html2text
