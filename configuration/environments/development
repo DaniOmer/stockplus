@@ -13,3 +13,5 @@ REPLY_NAME="noreply"
 REPLY_EMAIL="noreply@stockplus.io"
 
 ALLOWED_HOSTS="*"
+DEBUG=True
+SECRET_KEY=_wy47*f9+@w=*f^s3%w=vho$v=&x8kna_u7pt$y!j2izrmwd

@@ -1,0 +1,25 @@
+name: stockplus
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.prod
+    command: gunicorn configuration.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - SENDER_NAME=${SENDER_NAME}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - REPLY_NAME=${REPLY_NAME}
+      - REPLY_EMAIL=${REPLY_EMAIL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}

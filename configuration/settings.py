@@ -21,10 +21,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_wy47*f9+@w=*f^s3%w=vho$v(=&x8kna_u7pt$y!j2(izrmwd'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = []
 
@@ -85,7 +85,6 @@ if config('DATABASE') == "postgresql":
             'PORT': config('DB_PORT'),
         }
     }
-    print(config('SENDER_NAME'))
 else:
     DATABASES = {
         'default': {
