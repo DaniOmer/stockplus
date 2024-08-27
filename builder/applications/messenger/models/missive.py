@@ -6,23 +6,12 @@ from builder.applications.messenger.models.abstracts import MessengerModel
 
 class Missive(MessengerModel):
     backend = models.CharField(max_length=255, editable=False)
-    subject = models.CharField(max_length=255)
     msg_id = models.CharField(max_length=255, blank=True, null=True)
 
     response = models.TextField(blank=True, null=True, editable=False)
     partner_id = models.CharField(max_length=255, blank=True, null=True, editable=False)
     code_error = models.CharField(max_length=255, blank=True, null=True, editable=False)
     trace = models.TextField(blank=True, null=True, editable=False)
-    
-    class Meta(MessengerModel.Meta):
-        abstract = True
-        verbose_name = "missive"
-        verbose_name_plural = "missives"
-        permissions = [('can_check', _.permission_check),]
-        ordering = ['-date_create',]
-
-    def __str__(self):
-        return '%s (%s)' % (self.masking, self.subject)
 
     def need_to_send(self):
         if self.status == choices.STATUS_PREPARE and self.mode != choices.MODE_WEB:
@@ -43,8 +32,3 @@ class Missive(MessengerModel):
     def check_status(self):
         backend = self.get_backend()
         return getattr(backend, 'check_%s' % self.mode.lower())(self)
-
-    @property
-    def url_viewer(self):
-        from django.urls import reverse
-        return reverse('messenger-email-viewer', args=[self.uid])

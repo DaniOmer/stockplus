@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 ERROR_SMTP_101 = "The server is unable to connect."
 ERROR_SMTP_111 = "Connection refused or inability to open an SMTP stream."
 ERROR_SMTP_211 = "System status message or help reply."
@@ -46,5 +48,17 @@ STATUS_RECEIVED = 'RECEIVED'
 STATUS_OPEN = 'OPEN'
 STATUS_ERROR = 'ERROR'
 
+STATUS = (
+    (STATUS_PREPARE, _("prepare")),
+    (STATUS_SENT, _("sent")),
+    (STATUS_RECEIVED, _("received")),
+    (STATUS_ERROR, _("error")),
+)
+
 MODE_EMAIL = 'EMAIL'
 MODE_SMS = 'SMS'
+
+MODE = (
+    (MODE_EMAIL, _("email")),
+    (MODE_SMS, _("sms")),
+)

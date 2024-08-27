@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.template.loader import render_to_string
 
 from builder.applications.messenger import (
     choices, translates as _,
@@ -9,7 +8,6 @@ from builder.applications.messenger import (
     missive_backend_sms,
 )
 from builder.applications.messenger.apps import MessengerConfig as conf
-from builder.functions import masking_email, masking_phone, get_model, url_domain
 from builder.models.base import Base
 from builder.fields import RichTextField
 from html2text import html2text
@@ -18,7 +16,6 @@ class MessengerModel(Base):
     in_test = False
     mode = models.CharField(max_length=8, choices=choices.MODE, default=choices.MODE_EMAIL)
     status = models.CharField(choices=choices.STATUS, default=choices.STATUS_PREPARE, max_length=8)
-    priority = models.PositiveIntegerField(default=0, choices=choices.PRIORITIES)
     
     name = models.CharField(max_length=255, blank=True, null=True)
     sender = models.CharField(max_length=255, blank=True, null=True)
@@ -44,10 +41,6 @@ class MessengerModel(Base):
 
     default = ''
     attachments = []
-
-    class Meta(Base.Meta):
-        abstract = True
-        ordering = ['-date_create',]
 
     def need_to_send(self):
         raise NotImplementedError("Subclasses should implement need_to_send()")
@@ -108,33 +101,3 @@ class MessengerModel(Base):
     @property
     def content(self):
         return self.html if self.html else self.txt
-
-    @property
-    def masking_email(self):
-        return masking_email(self.target)
-    
-    @property
-    def masking_phone(self):
-        return masking_phone(self.target)
-
-    @property
-    def masking(self):
-        if self.mode == choices.MODE_SMS:
-            return self.masking_phone
-        elif self.mode == choices.MODE_EMAIL:
-            return self.masking_email
-        elif self.mode == choices.MODE_POSTAL:
-            return self.raw_address
-        return self.target
-
-    @property
-    def model_missive(self):
-        return get_model('builder', 'Missive')
-
-    @property
-    def model_notification(self):
-        return get_model('builder', 'Notification')
-
-    @property
-    def html_format(self):
-        return render_to_string(self.template, {"object": self, "domain_url": url_domain("", http=True) }) if self.template else self.html
