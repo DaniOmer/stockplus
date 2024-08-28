@@ -13,7 +13,6 @@ from builder.fields import RichTextField
 from html2text import html2text
 
 class MessengerModel(Base):
-    in_test = False
     mode = models.CharField(max_length=8, choices=choices.MODE, default=choices.MODE_EMAIL)
     status = models.CharField(choices=choices.STATUS, default=choices.STATUS_PREPARE, max_length=8)
     
@@ -39,8 +38,8 @@ class MessengerModel(Base):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
 
-    default = ''
-    attachments = []
+    class Meta(Base.Meta):
+        abstract = True
 
     def need_to_send(self):
         raise NotImplementedError("Subclasses should implement need_to_send()")

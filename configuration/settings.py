@@ -40,8 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_ckeditor_5',
-    'builder',
-    'builder.applications.messenger',
 ]
 
 MIDDLEWARE = [
@@ -134,3 +132,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+"""
+Builder configuration
+"""
+
+MIGRATION_MODULES = {"builder": "stockplus.migrations.builder"}
+AUTH_USER_MODEL = "builder.User"
+
+INSTALLED_APPS += ["builder",] + [
+    'builder.applications.user',
+    'builder.applications.messenger',
+]
+
+
+"""
+Brevo (Sendinblue) - Mail and Sms service configuration
+"""
+SENDINBLUE_APIKEY = config("SENDINBLUE_APIKEY")

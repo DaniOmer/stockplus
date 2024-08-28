@@ -19,3 +19,6 @@ class Base(models.Model):
     use_create_by = True
     use_update_by = True
     can_notify = True
+
+    class Meta:
+        abstract = True

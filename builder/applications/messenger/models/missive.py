@@ -13,6 +13,11 @@ class Missive(MessengerModel):
     code_error = models.CharField(max_length=255, blank=True, null=True, editable=False)
     trace = models.TextField(blank=True, null=True, editable=False)
 
+    class Meta(MessengerModel.Meta):
+        abstract = True
+        verbose_name = "missive"
+        verbose_name_plural = "missives"
+
     def need_to_send(self):
         if self.status == choices.STATUS_PREPARE and self.mode != choices.MODE_WEB:
             send_missive(self)
