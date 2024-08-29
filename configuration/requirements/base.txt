@@ -1,4 +1,7 @@
+django
 djangorestframework
+django-oauth-toolkit
+djangorestframework-simplejwt
 django-decouple
 psycopg2
 django-ckeditor-5
