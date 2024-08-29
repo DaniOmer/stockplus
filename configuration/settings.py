@@ -207,5 +207,21 @@ OAUTH2_PROVIDER = {
     # this is the list of available scopes
     'SCOPES': {'read': 'Read scope', 'write': 'Write scope', 'groups': 'Access to your groups'}
 }
+# LOGIN_URL = '/admin/login/'
 
-LOGIN_URL = '/admin/login/'
+"""
+Corsheaders configuration
+"""
+INSTALLED_APPS += ["corsheaders",]
+
+MIDDLEWARE += [
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+]
+
+CORS_ALLOW_ALL_ORIGINS=True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://stockplus.io",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:3000",
+# ]
