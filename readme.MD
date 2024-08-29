@@ -15,6 +15,14 @@
     pip install -r configuration/requirements/development.txt
 ```
 
+##### Installing other services
+
+###### - Brevo (Sendinblue)
+
+```bash
+pip install git+https://github.com/sendinblue/APIv3-python-library.git
+```
+
 ##### - Environment variables settings
 
 ```bash
