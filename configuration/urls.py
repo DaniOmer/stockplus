@@ -18,8 +18,6 @@ from django.urls import path, include
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from oauth2_provider import urls as oauth2_urls
-from stockplus import urls as stockplus_urls
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,4 +26,11 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
-urlpatterns += stockplus_urls.urlpatterns
+## Builder
+from builder import urls as urls_builder
+urlpatterns += urls_builder.urlpatterns
+
+## Stockplus 
+from stockplus import urls as urls_stockplus
+urlpatterns += urls_stockplus.urlpatterns
+
