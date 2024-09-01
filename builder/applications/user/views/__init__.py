@@ -1,5 +1,5 @@
-from builder.applications.user.views.create import CreateUserView
+from builder.applications.user.views.create import UserCreateView
 
 __all__ = (
-    CreateUserView,
+    UserCreateView,
 )

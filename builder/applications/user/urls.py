@@ -9,6 +9,6 @@ router = routers.DefaultRouter()
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('api/user/', include([
-        path('create/', views.CreateUserView.as_view(), name="create-user"),
+        path('create/', views.UserCreateView.as_view(), name="user-create"),
     ])),
 ]

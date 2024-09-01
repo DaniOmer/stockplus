@@ -25,13 +25,3 @@ class UserSerializer(serializers.ModelSerializer):
         user.groups.add(user_group)
 
         return user
-    
-
-    def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
-        instance = super().update(instance, validated_data)
-
-        if password:
-            instance.set_password(password)
-            instance.save()
-        return instance

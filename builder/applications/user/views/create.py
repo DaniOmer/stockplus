@@ -5,7 +5,7 @@ from builder.applications.user.serializers import UserSerializer
 
 User = get_user_model()
 
-class CreateUserView(generics.CreateAPIView):
+class UserCreateView(generics.CreateAPIView):
     """
     API endpoint to create User
     """
