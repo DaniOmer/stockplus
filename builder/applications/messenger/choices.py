@@ -57,6 +57,7 @@ STATUS = (
 
 MODE_EMAIL = 'EMAIL'
 MODE_SMS = 'SMS'
+MODE_WEB = 'WEB'
 
 MODE = (
     (MODE_EMAIL, _("email")),

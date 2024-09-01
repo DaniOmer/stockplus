@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -62,6 +63,10 @@ class MessengerModel(Base):
         self.set_backend()
         self.prepare_mode()
         self.need_to_send()
+    
+    def save(self, *args, **kwargs):
+        self.pre_save()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return '%s (%s)' % (self.masking, self.subject)
@@ -76,10 +81,6 @@ class MessengerModel(Base):
         self.txt = 'not used for postal'
 
     def prepare_email(self):
-        if not self.sender:
-            self.sender = conf.sender_email
-
-    def prepare_emailar(self):
         if not self.sender:
             self.sender = conf.sender_email
 

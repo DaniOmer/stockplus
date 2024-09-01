@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 def send_missive(missive):
     for backend, backend_path in get_backends([missive.backend], return_tuples=True, path_extend='.MissiveBackend', missive=missive):
+        logger.info(f"Sending : {backend}")
         return backend.send()
     return False
 

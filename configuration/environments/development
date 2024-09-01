@@ -8,7 +8,7 @@ DB_HOST="localhost"
 DB_PORT="5432"
 
 SENDER_NAME="contact"
-SENDER_EMAIL="contact@stockplus.io"
+SENDER_EMAIL="ddaniomer95@gmail.com"
 REPLY_NAME="noreply"
 REPLY_EMAIL="noreply@stockplus.io"
 

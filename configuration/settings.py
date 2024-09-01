@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -25,7 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -133,11 +135,43 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+"""
+Project configuration
+"""
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "templates/static"), ]
+TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates/')]
+
+
+"""
+Logger
+"""
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#         'builder': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
+
 
 """
 Builder configuration
 """
-
 MIGRATION_MODULES = {"builder": "stockplus.migrations.builder"}
 AUTH_USER_MODEL = "builder.User"
 
@@ -193,10 +227,22 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(seconds=seconds_delta),
 }
 
+
 """
 ## Brevo (Sendinblue) - Mail and Sms service configuration
 """
 SENDINBLUE_APIKEY = config("SENDINBLUE_APIKEY")
+
+MISSIVE_SERVICE = config('MISSIVE_SERVICE', default=True)
+MISSIVE_BACKENDS = 'builder.applications.messenger.backends'
+MISSIVE_BACKEND_EMAIL = 'builder.applications.messenger.backends.email.sendinblue'
+MESSENGER = {
+    'sender_name': config('SENDER_NAME', default='contact'),
+    'sender_email': config('SENDER_EMAIL', default='contact@stockplus.io'),
+    'reply_name': config('REPLY_NAME', default='noreply'),
+    'reply_email': config('REPLY_EMAIL', default='noreply@stockplus.io'),
+}
+
 
 """
 ## OAuth2 configuration

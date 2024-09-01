@@ -5,34 +5,37 @@ from builder.applications.messenger import choices
 from builder.applications.messenger.backends import MissiveBackend
 from builder.applications.messenger.apps import MessengerConfig as conf
 
-from __future__ import print_function
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 """
 Default configuration from Brevo (Sendinblue)
 Send Transactional Emails in Python Recipe
 """
-configuration = sib_api_v3_sdk.Configuration()
-configuration.api_key['api-key'] = 'YOUR API KEY'
+# configuration = sib_api_v3_sdk.Configuration()
+# configuration.api_key['api-key'] = 'YOUR API KEY'
 
-api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-subject = "from the Python SDK!"
-sender = {"name":"Sendinblue","email":"contact@sendinblue.com"}
-html_content = "<html><body><h1>This is my first transactional email </h1></body></html>"
-to = [{"email":"example@example.com","name":"Jane Doe"}]
-cc = [{"email":"example2@example2.com","name":"Jane Doe"}]
-bcc = [{"email":"example2@example2.com","name":"Jane Doe"}]
-reply_to = {"name":"Sendinblue","email":"contact@sendinblue.com"}
-headers = {"Some-Custom-Name":"unique-id-1234"}
-params = {"parameter":"My param value","subject":"New Subject"}
-send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, bcc=bcc, cc=cc, reply_to=reply_to, headers=headers, html_content=html_content, sender=sender, subject=subject)
+# api_instance = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+# subject = "from the Python SDK!"
+# sender = {"name":"Sendinblue","email":"contact@sendinblue.com"}
+# html_content = "<html><body><h1>This is my first transactional email </h1></body></html>"
+# to = [{"email":"example@example.com","name":"Jane Doe"}]
+# cc = [{"email":"example2@example2.com","name":"Jane Doe"}]
+# bcc = [{"email":"example2@example2.com","name":"Jane Doe"}]
+# reply_to = {"name":"Sendinblue","email":"contact@sendinblue.com"}
+# headers = {"Some-Custom-Name":"unique-id-1234"}
+# params = {"parameter":"My param value","subject":"New Subject"}
+# send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, bcc=bcc, cc=cc, reply_to=reply_to, headers=headers, html_content=html_content, sender=sender, subject=subject)
 
-try:
-    api_response = api_instance.send_transac_email(send_smtp_email)
-    print(api_response)
-except ApiException as e:
-    print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
+# try:
+#     api_response = api_instance.send_transac_email(send_smtp_email)
+#     print(api_response)
+# except ApiException as e:
+#     print("Exception when calling SMTPApi->send_transac_email: %s\n" % e)
 
 
 """
@@ -69,7 +72,7 @@ class MissiveBackend(MissiveBackend):
             to=[{"email": self.missive.target}],
             reply_to={"email": self.missive.sender, "name": conf.reply_name},
             sender={"email": self.missive.sender, "name": conf.sender_name},
-            subject= self.missive.subject
+            subject= self.missive.subject,
             html_content=self.missive.html,
             text_content=self.missive.txt,
         )
