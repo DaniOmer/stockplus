@@ -10,5 +10,6 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('api/user/', include([
         path('create/', views.UserCreateView.as_view(), name="user-create"),
+        path('<int:pk>/profile/', views.UserProfileView.as_view(), name="user-profile")
     ])),
 ]
