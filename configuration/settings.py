@@ -227,6 +227,7 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(seconds=seconds_delta),
 }
 
+EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(seconds=seconds_delta)
 
 """
 ## Brevo (Sendinblue) - Mail and Sms service configuration
@@ -271,3 +272,9 @@ CORS_ALLOW_ALL_ORIGINS=True
 #     "http://localhost:8080",
 #     "http://127.0.0.1:3000",
 # ]
+
+
+"""
+Frontend configuration
+"""
+FRONTEND_URL = config('FRONTEND_URL', default="http://stockplus.io")
