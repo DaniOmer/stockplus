@@ -1,5 +1,7 @@
 from django.urls import reverse
 from django.conf import settings
+from django.template.loader import render_to_string
+
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from builder.functions import setting
@@ -18,4 +20,20 @@ def generate_verification_url(user):
         verification_link = reverse('email-verify')
         verification_url = f"{settings.FRONTEND_URL}{verification_link}?token={str(token)}"
         return verification_url
+    return None
+
+def get_verification_data_missive(user):
+    verification_url = generate_verification_url(user)
+    if verification_url is not None:
+        html_content = render_to_string('activation_mail.html', {'user': user, 'verification_url': str(verification_url)})
+        return {
+            "content_type": None,
+            "object_id": None,
+            "subject": 'Bienvenue chez Stockplus',
+            "html": html_content,
+            "txt": html_content,
+            "target": user.email,
+            "mode": 'EMAIL',
+            "template": 'activation_mail.html'
+        }
     return None
