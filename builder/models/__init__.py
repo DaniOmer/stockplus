@@ -7,3 +7,4 @@ if 'builder.applications.messenger' in settings.INSTALLED_APPS:
 if 'builder.applications.user' in settings.INSTALLED_APPS:
     from builder.applications.user import models as models_user
     class User(models_user.User): pass
+    class Invitation(models_user.Invitation): pass

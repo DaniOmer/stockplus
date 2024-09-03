@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 
+from builder.models import Invitation
+
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,3 +53,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class InvitationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Invitation
+        fields = ['email']
+        
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("You must provide an email address.")
+        
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        
+        return value

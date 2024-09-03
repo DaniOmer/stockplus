@@ -256,6 +256,15 @@ OAUTH2_PROVIDER = {
 }
 # LOGIN_URL = '/admin/login/'
 
+
+"""
+User invitation settings
+"""
+from rest_framework.permissions import IsAuthenticated
+from stockplus.permissions import IsManager
+INVITATION_PERMISSION = [IsManager & IsAuthenticated]
+
+
 """
 Corsheaders configuration
 """
