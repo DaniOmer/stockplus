@@ -19,6 +19,10 @@ from django.urls import path, include
 urlpatterns = []
 
 # Enable app user
-# if "builder.applications.user" in settings.INSTALLED_APPS:
-from builder.applications.user import urls as urls_user
-urlpatterns += urls_user.urlpatterns
+if "builder.applications.user" in settings.INSTALLED_APPS:
+    from builder.applications.user import urls as urls_user
+    urlpatterns += urls_user.urlpatterns
+
+if "builder.applications.company" in settings.INSTALLED_APPS:
+    from builder.applications.company import urls as urls_company
+    urlpatterns += urls_company.urlpatterns

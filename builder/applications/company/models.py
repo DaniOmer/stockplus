@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.auth import get_user_model
 
 from builder.models.base import Base
 from builder.fields import RichTextField
 
+User = get_user_model()
 class Company(Base):
     search_fields = ['denomination']
     denomination = models.CharField(max_length=255)
@@ -10,6 +12,7 @@ class Company(Base):
     site = models.URLField(null=True, blank=True)
     effective = models.BigIntegerField(null=True, blank=True)
     resume = RichTextField(null=True, blank=True)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='company')
 
     legal_form = models.CharField(max_length=50)
     registration_number = models.CharField(max_length=100, unique=True, null=True, blank=True)
@@ -22,3 +25,6 @@ class Company(Base):
 
     class Meta(Base.Meta):
         abstract = True
+
+    def __str__(self):
+        return self.name
