@@ -264,7 +264,7 @@ User permissions settings
 from rest_framework.permissions import IsAuthenticated
 from stockplus.permissions import IsManager
 INVITATION_PERMISSION = [IsManager & IsAuthenticated]
-CREATE_COMPANY_PERMISSION = [IsManager & IsAuthenticated]
+COMPANY_CRUD_PERMISSION = [IsManager & IsAuthenticated]
 
 """
 Corsheaders configuration
