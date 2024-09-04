@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
-from rest_framework import permissions, generics
+from rest_framework import permissions, generics, serializers
 
+from builder.models import UserAddress
 from builder.applications.user.serializers import UserSerializer, UserAddressSerializer
 
 User = get_user_model()
@@ -20,5 +21,9 @@ class UserAddressCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        user = self.request.user
+
+        if UserAddress.objects.filter(user=user).exists():
+            raise serializers.ValidationError({"detail": "You already have an address."})
+        
         serializer.save(user=self.request.user)
-        return super().perform_create(serializer)
