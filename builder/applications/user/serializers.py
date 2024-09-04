@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from rest_framework import serializers
 
-from builder.models import Invitation
+from builder.models import Invitation, UserAddress
 
 User = get_user_model()
 
@@ -53,6 +53,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+
+class UserAddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAddress
+        exclude = ['user']
 
 
 class InvitationSerializer(serializers.ModelSerializer):

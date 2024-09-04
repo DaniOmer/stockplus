@@ -179,6 +179,15 @@ INSTALLED_APPS += ["builder",] + [
     'builder.applications.user',
     'builder.applications.messenger',
     'builder.applications.company',
+    'builder.applications.address',
+]
+
+
+"""
+Stockplus configuration
+"""
+INSTALLED_APPS += [
+    'stockplus.applications.pointofsale',
 ]
 
 

@@ -15,5 +15,8 @@ urlpatterns = [
         path('email-resend-verification/', views.ResendVerificationEmailView.as_view(), name= "email-resend-verification"),
         path('invite-user/', views.InvitationCreateView.as_view(), name= "invite-user"),
         path('invite-user-validation/', views.InvitationValidationView.as_view(), name= "invite-user-validation"),
+        path('address/', include([
+            path('create/', views.UserAddressCreateView.as_view(), name="user-address-create"),
+        ]))
     ])),
 ]

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 from builder.models.base import Base
+from builder.applications.address import models as AddressModels
 from builder.applications.user.apps import UserConfig
 
 class User(AbstractUser):
@@ -25,6 +26,13 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
+    
+
+class UserAddress(AddressModels.Address):
+    user = models.ForeignKey(UserConfig.ForeignKey.user, on_delete=models.CASCADE, related_name='user_address')
+
+    class Meta:
+        abstract = True
 
 class Invitation(Base):
     email = models.EmailField(unique=True)
