@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from builder.models import UserAddress
-from builder.applications.user.permissions import IsSelf
+from builder.permissions import IsSelf
 from builder.applications.user.serializers import UserProfileSerializer, UserAddressSerializer
 
 User = get_user_model()

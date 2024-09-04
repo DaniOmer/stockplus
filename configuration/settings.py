@@ -187,6 +187,7 @@ INSTALLED_APPS += ["builder",] + [
 Stockplus configuration
 """
 INSTALLED_APPS += [
+    'stockplus',
     'stockplus.applications.pointofsale',
 ]
 
@@ -270,10 +271,9 @@ OAUTH2_PROVIDER = {
 """
 User permissions settings
 """
-from rest_framework.permissions import IsAuthenticated
 from stockplus.permissions import IsManager
-INVITATION_PERMISSION = [IsManager & IsAuthenticated]
-COMPANY_CRUD_PERMISSION = [IsManager & IsAuthenticated]
+INVITATION_PERMISSION = IsManager
+COMPANY_CRUD_PERMISSION = IsManager
 
 """
 Corsheaders configuration

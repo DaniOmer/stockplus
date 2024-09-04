@@ -15,7 +15,7 @@ class InvitationCreateView(APIView):
     """
     API endpoint to send an Invitation
     """
-    permission_classes = InvitationPermission if InvitationPermission else [IsAuthenticated]
+    permission_classes = [InvitationPermission & IsAuthenticated] if InvitationPermission else [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = InvitationSerializer(data=request.data)
