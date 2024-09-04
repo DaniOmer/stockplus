@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from builder.applications.address import models as AddressModels
+from builder.applications.company.apps import CompanyConfig
 from builder.models.base import Base
 from builder.fields import RichTextField
 
@@ -28,3 +30,11 @@ class Company(Base):
 
     def __str__(self):
         return self.name
+    
+
+class CompanyAddress(AddressModels.Address):
+    company = models.ForeignKey(CompanyConfig.ForeignKey.company, on_delete=models.CASCADE, related_name='company_address')
+    is_siege = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
