@@ -1,8 +1,12 @@
 from django.contrib.auth import get_user_model
-from rest_framework import generics, permissions, status
+
+from rest_framework import generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from builder.applications.user.serializers import UserProfileSerializer
+from builder.models import UserAddress
+from builder.applications.user.permissions import IsSelf
+from builder.applications.user.serializers import UserProfileSerializer, UserAddressSerializer
 
 User = get_user_model()
 
@@ -12,13 +16,9 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     """
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsSelf]
 
     def get_queryset(self):
-        """
-        Optionally restricts the returned user details by
-        filtering against the 'id' query parameter in the URL.
-        """
         user_id = self.kwargs.get('pk')
         return self.queryset.filter(id=user_id)
     
@@ -31,3 +31,16 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             )
         
         return super().update(request, *args, **kwargs)
+
+
+class UserAddressDetailsView(generics.RetrieveUpdateAPIView):
+    """
+    API endpoint to get or update User Address
+    """
+    queryset = UserAddress.objects.all()
+    serializer_class = UserAddressSerializer
+    permission_classes = [IsAuthenticated, IsSelf]
+
+    def get_queryset(self):
+        address_id = self.kwargs.get('pk')
+        return self.queryset.filter(id=address_id)
