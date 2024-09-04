@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework import generics, serializers
 from rest_framework.permissions import IsAuthenticated
 
+from builder.permissions import IsSelf
 from builder.models import Company, CompanyAddress
 from builder.applications.company.serializers import CompanySerializer, CompanyAddressSerializer
 
@@ -9,7 +10,7 @@ CompanyCrudPersmission = getattr(settings, 'COMPANY_CRUD_PERMISSION', None)
 
 class CompanyCreateView(generics.CreateAPIView):
     serializer_class = CompanySerializer
-    permission_classes = CompanyCrudPersmission if CompanyCrudPersmission else [IsAuthenticated]
+    permission_classes = [CompanyCrudPersmission & IsAuthenticated & IsSelf] if CompanyCrudPersmission else [IsAuthenticated & IsSelf]
 
     def perform_create(self, serializer):
 
@@ -23,7 +24,7 @@ class CompanyAddressCreateView(generics.CreateAPIView):
     API endpoint to create Company Address
     """
     serializer_class = CompanyAddressSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [CompanyCrudPersmission & IsAuthenticated & IsSelf] if CompanyCrudPersmission else [IsAuthenticated & IsSelf]
 
     def perform_create(self, serializer):
         try:

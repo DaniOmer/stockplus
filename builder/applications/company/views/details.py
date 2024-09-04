@@ -1,33 +1,33 @@
 from django.conf import settings
-from rest_framework import generics, status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 
-from builder.models import Company
-from builder.applications.company.serializers import CompanySerializer
+from builder.models import Company, CompanyAddress
+from builder.permissions import IsSelf
+from builder.applications.company.serializers import CompanySerializer, CompanyAddressSerializer
 
 CompanyCrudPersmission = getattr(settings, 'COMPANY_CRUD_PERMISSION', None)
 
 class CompanyDetailsView(generics.RetrieveUpdateAPIView):
+    """
+    API endpoint to get or update company details
+    """
     serializer_class = CompanySerializer
-    permission_classes = CompanyCrudPersmission if CompanyCrudPersmission else [IsAuthenticated]
+    permission_classes = CompanyCrudPersmission if CompanyCrudPersmission else [IsAuthenticated & IsSelf]
 
     def get_queryset(self):
-        """
-        Restricts the returned company details by filtering against the 'id' query parameter 
-        and ensuring the requesting user is the owner of the company.
-        """
         company_id = self.kwargs.get('pk')
-        user = self.request.user
-        return Company.objects.filter(id=company_id, owner=user)
+        return Company.objects.filter(id=company_id)
     
-    def update(self, request, *args, **kwargs):
-        company = self.get_object()
-        if request.user != company.owner:
-            # return Response(
-            #     {"detail": "You do not have permission to update this company."}, 
-            #     status=status.HTTP_401_UNAUTHORIZED
-            # )
-            raise PermissionDenied("You do not have permission to update this company.")
-        return super().update(request, *args, **kwargs)
+
+class CompanyAddressDetailsView(generics.RetrieveUpdateAPIView):
+    """
+    API endpoint to get or update Company Address
+    """
+    queryset = CompanyAddress.objects.all()
+    serializer_class = CompanyAddressSerializer
+    permission_classes = CompanyCrudPersmission if CompanyCrudPersmission else [IsAuthenticated & IsSelf]
+
+    def get_queryset(self):
+        address_id = self.kwargs.get('pk')
+        return self.queryset.filter(id=address_id)
