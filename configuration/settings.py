@@ -273,7 +273,7 @@ User permissions settings
 """
 from stockplus.permissions import IsManager
 INVITATION_PERMISSION = IsManager
-COMPANY_CRUD_PERMISSION = IsManager
+ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
 """
 Corsheaders configuration

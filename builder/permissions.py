@@ -1,17 +1,20 @@
-from rest_framework.permissions import BasePermission
+from django.conf import settings
 
-from builder.models import User
+from importlib import import_module
 
-class IsSelf(BasePermission):
-    """
-    Custom permission to only allow users to access their own data.
-    """
-    def has_object_permission(self, request, view, obj):
-        # Check if the object is a User or a related resource with a user attribute
-        if isinstance(obj, User):
-            return obj == request.user
-        if hasattr(obj, 'user'):
-            return obj.user == request.user
-        if hasattr(obj, 'owner'):
-            return obj.owner == request.user
-        return False
+from django.conf import settings
+from rest_framework.permissions import IsAuthenticated
+
+AdditionalCrudPermissions = getattr(settings, 'ADDITIONAL_CRUD_PERMISSIONS', [])
+extra_permissions = []
+
+for perm in AdditionalCrudPermissions:
+    try:
+        module_path, class_name = perm.rsplit('.', 1)
+        module = import_module(module_path)
+        permission_class = getattr(module, class_name)
+        extra_permissions.append(permission_class)
+    except (ImportError, AttributeError) as e:
+        print(f"Something went wrong when trying to get {perm}: {e}")
+
+base_permissions = [IsAuthenticated,] + extra_permissions
