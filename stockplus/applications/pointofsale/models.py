@@ -14,7 +14,7 @@ class PointOfSale(Base):
     name = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='point_of_sale')
     type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='store')
-    manager = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='managed_point_of_sale')
+    collaborators = models.ManyToManyField(User, related_name='assigned_point_of_sales')
     opening_hours = models.CharField(max_length=255, blank=True, null=True)
     closing_hours = models.CharField(max_length=255, blank=True, null=True)
 
