@@ -17,6 +17,8 @@ class IsSelf(BasePermission):
             return obj.user == request.user
         if hasattr(obj, 'owner'):
             return obj.owner == request.user
+        if hasattr(obj, 'company') and hasattr(obj.company, 'owner'):
+            return obj.company.owner == request.user
         
         logger.warning(f"Permission denied for {request.user} on object {obj}")
         return False
