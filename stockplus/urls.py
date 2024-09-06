@@ -13,9 +13,15 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
+
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
+
+if 'stockplus.applications.pointofsale' in settings.INSTALLED_APPS:
+    from stockplus.applications.pointofsale import urls as urls_pointofsale
+    urlpatterns += urls_pointofsale.urlpatterns

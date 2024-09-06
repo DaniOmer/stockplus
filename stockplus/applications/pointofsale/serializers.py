@@ -6,3 +6,6 @@ class PointOfSaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = PointOfSale
         exclude = ['company']
+        extra_kwargs = {
+            'collaborators': {'required': False}
+        }

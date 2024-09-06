@@ -1,6 +1,9 @@
-from stockplus.applications.pointofsale.views import PointOfSaleViewSet
-from rest_framework.routers import DefaultRouter
+from django.urls import path, include
 
-router = DefaultRouter()
-router.register(r'api/pointofsale', PointOfSaleViewSet, basename='pointofsale')
-urlpatterns = router.urls
+from stockplus.applications.pointofsale import views
+
+urlpatterns = [
+    path('api/', include([
+        path('point-of-sale/', views.PointOfSaleListCreateView.as_view(), name='point_of_sale_list_create')
+    ]))
+]
