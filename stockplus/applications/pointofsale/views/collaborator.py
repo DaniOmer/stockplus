@@ -14,12 +14,12 @@ class PointOfSaleAddCollaboratorView(generics.GenericAPIView):
     permission_classes = [IsManager]
 
     def get_object(self):
-        user = self.request.user
-        try:
-            company = Company.objects.get(owner=user)
-            point_of_sale = PointOfSale.objects.get(pk=self.kwargs.get('pk'))
-        except Company.DoesNotExist:
+        company = self.request.user.company
+        if not company:
             raise ValidationError("You must create a company to continue.")
+        
+        try:
+            point_of_sale = PointOfSale.objects.get(pk=self.kwargs.get('pk'))
         except PointOfSale.DoesNotExist:
             raise ValidationError("PointOfSale matching query does not exist.")
         

@@ -13,9 +13,8 @@ class PointOfSaleRetrievUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         obj = super().get_object()
         user = self.request.user
-        try:
-            company = Company.objects.get(owner=user)
-        except Company.DoesNotExist:
+        company = user.company
+        if not company:
             raise ValidationError("You must create a company to continue.")
         
         if obj.company != company and not user in obj.collaborators.all():

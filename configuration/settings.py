@@ -175,6 +175,11 @@ Builder configuration
 """
 MIGRATION_MODULES = {"builder": "stockplus.migrations.builder"}
 AUTH_USER_MODEL = "builder.User"
+USER_ROLE_CHOICES = [
+    ('manager', 'Manager'),
+    ('collaborator', 'Collaborator'),
+    ('member', 'Member'),
+]
 
 INSTALLED_APPS += ["builder",] + [
     'builder.applications.user',

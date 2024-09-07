@@ -15,18 +15,18 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
     allowed_groups = ["Manager"]
 
     def get_queryset(self):
-        user = self.request.user
+        company = self.request.user.company
+        if not company:
+            raise ValidationError("You must create a company to continue.")
+        
         try:
-            company = Company.objects.get(owner=user)
             return PointOfSale.objects.filter(company=company)
         except Company.DoesNotExist:
             return PointOfSale.objects.none()
         
     def perform_create(self, serializer):
-        user = self.request.user
-        try:
-            company = Company.objects.get(owner=user)
-        except Company.DoesNotExist:
+        company = self.request.user.company
+        if not company:
             raise ValidationError("You must create a company to continue.")
         serializer.save(company=company)
         
