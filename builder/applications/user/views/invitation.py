@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
@@ -5,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
+from builder.functions import setting
 from builder.models import Invitation, Collaboration
 from builder.applications.user.serializers import InvitationSerializer, UserSerializer
 
@@ -72,13 +74,23 @@ class UserCreateFromInvitationView(APIView):
         user_data.pop('token', None)
         user_data.pop('manager', None)
 
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(data=user_data)
         if serializer.is_valid():
-            user = serializer.save()
-            collaboration = Collaboration.objects.create(
-                collaborator=user,
-                manager=invitation.sender
-            )
-            invitation.mark_as_validated()
-            return Response({"detail": "User successfully created."}, status=status.HTTP_201_CREATED)
+            try:
+                with transaction.atomic():
+                    user = serializer.save()
+                    
+                    if setting('USER_ROLE_INVITE', False):
+                        user.role = settings.USER_ROLE_INVITE
+                        user.save()
+
+                    Collaboration.objects.create(
+                        collaborator=user,
+                        manager=invitation.sender
+                    )
+                    invitation.mark_as_validated()
+
+                return Response({"detail": "User successfully created."}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

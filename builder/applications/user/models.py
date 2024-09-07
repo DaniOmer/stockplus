@@ -24,7 +24,7 @@ class User(AbstractUser):
     
     if 'builder.applications.company' in settings.INSTALLED_APPS:
         company = models.ForeignKey(UserConfig.ForeignKey.company, on_delete=models.SET_NULL, blank=True, null=True, related_name="members")
-        role = models.CharField(max_length=100, choices=settings.USER_ROLE_CHOICES, null=True, blank=True)
+        role = models.CharField(max_length=100, choices=settings.USER_ROLE_CHOICES, default=settings.USER_ROLE_DEFAULT, null=True, blank=True)
 
     class Meta:
         abstract = True

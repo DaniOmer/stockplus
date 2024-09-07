@@ -175,11 +175,6 @@ Builder configuration
 """
 MIGRATION_MODULES = {"builder": "stockplus.migrations.builder"}
 AUTH_USER_MODEL = "builder.User"
-USER_ROLE_CHOICES = [
-    ('manager', 'Manager'),
-    ('collaborator', 'Collaborator'),
-    ('member', 'Member'),
-]
 
 INSTALLED_APPS += ["builder",] + [
     'builder.applications.user',
@@ -188,6 +183,22 @@ INSTALLED_APPS += ["builder",] + [
     'builder.applications.company',
     'builder.applications.address',
 ]
+
+# Company configuration
+USER_ROLE = [
+    ('manager', 'Manager'),
+    ('collaborator', 'Collaborator'),
+    ('member', 'Member'),
+]
+USER_ROLE_DEFAULT = 'manager'
+USER_ROLE_INVITE = 'collaborator'
+
+"""
+User permissions settings
+"""
+from stockplus.permissions import IsManager
+INVITATION_PERMISSION = IsManager
+ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
 
 """
@@ -274,13 +285,6 @@ OAUTH2_PROVIDER = {
 }
 # LOGIN_URL = '/admin/login/'
 
-
-"""
-User permissions settings
-"""
-from stockplus.permissions import IsManager
-INVITATION_PERMISSION = IsManager
-ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
 """
 Corsheaders configuration
