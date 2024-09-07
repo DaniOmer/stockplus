@@ -6,7 +6,7 @@ class CompanySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Company
-        exclude = ['owner']
+        fields = '__all__'
 
 class CompanyAddressSerializer(serializers.ModelSerializer):
     class Meta:

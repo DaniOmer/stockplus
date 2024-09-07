@@ -14,7 +14,6 @@ class Company(Base):
     site = models.URLField(null=True, blank=True)
     effective = models.BigIntegerField(null=True, blank=True)
     resume = RichTextField(null=True, blank=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='company')
 
     legal_form = models.CharField(max_length=50)
     registration_number = models.CharField(max_length=100, unique=True, null=True, blank=True)

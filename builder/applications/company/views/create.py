@@ -1,5 +1,4 @@
 from rest_framework import generics, serializers
-from rest_framework.permissions import IsAuthenticated
 
 from builder.permissions import base_permissions
 from builder.models import Company, CompanyAddress
@@ -11,11 +10,12 @@ class CompanyCreateView(generics.CreateAPIView):
     permission_classes = base_permissions
 
     def perform_create(self, serializer):
-
-        if Company.objects.filter(owner=self.request.user).exists():
-            raise serializers.ValidationError({"detail": "There's already one company associated to this company."})
-        serializer.save(owner=self.request.user)
-
+        if self.request.user.company is not None:
+            raise serializers.ValidationError({"detail": "There's already one company associated to this user."})
+        serializer.save()
+        company = serializer.instance
+        self.request.user.company = company
+        self.request.user.save()
 
 class CompanyAddressCreateView(generics.CreateAPIView):
     """
@@ -25,9 +25,8 @@ class CompanyAddressCreateView(generics.CreateAPIView):
     permission_classes = base_permissions
 
     def perform_create(self, serializer):
-        try:
-            company = Company.objects.get(owner=self.request.user)
-        except Company.DoesNotExist:
+        company = self.request.user.company
+        if company is not None:
             raise serializers.ValidationError({"detail": "You must create a company before creating an associated address."})
         
         if CompanyAddress.objects.filter(company=company).exists():
