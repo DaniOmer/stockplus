@@ -63,6 +63,7 @@ class UserCreateFromInvitationView(APIView):
         try:
             invitation = Invitation.objects.get(token=token)
             if not invitation.is_valid():
+                invitation.mark_as_expired()
                 return Response({'detail': 'Invitation token is expired.'}, status=status.HTTP_400_BAD_REQUEST)
         except Invitation.DoesNotExist:
             return Response({'detail': 'Invalid token.' }, status=status.HTTP_404_NOT_FOUND)
@@ -78,5 +79,6 @@ class UserCreateFromInvitationView(APIView):
                 collaborator=user,
                 manager=invitation.sender
             )
+            invitation.mark_as_validated()
             return Response({"detail": "User successfully created."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

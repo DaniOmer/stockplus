@@ -7,6 +7,7 @@ from django.contrib.auth.models import AbstractUser
 
 from builder.models.base import Base
 from builder.applications.address import models as AddressModels
+from builder.applications.user import choices
 from builder.applications.user.apps import UserConfig
 
 class User(AbstractUser):
@@ -38,10 +39,19 @@ class Invitation(Base):
     email = models.EmailField(unique=True)
     sender = models.ForeignKey(UserConfig.ForeignKey.user, on_delete=models.CASCADE, related_name='invitations')
     token = models.CharField(max_length=64, unique=True)
+    status = models.CharField(max_length=50, choices=choices.INVITATION_STATUS, default='PENDING')
     expires_at = models.DateTimeField()
 
     class Meta:
         abstract = True
+    
+    def mark_as_validated(self):
+        self.status = 'VALIDATED'
+        self.save()
+    
+    def mark_as_expired(self):
+        self.status = 'EXPIRED'
+        self.save()
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
@@ -51,7 +61,7 @@ class Invitation(Base):
         super().save(*args, **kwargs)
 
     def is_valid(self):
-        return timezone.now() < self.expires_at
+        return self.status == 'PENDING' and timezone.now() < self.expires_at
 
     def __str__(self):
         return f"Invitation({self.email})"
