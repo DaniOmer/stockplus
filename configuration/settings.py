@@ -190,6 +190,7 @@ Stockplus configuration
 INSTALLED_APPS += [
     'stockplus',
     'stockplus.applications.pointofsale',
+    'stockplus.applications.collaboration',
 ]
 
 
