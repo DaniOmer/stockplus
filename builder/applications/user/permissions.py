@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from builder.models import User
+from builder.models import User, Company
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,12 +13,10 @@ class IsSelf(BasePermission):
         # Check if the object is a User or a related resource with a user attribute
         if isinstance(obj, User):
             return obj == request.user
+        if isinstance(obj, Company):
+            return obj == request.user.company
         if hasattr(obj, 'user'):
             return obj.user == request.user
-        if hasattr(obj, 'owner'):
-            return obj.owner == request.user
-        if hasattr(obj, 'company') and hasattr(obj.company, 'owner'):
-            return obj.company.owner == request.user
         
         logger.warning(f"Permission denied for {request.user} on object {obj}")
         return False

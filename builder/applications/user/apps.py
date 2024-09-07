@@ -9,6 +9,7 @@ class Config:
         nationalities = 'builder.Nationality'
         address = 'builder.UserAddress'
         user = 'builder.User'
+        company = 'builder.Company'
 
 class UserConfig(AppConfig, Config):
     default_auto_field = 'django.db.models.BigAutoField'
