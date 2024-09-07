@@ -11,7 +11,7 @@ from builder.applications.user.apps import UserConfig
 
 class User(AbstractUser):
     email = models.CharField(max_length=100, unique=True)
-    username = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    username = models.CharField(max_length=100, unique=True)
     phone_number = models.CharField(max_length=20, unique=True)
     date_of_birth = models.DateField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)

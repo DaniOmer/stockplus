@@ -15,10 +15,11 @@ User = get_user_model()
 def send_activation_mail(sender, instance, created, **kwargs):
     if created:
         try:
-            data = get_verification_data_missive(instance)
-            missive = Missive(**data)
-            missive.save()
-            logger.info(f"Activation email successfully sent to {instance.email}")
+            if not Invitation.objects.filter(email=instance.email).exists():
+                data = get_verification_data_missive(instance)
+                missive = Missive(**data)
+                missive.save()
+                logger.info(f"Activation email successfully sent to {instance.email}")
 
         except Exception as e:
             logger.error(f"Failed to send activation email : {e}.")

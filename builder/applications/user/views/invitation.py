@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from builder.models import Invitation
-from builder.applications.user.serializers import InvitationSerializer
+from builder.models import Invitation, Collaboration
+from builder.applications.user.serializers import InvitationSerializer, UserSerializer
 
 User = get_user_model()
 InvitationPermission = getattr(settings, 'INVITATION_PERMISSION', None)
@@ -35,12 +35,48 @@ class InvitationValidationView(APIView):
         token = request.data.get('token', None)
 
         if token is None:
-            return Response({'details': 'Invitation token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Invitation token is required.'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             invitation = Invitation.objects.get(token=token)
             if not invitation.is_valid():
-                return Response({'details': 'Invitation token is expired'}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'email': invitation.email}, status=status.HTTP_200_OK)
+                return Response({'detail': 'Invitation token is expired.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'email': invitation.email, 'manager': invitation.sender}, 
+                status=status.HTTP_200_OK)
         except Invitation.DoesNotExist:
-            return Response({'details': 'Invalid token.' }, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Invalid token.' }, status=status.HTTP_404_NOT_FOUND)
+        
+
+class UserCreateFromInvitationView(APIView):
+    """
+    API endpoint to register from invitation
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        token = request.data.get('token', None)
+
+        if token is None:
+            return Response({'detail': 'Invitation token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            invitation = Invitation.objects.get(token=token)
+            if not invitation.is_valid():
+                return Response({'detail': 'Invitation token is expired.'}, status=status.HTTP_400_BAD_REQUEST)
+        except Invitation.DoesNotExist:
+            return Response({'detail': 'Invalid token.' }, status=status.HTTP_404_NOT_FOUND)
+        
+        user_data = request.data.copy()
+        user_data.pop('token', None)
+        user_data.pop('manager', None)
+
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            collaboration = Collaboration.objects.create(
+                collaborator=user,
+                manager=invitation.sender
+            )
+            return Response({"detail": "User successfully created."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

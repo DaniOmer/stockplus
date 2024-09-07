@@ -41,7 +41,7 @@ def get_verification_data_missive(user):
 
 def get_invitation_data_missive(invitation):
     sender = invitation.sender.first_name
-    invitation_link = reverse('register-by-invitation')
+    invitation_link = reverse('user-create-from-invitation')
     invitation_url = f"{settings.FRONTEND_URL}{invitation_link}?token={str(invitation.token)}"
     html_content = render_to_string('invitation_mail.html', {'invitation_url': str(invitation_url), 'sender': str(sender)})
     return {
