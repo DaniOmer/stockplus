@@ -14,7 +14,3 @@ if 'builder.applications.company' in settings.INSTALLED_APPS:
     from builder.applications.company import models as models_company
     class Company(models_company.Company): pass
     class CompanyAddress(models_company.CompanyAddress): pass
-
-if 'builder.applications.collaboration' in settings.INSTALLED_APPS:
-    from builder.applications.collaboration import models as models_collaboration
-    class Collaboration(models_collaboration.Collaboration): pass

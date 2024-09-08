@@ -178,7 +178,6 @@ AUTH_USER_MODEL = "builder.User"
 
 INSTALLED_APPS += ["builder",] + [
     'builder.applications.user',
-    'builder.applications.collaboration',
     'builder.applications.messenger',
     'builder.applications.company',
     'builder.applications.address',

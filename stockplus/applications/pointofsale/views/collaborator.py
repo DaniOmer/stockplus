@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError, PermissionDenied
 
-from builder.models import Company, User, Collaboration
+from builder.models import User
 from stockplus.models import PointOfSale
 from stockplus.permissions import IsManager
 from stockplus.applications.pointofsale.serializers import PointOfSaleAddCollaboratorSerializer
@@ -32,17 +32,14 @@ class PointOfSaleAddCollaboratorView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        collaborator_email = serializer.validated_data.get('email')
+        email = serializer.validated_data.get('email')
         try:
-            collaborator = User.objects.get(email=collaborator_email)
-            collaboration = Collaboration.objects.get(manager=self.request.user, collaborator=collaborator)
+            collaborator = User.objects.get(email=email)
         except User.DoesNotExist:
             raise ValidationError("There is no user with the given email.")
-        except Collaboration.DoesNotExist:
-            raise ValidationError("There is no collaborator with the given email.")
         
         if point_of_sale.collaborators.acontains(collaborator):
-            return Response({'detail': 'You already add this collaborator to the point of sale.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'You already add this team member to the point of sale.'}, status=status.HTTP_400_BAD_REQUEST)
         point_of_sale.collaborators.add(collaborator)
         point_of_sale.save()
         

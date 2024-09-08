@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from builder.functions import setting
-from builder.models import Invitation, Collaboration
+from builder.models import Invitation
 from builder.applications.user.serializers import InvitationSerializer, UserSerializer
 
 User = get_user_model()
@@ -20,10 +20,12 @@ class InvitationCreateView(APIView):
     permission_classes = [InvitationPermission & IsAuthenticated] if InvitationPermission else [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        if not self.request.user.company:
+            return Response({"detail": "You must create a company to continue."}, status=status.HTTP_400_BAD_REQUEST)
         serializer = InvitationSerializer(data=request.data)
         if serializer.is_valid():
             invitation = serializer.save(sender=request.user)
-            return Response({"message": "Invitation sent"}, status=status.HTTP_201_CREATED)
+            return Response({"detail": "Invitation sent"}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
@@ -82,14 +84,10 @@ class UserCreateFromInvitationView(APIView):
                     
                     if setting('USER_ROLE_INVITE', False):
                         user.role = settings.USER_ROLE_INVITE
-                        user.save()
+                    user.company = invitation.sender.company
+                    user.save()
 
-                    Collaboration.objects.create(
-                        collaborator=user,
-                        manager=invitation.sender
-                    )
                     invitation.mark_as_validated()
-
                 return Response({"detail": "User successfully created."}, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
