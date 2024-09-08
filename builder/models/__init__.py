@@ -14,3 +14,9 @@ if 'builder.applications.company' in settings.INSTALLED_APPS:
     from builder.applications.company import models as models_company
     class Company(models_company.Company): pass
     class CompanyAddress(models_company.CompanyAddress): pass
+
+if 'builder.applications.subscription' in settings.INSTALLED_APPS:
+    from builder.applications.subscription import models as models_subscription
+    class Subscription(models_subscription.Subscription): pass
+    class SubscriptionPlan(models_subscription.SubscriptionPlan): pass
+    class Feature(models_subscription.Feature): pass

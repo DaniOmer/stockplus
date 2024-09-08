@@ -181,6 +181,7 @@ INSTALLED_APPS += ["builder",] + [
     'builder.applications.messenger',
     'builder.applications.company',
     'builder.applications.address',
+    'builder.applications.subscription',
 ]
 
 # Company configuration
@@ -199,6 +200,13 @@ from stockplus.permissions import IsManager
 INVITATION_PERMISSION = IsManager
 ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
+# Subscription configuration
+SUBSCRIPTION_MODEL = [
+    ('stater', 'Starter'),
+    ('premium', 'Premium'),
+]
+
+SAAS_MODEL = 'B2B' # Remember to put this in environment variable
 
 """
 Stockplus configuration
