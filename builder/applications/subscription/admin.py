@@ -1,3 +1,11 @@
 from django.contrib import admin
 
-# Register your models here.
+
+class FeatureAdmin(admin.ModelAdmin):
+    pass
+
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    pass
+
+class SubscriptionAdmin(admin.ModelAdmin):
+    pass

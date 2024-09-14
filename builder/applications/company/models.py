@@ -28,7 +28,7 @@ class Company(Base):
         abstract = True
 
     def __str__(self):
-        return self.name
+        return self.denomination
     
 
 class CompanyAddress(AddressModels.Address):

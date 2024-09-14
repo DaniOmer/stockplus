@@ -26,9 +26,9 @@ class SubscriptionPlan(Base):
     description = models.TextField(max_length=255, blank=True, null=True)
     features = models.ManyToManyField(conf.ForeignKey.feature, related_name='features')
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
-    permission = models.ManyToManyField(Permission, related_name='permissions', 
+    permissions = models.ManyToManyField(Permission, related_name='permissions', 
                                         limit_choices_to={
-                                            "content_type__app_label": "subscription",
+                                            "content_type__app_label": "builder",
                                             "codename__in": [x[0] for x in settings.SUBSCRIPTION_PERMISSIONS]
                                         })
 
