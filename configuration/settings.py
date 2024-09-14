@@ -206,7 +206,11 @@ SUBSCRIPTION_MODEL = [
     ('premium', 'Premium'),
 ]
 
-SAAS_MODEL = 'B2B' # Remember to put this in environment variable
+SUBSCRIPTION_PERMISSIONS = [
+    ('stater', 'Starter Permissions'),
+    ('premium', 'Premium Permissions'),
+]
+
 
 """
 Stockplus configuration
