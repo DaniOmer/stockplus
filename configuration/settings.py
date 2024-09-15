@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_ckeditor_5',
-    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -171,6 +170,16 @@ Logger
 #     },
 # }
 
+"""
+SWAGGER UI configuration
+"""
+INSTALLED_APPS += ['drf_spectacular',]
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Stockplus',
+    'DESCRIPTION': 'Inventory management application',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 """
 Builder configuration
@@ -234,7 +243,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-    )
+    ), 
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 """

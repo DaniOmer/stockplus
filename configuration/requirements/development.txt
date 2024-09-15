@@ -1,2 +1,2 @@
 -r base.txt
-drf-yasg
+drf-spectacular
