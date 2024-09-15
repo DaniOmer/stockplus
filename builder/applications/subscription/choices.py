@@ -11,3 +11,9 @@ SUBSCRIPTION_DURATION = [
     ('semestrial', 'Semestrial'),
     ('yearly', 'Yearly'),
 ]
+
+CURRENCY = [
+    ('dollar', 'USD'),
+    ('euro', 'EUR'),
+    ('fcfa', 'FCFA')
+]

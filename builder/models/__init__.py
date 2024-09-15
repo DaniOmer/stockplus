@@ -17,6 +17,7 @@ if 'builder.applications.company' in settings.INSTALLED_APPS:
 
 if 'builder.applications.subscription' in settings.INSTALLED_APPS:
     from builder.applications.subscription import models as models_subscription
-    class Subscription(models_subscription.Subscription): pass
-    class SubscriptionPlan(models_subscription.SubscriptionPlan): pass
     class Feature(models_subscription.Feature): pass
+    class SubscriptionPlan(models_subscription.SubscriptionPlan): pass
+    class SubscriptionPricing(models_subscription.SubscriptionPricing): pass
+    class Subscription(models_subscription.Subscription): pass

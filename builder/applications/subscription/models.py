@@ -6,6 +6,7 @@ from datetime import timezone
 from dateutil.relativedelta import relativedelta
 
 from builder.functions import setting
+from builder.models import SubscriptionPricing as Pricing
 from builder.models.base import Base
 from builder.applications.subscription import choices
 from builder.applications.subscription.apps import SubscriptionConfig as conf
@@ -35,13 +36,26 @@ class SubscriptionPlan(Base):
                                             "content_type__app_label": "builder",
                                             "codename__in": [x[0] for x in settings.SUBSCRIPTION_PERMISSIONS]
                                         })
-
     class Meta:
         abstract = True
         permissions = settings.SUBSCRIPTION_PERMISSIONS
     
     def __str__(self):
         return f"{self.name}"
+    
+
+class SubscriptionPricing(Base):
+    plan = models.ForeignKey(conf.ForeignKey.subscription_plan, related_name='pricing', on_delete=models.CASCADE)
+    duration_choice = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_DURATION)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10, choices=choices.CURRENCY, default='euro')
+
+    class Meta:
+        abstract = True
+        unique_together = ('plan', 'duration_choice')
+
+    def __str__(self):
+        return f"{self.plan.name} - {self.duration}: {self.price} {self.currency}"
 
 
 class Subscription(Base):
@@ -89,3 +103,13 @@ class Subscription(Base):
     def cancel(self):
         self.status = 'cancelled'
         self.save()
+
+    def get_price(self):
+        pricing = Pricing.objects.filter(
+            plan=self.subscription_plan,
+            duration=self.duration_choice
+        ).first()
+
+        if pricing:
+            return pricing.price
+        return None
