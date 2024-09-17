@@ -1,11 +1,15 @@
-from builder.models import User, Subscription
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 def add_users_to_subscription_group(subscription):
     """Add users to a subscription group."""
+    from builder.models import SubscriptionPlan
+
     subscription_plan_obj = subscription.subscription_plan
-    # Filter active subscriptions, excluding the current one
-    subs_qs = Subscription.objects.filter(active=True).exclude(id=subscription.id)
-    subs_groups = subs_qs.values_list('subscription_plan__group_id', flat=True)
+    # Filter active subscriptions plan, excluding the one related to the user current subscription
+    subs_plan_qs = SubscriptionPlan.objects.filter(active=True).exclude(id=subscription_plan_obj.id)
+    subs_groups = subs_plan_qs.values_list('group_id', flat=True)
     subs_groups_set = set(subs_groups)
 
     # Group associated to the current subscription
