@@ -171,6 +171,33 @@ Logger
 # }
 
 """
+Ckeditor
+"""
+CKEDITOR_5_CONFIGS = {
+    'default': {
+        'toolbar': [
+            'heading', '|',
+            'outdent', 'indent', 'Alignment', '|',
+            'bold', 'italic', 'link', 'underline', 'strikethrough', 'code', 'subscript', 'superscript', 'highlight', '|',
+            'bulletedList', 'numberedList', 'todoList', '|',
+            'blockQuote', '|',
+            'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor', 'removeFormat', 'insertTable', ],
+        'heading': {
+            'options': [
+                {'model': 'paragraph', 'title': 'Paragraph',
+                    'class': 'ck-heading_paragraph'},
+                {'model': 'heading1', 'view': 'h1', 'title': 'Heading 1',
+                    'class': 'ck-heading_heading1'},
+                {'model': 'heading2', 'view': 'h2', 'title': 'Heading 2',
+                    'class': 'ck-heading_heading2'},
+                {'model': 'heading3', 'view': 'h3',
+                    'title': 'Heading 3', 'class': 'ck-heading_heading3'}
+            ]
+        }
+    }
+}
+
+"""
 SWAGGER UI configuration
 """
 INSTALLED_APPS += ['drf_spectacular',]

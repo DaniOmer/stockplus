@@ -14,10 +14,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.urls import path, include
+from django.urls import path, include, re_path
 
 urlpatterns = []
 
+if 'django_ckeditor_5' in settings.INSTALLED_APPS:
+    urlpatterns += [path("ckeditor5/", include('django_ckeditor_5.urls')),]
+    
 """
 SWAGGER UI configuration
 """
