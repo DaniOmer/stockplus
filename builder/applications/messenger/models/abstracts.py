@@ -68,9 +68,6 @@ class MessengerModel(Base):
         self.pre_save()
         return super().save(*args, **kwargs)
 
-    def __str__(self):
-        return '%s (%s)' % (self.masking, self.subject)
-
     def prepare_sms(self):
         self.html = 'not used for sms'
 
