@@ -1,4 +1,3 @@
-from typing import Iterable
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
@@ -6,7 +5,6 @@ from datetime import timezone
 from dateutil.relativedelta import relativedelta
 
 from builder.functions import setting
-from builder.models import SubscriptionPricing as Pricing
 from builder.models.base import Base
 from builder.applications.subscription import choices
 from builder.applications.subscription.apps import SubscriptionConfig as conf
@@ -29,6 +27,7 @@ class SubscriptionPlan(Base):
     else:
         name = models.CharField(max_length=255)
     description = models.TextField(max_length=255, blank=True, null=True)
+    active = models.BooleanField(default=True)
     features = models.ManyToManyField(conf.ForeignKey.feature, related_name='features')
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
     permissions = models.ManyToManyField(Permission, related_name='permissions', 
@@ -55,7 +54,7 @@ class SubscriptionPricing(Base):
         unique_together = ('plan', 'duration_choice')
 
     def __str__(self):
-        return f"{self.plan.name} - {self.duration}: {self.price} {self.currency}"
+        return f"{self.plan.name} - {self.duration_choice}: {self.price} {self.currency}"
 
 
 class Subscription(Base):
@@ -74,7 +73,7 @@ class Subscription(Base):
         abstract = True
     
     def __str__(self):
-        return f"Subscription from {self.user} : {self.subscription_plan}"
+        return f"Subscription for {self.user} : {self.subscription_plan}"
     
     def pre_activate(self):
         self.start_date = timezone.now()
@@ -105,6 +104,7 @@ class Subscription(Base):
         self.save()
 
     def get_price(self):
+        from builder.models import SubscriptionPricing as Pricing
         pricing = Pricing.objects.filter(
             plan=self.subscription_plan,
             duration=self.duration_choice
