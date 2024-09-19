@@ -7,5 +7,8 @@ class FeatureAdmin(admin.ModelAdmin):
 class SubscriptionPlanAdmin(admin.ModelAdmin):
     pass
 
+class SubscriptionPricingAdmin(admin.ModelAdmin):
+    pass
+
 class SubscriptionAdmin(admin.ModelAdmin):
     pass
