@@ -15,3 +15,5 @@ REPLY_EMAIL="noreply@stockplus.io"
 ALLOWED_HOSTS="*"
 DEBUG=True
 SECRET_KEY=_wy47*f9+@w=*f^s3%w=vho$v=&x8kna_u7pt$y!j2izrmwd
+
+STRIPE_API_KEY=pk_test_51H2hh0BV8JZn7CZQB7QpFgIlBuBNT8VF5VS8EbvEUYnUnMOtMr4zus2UEC7rDQ1Z5z0MmK3QbI6Qt5skeiAkLpxy00on0meyiy

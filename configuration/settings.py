@@ -251,6 +251,12 @@ SUBSCRIPTION_PERMISSIONS = [
 
 
 """
+SHOP Configuration settings
+"""
+INSTALLED_APPS += ['builder.applications.shop',]
+
+
+"""
 Stockplus configuration
 """
 INSTALLED_APPS += [
@@ -322,6 +328,12 @@ MESSENGER = {
     'reply_name': config('REPLY_NAME', default='noreply'),
     'reply_email': config('REPLY_EMAIL', default='noreply@stockplus.io'),
 }
+
+
+"""
+STRIPE Configuration
+"""
+STRIPE_API_KEY = config('STRIPE_API_KEY')
 
 
 """
