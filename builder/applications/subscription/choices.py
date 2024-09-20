@@ -6,10 +6,10 @@ SUBSCRIPTION_STATUS = [
     ('expired', 'Expired'),
 ]
 
-SUBSCRIPTION_DURATION = [
-    ('monthly', 'Monthly'),
-    ('semestrial', 'Semestrial'),
-    ('yearly', 'Yearly'),
+SUBSCRIPTION_INTERVAL = [
+    ('month', 'Monthly'),
+    ('semester', 'Semestrial'),
+    ('year', 'Yearly'),
 ]
 
 CURRENCY = [

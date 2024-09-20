@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
@@ -22,6 +23,9 @@ class Feature(Base):
 
 
 class SubscriptionPlan(Base):
+    """
+    SUBSCRIPTION PLAN is equivalent to STRIPE PRODUCT
+    """
     if setting('SUBSCRIPTION_MODEL', False):
         name = models.CharField(max_length=255, choices=settings.SUBSCRIPTION_MODEL)
     else:
@@ -44,17 +48,19 @@ class SubscriptionPlan(Base):
     
 
 class SubscriptionPricing(Base):
-    plan = models.ForeignKey(conf.ForeignKey.subscription_plan, related_name='pricing', on_delete=models.CASCADE)
-    duration_choice = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_DURATION)
+    """
+    SUBSCRIPTION PRICING is equivalent to STRIPE PRICE
+    """
+    subscription_plan = models.ForeignKey(conf.ForeignKey.subscription_plan, related_name='pricing', on_delete=models.SET_NULL, null=True)
+    interval = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_INTERVAL, default='month')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, choices=choices.CURRENCY, default='euro')
 
     class Meta:
         abstract = True
-        unique_together = ('plan', 'duration_choice')
 
     def __str__(self):
-        return f"{self.plan.name} - {self.duration_choice}: {self.price} {self.currency}"
+        return f"{self.subscription_plan.name} - {self.interval}: {self.price} {self.currency}"
 
 
 class Subscription(Base):
@@ -63,7 +69,7 @@ class Subscription(Base):
         company = models.OneToOneField(conf.ForeignKey.company, on_delete=models.CASCADE)
 
     subscription_plan = models.ForeignKey(conf.ForeignKey.subscription_plan, on_delete=models.SET_NULL, null=True, blank=True)
-    duration_choice = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_DURATION, null=True, blank=True)
+    interval = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_INTERVAL, default='month')
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     renewal_date = models.DateTimeField()
@@ -77,11 +83,11 @@ class Subscription(Base):
     
     def pre_activate(self):
         self.start_date = timezone.now()
-        if self.duration_choice == 'monthly':
+        if self.interval == 'month':
             self.end_date = self.start_date + relativedelta(months=1)
-        elif self.duration_choice == 'semestrial':
+        elif self.interval == 'semester':
             self.end_date = self.start_date + relativedelta(months=6)
-        elif self.duration_choice == 'yearly':
+        elif self.interval == 'year':
             self.end_date = self.start_date + relativedelta(years=1)
         
         self.renewal_date = self.end_date
@@ -106,8 +112,8 @@ class Subscription(Base):
     def get_price(self):
         from builder.models import SubscriptionPricing as Pricing
         pricing = Pricing.objects.filter(
-            plan=self.subscription_plan,
-            duration=self.duration_choice
+            subscription_plan=self.subscription_plan,
+            interval=self.interval
         ).first()
 
         if pricing:
