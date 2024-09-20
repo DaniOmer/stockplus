@@ -26,8 +26,5 @@ if 'builder.applications.subscription' in settings.INSTALLED_APPS:
     @admin.register(all_models.SubscriptionPlan)
     class SubscriptionPlanAdmin(admin_subscription.SubscriptionPlanAdmin): pass
 
-    @admin.register(all_models.SubscriptionPricing)
-    class SubscriptionPricingAdmin(admin_subscription.SubscriptionPricingAdmin): pass
-
     @admin.register(all_models.Subscription)
     class SubscriptionAdmin(admin_subscription.SubscriptionAdmin): pass
