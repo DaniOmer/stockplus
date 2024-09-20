@@ -62,6 +62,16 @@ class SubscriptionPricing(Base):
     def __str__(self):
         return f"{self.subscription_plan.name} - {self.interval}: {self.price} {self.currency}"
 
+    def save(self, *args, **kwags):
+        super().save(*args, **kwags)
+        from builder.models import SubscriptionPricing
+        if not self.is_disable:
+            qs = SubscriptionPricing.objects.filter(
+                subscription_plan=self.subscription_plan,
+                interval=self.interval
+            ).exclude(id=self.id)
+            qs.update(is_disable=True)
+
 
 class Subscription(Base):
     user = models.OneToOneField(conf.ForeignKey.user, on_delete=models.CASCADE)
