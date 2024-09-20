@@ -7,7 +7,6 @@ from builder.models import Invitation, UserAddress
 User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
-    is_invited = serializers.BooleanField(default=False, write_only=True)
     class Meta:
         model = User
         fields = ['username', 'password', 'email', 'first_name', 'last_name', 'phone_number']
