@@ -1,7 +1,7 @@
 default_app_config = 'builder.applications.messenger.apps.MessengerConfig'
 
 from django.conf import settings
-from builder.functions import get_backends
+from builder.utils import get_backends
 from builder.applications.messenger.choices import MODE_EMAIL, MODE_SMS
 from builder.applications.messenger.apps import MessengerConfig as conf
 import logging

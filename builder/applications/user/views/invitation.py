@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from builder.functions import setting
+from builder.utils import setting
 from builder.models import Invitation
 from builder.applications.user.serializers import InvitationSerializer, UserSerializer
 

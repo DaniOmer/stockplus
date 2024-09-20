@@ -4,7 +4,7 @@ from django.template.loader import render_to_string
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from builder.functions import setting
+from builder.utils import setting
 
 def generate_verification_token(user):
     token = RefreshToken.for_user(user).access_token

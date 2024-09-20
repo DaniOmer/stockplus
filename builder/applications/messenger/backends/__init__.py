@@ -1,7 +1,7 @@
 from django.core.mail import EmailMultiAlternatives
 from django.core.mail.message import make_msgid
 
-from builder.functions import setting
+from builder.utils import setting
 from builder.applications.messenger import choices
 from builder.applications.messenger.apps import MessengerConfig as conf
 import logging, os

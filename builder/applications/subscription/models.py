@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group, Permission
 from datetime import timezone
 from dateutil.relativedelta import relativedelta
 
-from builder.functions import setting
+from builder.utils import setting
 from builder.models.base import Base
 from builder.applications.subscription import choices
 from builder.applications.subscription.apps import SubscriptionConfig as conf
