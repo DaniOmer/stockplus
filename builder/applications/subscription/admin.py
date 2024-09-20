@@ -7,7 +7,8 @@ class FeatureAdmin(admin.ModelAdmin):
 
 class SubscriptionPricingAdmin(admin.TabularInline):
     model = SubscriptionPricing
-    fields = ['duration_choice', 'price', 'currency']
+    fields = ['interval', 'price', 'currency', 'is_disable']
+    # readonly_fields = ['is_disable',]
     extra = 1
 
 class SubscriptionPlanAdmin(admin.ModelAdmin):
@@ -15,4 +16,4 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
     fields = ['name', 'description', 'active', 'features', 'group', 'permissions']
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    fields = ['user', 'subscription_plan', 'duration_choice', 'start_date', 'end_date', 'renewal_date', 'status']
+    fields = ['user', 'subscription_plan', 'interval', 'start_date', 'end_date', 'renewal_date', 'status']
