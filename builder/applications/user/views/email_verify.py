@@ -9,7 +9,7 @@ import jwt
 
 from builder.models import Missive
 from builder.applications.user.utils import get_verification_data_missive
-from builder.applications.user.serializers import EmailVerifySerializer
+from builder.applications.user.serializers import EmailVerifySerializer, ResendVerificationEmailSerializer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -45,21 +45,26 @@ class EmailVerifyView(APIView):
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ResendVerificationEmailView(APIView):
+    serializer_class = ResendVerificationEmailSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
-        email = request.data.get('email')
-        try:
-            user = User.objects.get(email=email)
-            if user.is_verified:
-                return response.Response({'message': 'This email is already verified.'}, status=status.HTTP_400_BAD_REQUEST)
-            
-            data = get_verification_data_missive(user)
-            missive = Missive(**data)
-            missive.save()
-            logger.info(f"A new verification email has been sent to {user.email}")
+        serializer = ResendVerificationEmailSerializer(data=request.data)
+        if serializer.is_valid():
 
-            return response.Response({'message': 'A new verification email has been sent.'}, status=status.HTTP_200_OK)
+            email = serializer.validated_data.get('email')
+            try:
+                user = User.objects.get(email=email)
+                if user.is_verified:
+                    return response.Response({'message': 'This email is already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+                
+                data = get_verification_data_missive(user)
+                missive = Missive(**data)
+                missive.save()
+                logger.info(f"A new verification email has been sent to {user.email}")
 
-        except User.DoesNotExist:
-            return response.Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+                return response.Response({'message': 'A new verification email has been sent.'}, status=status.HTTP_200_OK)
+
+            except User.DoesNotExist:
+                return response.Response({'error': 'User with this email does not exist.'}, status=status.HTTP_404_NOT_FOUND)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

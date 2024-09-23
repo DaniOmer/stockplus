@@ -59,3 +59,6 @@ class InvitationSerializer(serializers.ModelSerializer):
     
 class EmailVerifySerializer(serializers.Serializer):
     token = serializers.CharField()
+
+class ResendVerificationEmailSerializer(serializers.Serializer):
+    email = serializers.CharField()
