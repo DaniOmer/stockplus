@@ -17,6 +17,7 @@ class InvitationCreateView(APIView):
     """
     API endpoint to send an Invitation
     """
+    serializer_class = InvitationSerializer
     permission_classes = [InvitationPermission & IsAuthenticated] if InvitationPermission else [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -33,6 +34,7 @@ class InvitationValidationView(APIView):
     """
     API endpoint to validate user invitation token
     """
+    serializer_class = InvitationSerializer
     permission_classes=[AllowAny]
 
     def post(self, request, *args, **kwargs):
@@ -56,6 +58,7 @@ class UserCreateFromInvitationView(APIView):
     """
     API endpoint to register from invitation
     """
+    serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):

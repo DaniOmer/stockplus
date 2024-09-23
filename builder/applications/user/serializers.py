@@ -56,3 +56,6 @@ class InvitationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("A user with this email already exists.")
         
         return value
+    
+class EmailVerifySerializer(serializers.Serializer):
+    token = serializers.CharField()

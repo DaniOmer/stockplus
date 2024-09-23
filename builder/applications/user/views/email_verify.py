@@ -9,6 +9,7 @@ import jwt
 
 from builder.models import Missive
 from builder.applications.user.utils import get_verification_data_missive
+from builder.applications.user.serializers import EmailVerifySerializer
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,28 +17,32 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class EmailVerifyView(APIView):
+    serializer_class = EmailVerifySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        token = request.data.get('token')
+        serializer = EmailVerifySerializer(data=request.data)
 
-        try:
-            # Decode the token and verify its claims
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-            user = User.objects.get(id=payload['user_id'])
+        if serializer.is_valid():
+            token = serializer.validated_data.get('token')
+            try:
+                # Decode the token and verify its claims
+                payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+                user = User.objects.get(id=payload['user_id'])
 
-            if payload.get('scope') == 'email_verification':
-                if not user.is_verified:
-                    user.is_verified = True
-                    user.save()
-                return response.Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
-            return response.Response({'error': 'Invalid token scope'}, status=status.HTTP_400_BAD_REQUEST)
+                if payload.get('scope') == 'email_verification':
+                    if not user.is_verified:
+                        user.is_verified = True
+                        user.save()
+                    return response.Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
+                return response.Response({'error': 'Invalid token scope'}, status=status.HTTP_400_BAD_REQUEST)
 
-        except jwt.ExpiredSignatureError:
-            return response.Response({'error': 'Activation link expired'}, status=status.HTTP_400_BAD_REQUEST)
-        except jwt.exceptions.DecodeError:
-            return response.Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
-
+            except jwt.ExpiredSignatureError:
+                return response.Response({'error': 'Activation link expired'}, status=status.HTTP_400_BAD_REQUEST)
+            except jwt.exceptions.DecodeError:
+                return response.Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ResendVerificationEmailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
