@@ -87,6 +87,10 @@ if config('DATABASE') == "postgresql":
             'PASSWORD': config('DB_PASSWORD'),
             'HOST': config('DB_HOST'),
             'PORT': config('DB_PORT'),
+            'OPTIONS': {
+                'sslmode': 'require',
+                'sslrootcert': os.path.join(BASE_DIR, 'ca-certificate.crt')
+            },
         }
     }
 else:
