@@ -24,8 +24,7 @@ if 'django_ckeditor_5' in settings.INSTALLED_APPS:
 """
 SWAGGER UI configuration
 """
-# if 'drf_spectacular' in settings.INSTALLED_APPS and str(settings.ENV) == 'DEVELOPMENT': À remplacer plus tard
-if 'drf_spectacular' in settings.INSTALLED_APPS:
+if 'drf_spectacular' in settings.INSTALLED_APPS and str(settings.ENV) == 'DEVELOPMENT':
     from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
     swagger_urlpatterns = [
         path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
