@@ -9,3 +9,4 @@ django-ckeditor-5
 html2text
 stripe==10.12.0
 drf-spectacular
+python-dateutil
