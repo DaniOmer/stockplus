@@ -12,6 +12,7 @@ services:
       - "80:8000"
     environment:
       - DEBUG=False
+      - DATABASE=${DATABASE}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
@@ -23,3 +24,5 @@ services:
       - REPLY_EMAIL=${REPLY_EMAIL}
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - MISSIVE_SERVICE=${MISSIVE_SERVICE}
+      - SENDINBLUE_APIKEY=${SENDINBLUE_APIKEY}
