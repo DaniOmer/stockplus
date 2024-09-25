@@ -21,3 +21,7 @@ if 'builder.applications.subscription' in settings.INSTALLED_APPS:
     class SubscriptionPlan(models_subscription.SubscriptionPlan): pass
     class SubscriptionPricing(models_subscription.SubscriptionPricing): pass
     class Subscription(models_subscription.Subscription): pass
+
+if 'builder.applications.shop' in settings.INSTALLED_APPS:
+    from builder.applications.shop import models as models_shop
+    class Customer(models_shop.Customer): pass
