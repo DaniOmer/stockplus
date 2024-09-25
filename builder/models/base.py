@@ -22,3 +22,14 @@ class Base(models.Model):
 
     class Meta:
         abstract = True
+
+    def save(self, *args, **kwargs):
+        self.pre_save()
+        super().save(*args, **kwargs)
+        self.post_save()
+ 
+    def pre_save(self):
+        pass
+
+    def post_save(self):
+        pass

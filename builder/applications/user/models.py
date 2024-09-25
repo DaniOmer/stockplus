@@ -29,10 +29,13 @@ class User(AbstractUser):
     class Meta:
         abstract = True
 
-    def __str__(self) -> str:
+    @property
+    def fullname(self):
         return f"{self.first_name} {self.last_name}"
     
-
+    def __str__(self) -> str:
+        return self.fullname
+    
 class UserAddress(AddressModels.Address):
     user = models.ForeignKey(UserConfig.ForeignKey.user, on_delete=models.CASCADE, related_name='user_address')
 

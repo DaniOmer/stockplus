@@ -63,10 +63,6 @@ class MessengerModel(Base):
         self.set_backend()
         self.prepare_mode()
         self.need_to_send()
-    
-    def save(self, *args, **kwargs):
-        self.pre_save()
-        return super().save(*args, **kwargs)
 
     def prepare_sms(self):
         self.html = 'not used for sms'
