@@ -7,7 +7,7 @@ def init_stripe():
     env = setting('ENV', 'DEVELOPMENT')
 
     if stripe_api_key is not None:
-        if env != 'DEVELOPMENT' and 'pk_test' in stripe_api_key:
+        if env != 'DEVELOPMENT' and 'sk_test' in stripe_api_key:
             raise ValueError('You provide the wrong stripe API key.')
         stripe.api_key = stripe_api_key
         return stripe
