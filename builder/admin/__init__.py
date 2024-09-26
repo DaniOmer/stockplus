@@ -28,3 +28,8 @@ if 'builder.applications.subscription' in settings.INSTALLED_APPS:
 
     @admin.register(all_models.Subscription)
     class SubscriptionAdmin(admin_subscription.SubscriptionAdmin): pass
+
+if 'builder.applications.shop' in settings.INSTALLED_APPS:
+    from builder.applications.shop import admin as admin_shop
+    @admin.register(all_models.Customer)
+    class CustomerAdmin(admin_shop.CustomerAdmin): pass
