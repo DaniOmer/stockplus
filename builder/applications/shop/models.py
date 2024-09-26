@@ -1,8 +1,6 @@
 import logging
 from django.db import models
-from django.db.models.signals import post_save
 from django.contrib.auth import get_user_model
-from django.dispatch import receiver
 
 from builder.models.base import Base
 from builder.applications.shop.services import CustomerService
@@ -30,9 +28,3 @@ class Customer(Base):
                 logger.info(f"Failed to create stripe Customer for user {self.user.name} : {e}")
                 return None
         return None
-    
-@receiver(post_save, sender=Customer)
-def create_stripe_customer(sender, instance, created, **kwargs):
-    if created and not instance.stripe_id:
-        stripe_id = instance.get_stripe_id()
-        instance.stripe_id = stripe_id
