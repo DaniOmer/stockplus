@@ -33,15 +33,34 @@ if 'drf_spectacular' in settings.INSTALLED_APPS:
     ]
     urlpatterns += swagger_urlpatterns
 
-# Enable app user
+"""
+Simple JWT configuration
+"""
+from rest_framework_simplejwt.views import TokenRefreshView
+from builder.views import CustomTokenObtainPairView
+simplejwt_urlpatterns = [
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+urlpatterns += simplejwt_urlpatterns
+
+"""
+User configuration
+"""
 if "builder.applications.user" in settings.INSTALLED_APPS:
     from builder.applications.user import urls as urls_user
     urlpatterns += urls_user.urlpatterns
 
+"""
+Company configuration
+"""
 if "builder.applications.company" in settings.INSTALLED_APPS:
     from builder.applications.company import urls as urls_company
     urlpatterns += urls_company.urlpatterns
 
+"""
+Subscription configuration
+"""
 if "builder.applications.subscription" in settings.INSTALLED_APPS:
     from builder.applications.subscription import urls as urls_subscription
     urlpatterns += urls_subscription.urlpatterns

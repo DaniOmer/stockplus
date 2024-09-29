@@ -210,8 +210,12 @@ SPECTACULAR_SETTINGS = {
 """
 Builder configuration
 """
-MIGRATION_MODULES = {"builder": "stockplus.migrations.builder"}
-AUTH_USER_MODEL = "builder.User"
+MIGRATION_MODULES = {'builder': 'stockplus.migrations.builder'}
+AUTH_USER_MODEL = 'builder.User'
+AUTHENTICATION_BACKENDS  = [
+    'builder.auth.backends.EmailOrPhoneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 
 INSTALLED_APPS += ["builder",] + [
     'builder.applications.user',
@@ -283,6 +287,7 @@ REST_FRAMEWORK = {
 ## Simple JWT Authentication
 """
 seconds_delta = config('TOKEN_LIFETIME', default=86400, cast=int)
+INSTALLED_APPS += ['rest_framework_simplejwt',]
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(seconds=seconds_delta),
     'REFRESH_TOKEN_LIFETIME': timedelta(seconds=seconds_delta),
@@ -303,6 +308,7 @@ SIMPLE_JWT = {
 
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
+    'TOKEN_OBTAIN_SERIALIZER': 'builder.serializer.CustomTokenObtainPairSerializer',
 
     'JTI_CLAIM': 'jti',
 
