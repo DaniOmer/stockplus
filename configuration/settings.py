@@ -30,7 +30,8 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split()
 
-ENV = config('ENV', default="DEVELOPMENT")
+# ENV = config('ENV', default="DEVELOPMENT") // Temporarily ignored
+ENV="DEVELOPMENT"
 
 # Application definition
 
@@ -73,7 +74,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'configuration.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases

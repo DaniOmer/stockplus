@@ -25,6 +25,6 @@ class Customer(Base):
                 )
                 return stripe_id
             except Exception as e:
-                logger.info(f"Failed to create stripe Customer for user {self.user.name} : {e}")
+                logger.info(f"Failed to create stripe Customer for user {self.user.fullname} : {e}")
                 return None
         return None
