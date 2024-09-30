@@ -13,7 +13,8 @@ SUBSCRIPTION_INTERVAL = [
 ]
 
 CURRENCY = [
-    ('dollar', 'USD'),
-    ('euro', 'EUR'),
-    ('fcfa', 'FCFA')
+    ('usd', 'USD'),
+    ('eur', 'EUR'),
+    ('xof', 'XOF'),
+    ('xaf', 'XAF')
 ]

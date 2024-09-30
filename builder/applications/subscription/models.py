@@ -1,5 +1,4 @@
 import logging
-from typing import Iterable
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
@@ -11,7 +10,7 @@ from builder.models.base import Base
 from builder.applications.subscription import choices
 from builder.applications.subscription.apps import SubscriptionConfig as conf
 from builder.applications.subscription import utils
-from builder.applications.shop.services import ProductService
+from builder.applications.shop.services import ProductService, PriceService
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +54,10 @@ class SubscriptionPlan(Base):
         try:
             stripe_id = ProductService.create_stripe_product(
                 name=self.name,
-                description=self.description,
+                description=self.description if self.description else self.name,
                 active=self.active,
                 metadata={ 'subscription_plan_id': self.id }
             )
-            print("stripeId: " + stripe_id)
             return stripe_id
         except Exception as e:
             logger.error(f"An error occurred while creating stripe product for {self.name}: {e}")
@@ -73,13 +71,63 @@ class SubscriptionPricing(Base):
     subscription_plan = models.ForeignKey(conf.ForeignKey.subscription_plan, related_name='pricing', on_delete=models.SET_NULL, null=True)
     interval = models.CharField(max_length=100, choices=choices.SUBSCRIPTION_INTERVAL, default='month')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    currency = models.CharField(max_length=10, choices=choices.CURRENCY, default='euro')
+    currency = models.CharField(max_length=10, choices=choices.CURRENCY, default='eur')
+    stripe_id = models.CharField(max_length=120, null=True, blank=True)
 
+    @property
+    def stripe_product_id(self):
+        """ Get stripe product id related to the subscription plan """
+        if self.subscription_plan is None:
+            return None
+        return self.subscription_plan.stripe_id
+    
+    @property
+    def stripe_price(self):
+        """ Remove the price decimal """
+        return self.price * 100
+    
+    @property
+    def stripe_interval(self):
+        """ 
+            Get the interval count based on subscription 
+            pricing interval to match Stripe interval. Only
+            'day', 'month', 'week' and 'year' are supported
+            by Stripe.
+        """
+        if self.interval not in ['day', 'month', 'week', 'year']:
+            return 'month'
+        else:
+            return self.interval
+
+    @property
+    def stripe_interval_count(self):
+        """ Get the interval count based on subscription pricing interval """
+        if self.interval == 'month':
+            return 1
+        elif self.interval == 'semester':
+            return 6
+        elif self.interval == 'year':
+            return 1
+    
     class Meta:
         abstract = True
 
     def __str__(self):
         return f"{self.subscription_plan.name} - {self.interval}: {self.price} {self.currency}"
+    
+    def get_stripe_id(self):
+        try:
+            stripe_id = PriceService.create_stripe_price(
+                currency=self.currency,
+                unit_amount=self.stripe_price, 
+                interval=self.stripe_interval, 
+                interval_count=self.stripe_interval_count, 
+                product=self.stripe_product_id, 
+                metadata={"subscription_plan_id": self.subscription_plan.id},
+            )
+            return stripe_id
+        except Exception as e:
+            logger.error(f"An error occurred while creating stripe price for {self.subscription_plan.name}: {e}")
 
     def save(self, *args, **kwags):
         super().save(*args, **kwags)
@@ -91,7 +139,8 @@ class SubscriptionPricing(Base):
         if not self.is_disable:
             qs = SubscriptionPricing.objects.filter(
                 subscription_plan=self.subscription_plan,
-                interval=self.interval
+                interval=self.interval,
+                currency=self.currency
             ).exclude(id=self.id)
             qs.update(is_disable=True)
 
