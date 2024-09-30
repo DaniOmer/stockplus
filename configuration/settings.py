@@ -245,11 +245,13 @@ ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', '
 SUBSCRIPTION_MODEL = [
     ('stater', 'Starter'),
     ('premium', 'Premium'),
+    ('enterprise', 'Enterprise'),
 ]
 
 SUBSCRIPTION_PERMISSIONS = [
     ('stater', 'Starter Permissions'),
     ('premium', 'Premium Permissions'),
+    ('enterprise', 'Enterprise Permissions'),
 ]
 
 
