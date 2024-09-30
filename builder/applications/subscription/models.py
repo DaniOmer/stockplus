@@ -1,3 +1,4 @@
+import logging
 from typing import Iterable
 from django.db import models
 from django.conf import settings
@@ -10,6 +11,9 @@ from builder.models.base import Base
 from builder.applications.subscription import choices
 from builder.applications.subscription.apps import SubscriptionConfig as conf
 from builder.applications.subscription import utils
+from builder.applications.shop.services import ProductService
+
+logger = logging.getLogger(__name__)
 
 class Feature(Base):
     name = models.CharField(max_length=255)
@@ -27,9 +31,9 @@ class SubscriptionPlan(Base):
     SUBSCRIPTION PLAN is equivalent to STRIPE PRODUCT
     """
     if setting('SUBSCRIPTION_MODEL', False):
-        name = models.CharField(max_length=255, choices=settings.SUBSCRIPTION_MODEL)
+        name = models.CharField(max_length=255, choices=settings.SUBSCRIPTION_MODEL, unique=True)
     else:
-        name = models.CharField(max_length=255)
+        name = models.CharField(max_length=255, unique=True)
     description = models.TextField(max_length=255, blank=True, null=True)
     active = models.BooleanField(default=True)
     features = models.ManyToManyField(conf.ForeignKey.feature, related_name='features')
@@ -39,12 +43,27 @@ class SubscriptionPlan(Base):
                                             "content_type__app_label": "builder",
                                             "codename__in": [x[0] for x in settings.SUBSCRIPTION_PERMISSIONS]
                                         })
+    stripe_id = models.CharField(max_length=120, blank=True, null=True)
     class Meta:
         abstract = True
         permissions = settings.SUBSCRIPTION_PERMISSIONS
     
     def __str__(self):
         return f"{self.name}"
+    
+    def get_stripe_id(self):
+        try:
+            stripe_id = ProductService.create_stripe_product(
+                name=self.name,
+                description=self.description,
+                active=self.active,
+                metadata={ 'subscription_plan_id': self.id }
+            )
+            print("stripeId: " + stripe_id)
+            return stripe_id
+        except Exception as e:
+            logger.error(f"An error occurred while creating stripe product for {self.name}: {e}")
+            return None
     
 
 class SubscriptionPricing(Base):
@@ -64,6 +83,10 @@ class SubscriptionPricing(Base):
 
     def save(self, *args, **kwags):
         super().save(*args, **kwags)
+        """
+        Logic to disable existing pricing if the new one is 
+        created with the same subscription plan and same interval.
+        """
         from builder.models import SubscriptionPricing
         if not self.is_disable:
             qs = SubscriptionPricing.objects.filter(
