@@ -13,7 +13,7 @@ class SubscriptionPricingAdmin(admin.TabularInline):
 
 class SubscriptionPlanAdmin(admin.ModelAdmin):
     inlines = [SubscriptionPricingAdmin]
-    fields = ['name', 'description', 'active', 'features', 'group', 'permissions']
+    fields = ['name', 'description', 'stripe_id', 'active', 'features', 'group', 'permissions']
 
 class SubscriptionAdmin(admin.ModelAdmin):
     fields = ['user', 'subscription_plan', 'interval', 'start_date', 'end_date', 'renewal_date', 'status']
