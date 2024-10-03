@@ -9,6 +9,7 @@ class SubscriptionPricingAdmin(admin.TabularInline):
     model = SubscriptionPricing
     fields = ['interval', 'price', 'currency', 'is_disable', 'stripe_id']
     readonly_fields = ['stripe_id',]
+    can_delete = False
     extra = 1
 
 class SubscriptionPlanAdmin(admin.ModelAdmin):

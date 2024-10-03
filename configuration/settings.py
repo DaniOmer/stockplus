@@ -30,8 +30,8 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split()
 
-# ENV = config('ENV', default="DEVELOPMENT") // Temporarily ignored
-ENV="DEVELOPMENT"
+ENV = config('ENV', default="DEVELOPMENT")
+# ENV="DEVELOPMENT"
 
 # Application definition
 

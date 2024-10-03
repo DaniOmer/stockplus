@@ -84,7 +84,7 @@ class SubscriptionPricing(Base):
     @property
     def stripe_price(self):
         """ Remove the price decimal """
-        return self.price * 100
+        return int(self.price * 100)
     
     @property
     def stripe_interval(self):
