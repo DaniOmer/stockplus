@@ -11,7 +11,7 @@ services:
     ports:
       - "80:8000"
     environment:
-      - DEBUG=False
+      - DEBUG=True
       - DATABASE=${DATABASE}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
