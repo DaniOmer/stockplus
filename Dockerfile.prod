@@ -3,7 +3,6 @@ LABEL maintainer="ddaniomer@gmail.com"
 
 ENV PYTHONUNBUFFERED 1
 
-
 COPY . /app/
 
 WORKDIR /app
@@ -23,5 +22,14 @@ RUN python3 -m venv /venv && \
 # Add the virtual environment to PATH
 ENV PATH="/venv/bin:$PATH"
 
-# Command to start the application
+# Collect static files
+RUN /venv/bin/python3 manage.py collectstatic --noinput
+
+# Copy Nginx configuration file
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Run migrations
+RUN /venv/bin/python3 manage.py migrate
+
+# Command to start Gunicorn and Nginx
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "configuration.wsgi:application"]
