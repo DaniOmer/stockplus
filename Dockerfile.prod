@@ -22,6 +22,9 @@ RUN python3 -m venv /venv && \
 # Add the virtual environment to PATH
 ENV PATH="/venv/bin:$PATH"
 
+# Add secret key variable
+ENV SECRET_KEY=${SECRET_KEY}
+
 # Collect static files
 RUN /venv/bin/python3 manage.py collectstatic --noinput
 
