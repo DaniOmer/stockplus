@@ -25,4 +25,4 @@ ENV PATH="/venv/bin:$PATH"
 # Copy Nginx configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-ENTRYPOINT [ "sh", "-c", "entrypoint.sh" ]
+ENTRYPOINT [ "sh", "-c", "./entrypoint.sh" ]
