@@ -5,6 +5,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from builder.applications.user.serializers import UserSerializer
+
 logger = logging.getLogger(__name__)
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -25,8 +27,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             raise serializers.ValidationError('Invalid credentials.')
         
         refresh = RefreshToken.for_user(user)
+        user_data = UserSerializer(user).data
+        
         data = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
+            'user': user_data
         }
         return data
