@@ -226,6 +226,8 @@ INSTALLED_APPS += ["builder",] + [
     'builder.applications.company',
     'builder.applications.address',
     'builder.applications.subscription',
+    'builder.applications.shop',
+    'builder.applications.product',
 ]
 
 # Company configuration
@@ -256,12 +258,6 @@ SUBSCRIPTION_PERMISSIONS = [
     ('premium', 'Premium Permissions'),
     ('enterprise', 'Enterprise Permissions'),
 ]
-
-
-"""
-SHOP Configuration settings
-"""
-INSTALLED_APPS += ['builder.applications.shop',]
 
 
 """
