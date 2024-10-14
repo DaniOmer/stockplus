@@ -10,3 +10,5 @@ if 'stockplus.applications.product' in settings.INSTALLED_APPS:
     class ProductCategory(models_product.ProductCategory): pass
     class Product(models_product.Product): pass
     class ProductFeature(models_product.ProductFeature): pass
+    class ProductVariant(models_product.ProductVariant): pass
+    class PointOfSaleProductVariant(models_product.PointOfSaleProductVariant): pass
