@@ -227,7 +227,6 @@ INSTALLED_APPS += ["builder",] + [
     'builder.applications.address',
     'builder.applications.subscription',
     'builder.applications.shop',
-    'builder.applications.product',
 ]
 
 # Company configuration
@@ -266,6 +265,7 @@ Stockplus configuration
 INSTALLED_APPS += [
     'stockplus',
     'stockplus.applications.pointofsale',
+    'stockplus.applications.product',
 ]
 
 

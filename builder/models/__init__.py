@@ -25,10 +25,3 @@ if 'builder.applications.subscription' in settings.INSTALLED_APPS:
 if 'builder.applications.shop' in settings.INSTALLED_APPS:
     from builder.applications.shop import models as models_shop
     class Customer(models_shop.Customer): pass
-
-if 'builder.applications.product' in settings.INSTALLED_APPS:
-    from builder.applications.product import models as models_product
-    class Brand(models_product.Brand): pass
-    class ProductCategory(models_product.ProductCategory): pass
-    class Product(models_product.Product): pass
-    class ProductFeature(models_product.ProductFeature): pass
