@@ -41,3 +41,18 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
             raise NotFound({"detail": "You must create a company to continue."})
 
         return ProductCategory.objects.filter(company=company)
+    
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    A simple ViewSet for viewing and editing the products
+    associated with the user company.
+    """
+    serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated,]
+
+    def get_queryset(self):
+        company = self.request.user.company
+        if not company:
+            raise NotFound({"detail": "You must create a company to continue."})
+
+        return Product.objects.filter(company=company)
