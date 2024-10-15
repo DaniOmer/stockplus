@@ -9,32 +9,30 @@ from stockplus.models import (
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
-        fields = ['name', 'description', 'logo_url']
+        fields = ['id', 'name', 'description', 'logo_url']
 
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
-        fields = ['name', 'description']
+        fields = ['id', 'name', 'description']
 
 class ProductFeatureSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductFeature
-        fields = ['name', 'description']
+        fields = ['id', 'name', 'description']
 
 class PointOfSaleProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = PointOfSaleProductVariant
-        fields = ['id', 'point_of_sale', 'stock']
+        fields = ['id', 'point_of_sale', 'stock', 'price']
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     stocks = PointOfSaleProductVariantSerializer(many=True)
     class Meta:
         model = ProductVariant
-        fields = ['id', 'product', 'color', 'size', 'price', 'buy_price', 'sku', 'stocks']
+        fields = ['id', 'color', 'size', 'price', 'buy_price', 'sku', 'stocks']
 
 class ProductSerializer(serializers.ModelSerializer):
-    brand = BrandSerializer(many=False, required=False)
-    category = ProductCategorySerializer(many=False, required=True)
     variants = ProductVariantSerializer(many=True)
     class Meta:
         model = Product
