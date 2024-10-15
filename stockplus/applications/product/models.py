@@ -50,6 +50,7 @@ class ProductFeature(Base):
         return str(self.name)
     
 class ProductVariant(Base):
+    name = models.CharField(max_length=100, null=True, blank=True)
     product = models.ForeignKey(conf.ForeignKey.product, related_name="variants", on_delete=models.CASCADE)
     color = models.CharField(max_length=20, null=True, blank=True)
     size = models.CharField(max_length=20, null=True, blank=True)
@@ -63,12 +64,12 @@ class ProductVariant(Base):
 
     def __str__(self):
         return f"{self.product.name} - {self.color} {self.size}"
-    
 
 class PointOfSaleProductVariant(Base):
     point_of_sale = models.ForeignKey(conf.ForeignKey.point_of_sale, related_name="product_variants", on_delete=models.CASCADE)
     product_variant = models.ForeignKey(conf.ForeignKey.product_variant, related_name="point_of_sale_variants", on_delete=models.CASCADE)
     stock = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     class Meta:
         abstract = True
