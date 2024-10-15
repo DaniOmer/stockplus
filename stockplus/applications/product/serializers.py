@@ -10,11 +10,33 @@ class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'name', 'description', 'logo_url']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
+    
+    def create(self, validated_data):
+        request = self.context.get('request')
+        company = request.user.company
+
+        if not company:
+            raise ValidationError('You must provide your company information to continue.')
+        return Brand.objects.create(company=company, **validated_data)
 
 class ProductCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductCategory
         fields = ['id', 'name', 'description']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
+    
+    def create(self, validated_data):
+        request = self.context.get('request')
+        company = request.user.company
+
+        if not company:
+            raise ValidationError('You must provide your company information to continue.')
+        return ProductCategory.objects.create(company=company, **validated_data)
 
 class ProductFeatureSerializer(serializers.ModelSerializer):
     class Meta:

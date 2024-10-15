@@ -25,3 +25,7 @@ urlpatterns = [
 if 'stockplus.applications.pointofsale' in settings.INSTALLED_APPS:
     from stockplus.applications.pointofsale import urls as urls_pointofsale
     urlpatterns += urls_pointofsale.urlpatterns
+
+if 'stockplus.applications.product' in settings.INSTALLED_APPS:
+    from stockplus.applications.product import urls as urls_product
+    urlpatterns += urls_product.urlpatterns
