@@ -7,6 +7,7 @@ class Brand(Base):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True, null=True)
     logo_url = models.URLField(blank=True, null=True)
+    company = models.ForeignKey(conf.ForeignKey.company, related_name="brands", on_delete=models.CASCADE)
 
     class Meta():
         abstract = True
@@ -18,6 +19,7 @@ class ProductCategory(Base):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True, null=True)
     parent = models.ForeignKey('self', related_name='children', on_delete=models.CASCADE, blank=True, null=True)
+    company = models.ForeignKey(conf.ForeignKey.company, related_name="product_categories", on_delete=models.CASCADE)
 
     class Meta():
         abstract = True
