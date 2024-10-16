@@ -6,7 +6,8 @@ from stockplus.models import PointOfSale
 class PointOfSaleSerializer(serializers.ModelSerializer):
     class Meta:
         model = PointOfSale
-        exclude = ['company', 'collaborators']
+        fields = ['id', 'uid', 'name', 'type', 'opening_hours', 'closing_hours', 'collaborators']
+        read_only_fields = ['id', 'uid']
 
 class PointOfSaleAddCollaboratorSerializer(serializers.Serializer):
     email = serializers.CharField()
