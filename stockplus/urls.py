@@ -22,10 +22,10 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
-if 'stockplus.applications.pointofsale' in settings.INSTALLED_APPS:
-    from stockplus.applications.pointofsale import urls as urls_pointofsale
+if 'stockplus.modules.pointofsale' in settings.INSTALLED_APPS:
+    from stockplus.modules.pointofsale import urls as urls_pointofsale
     urlpatterns += urls_pointofsale.urlpatterns
 
-if 'stockplus.applications.product' in settings.INSTALLED_APPS:
-    from stockplus.applications.product import urls as urls_product
+if 'stockplus.modules.product' in settings.INSTALLED_APPS:
+    from stockplus.modules.product import urls as urls_product
     urlpatterns += urls_product.urlpatterns

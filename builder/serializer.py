@@ -5,7 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from builder.applications.user.serializers import UserSerializer
+from builder.modules.user.serializers import UserSerializer
 
 logger = logging.getLogger(__name__)
 

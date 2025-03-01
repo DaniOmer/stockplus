@@ -221,12 +221,12 @@ AUTHENTICATION_BACKENDS  = [
 ]
 
 INSTALLED_APPS += ["builder",] + [
-    'builder.applications.user',
-    'builder.applications.messenger',
-    'builder.applications.company',
-    'builder.applications.address',
-    'builder.applications.subscription',
-    'builder.applications.shop',
+    'builder.modules.user',
+    'builder.modules.messenger',
+    'builder.modules.company',
+    'builder.modules.address',
+    'builder.modules.subscription',
+    'builder.modules.shop',
 ]
 
 # Company configuration
@@ -243,7 +243,7 @@ User permissions settings
 """
 from stockplus.permissions import IsManager
 INVITATION_PERMISSION = IsManager
-ADDITIONAL_CRUD_PERMISSIONS = ['builder.applications.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
+ADDITIONAL_CRUD_PERMISSIONS = ['builder.modules.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
 # Subscription configuration
 SUBSCRIPTION_MODEL = [
@@ -264,8 +264,14 @@ Stockplus configuration
 """
 INSTALLED_APPS += [
     'stockplus',
-    'stockplus.applications.pointofsale',
-    'stockplus.applications.product',
+    'stockplus.modules.pointofsale',
+    'stockplus.modules.product',
+    'stockplus.interfaces.admin',
+]
+
+# Configuration pour l'autodiscover des fichiers admin dans les interfaces
+ADMIN_AUTODISCOVER_MODULES = [
+    'stockplus.interfaces.admin',
 ]
 
 
@@ -326,8 +332,8 @@ EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(seconds=seconds_delta)
 SENDINBLUE_APIKEY = config("SENDINBLUE_APIKEY")
 
 MISSIVE_SERVICE = config('MISSIVE_SERVICE', default=True)
-MISSIVE_BACKENDS = 'builder.applications.messenger.backends'
-MISSIVE_BACKEND_EMAIL = 'builder.applications.messenger.backends.email.sendinblue'
+MISSIVE_BACKENDS = 'builder.modules.messenger.backends'
+MISSIVE_BACKEND_EMAIL = 'builder.modules.messenger.backends.email.sendinblue'
 MESSENGER = {
     'sender_name': config('SENDER_NAME', default='contact'),
     'sender_email': config('SENDER_EMAIL', default='contact@stockplus.io'),

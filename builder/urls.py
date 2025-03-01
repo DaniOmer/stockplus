@@ -47,20 +47,20 @@ urlpatterns += simplejwt_urlpatterns
 """
 User configuration
 """
-if "builder.applications.user" in settings.INSTALLED_APPS:
-    from builder.applications.user import urls as urls_user
+if "builder.modules.user" in settings.INSTALLED_APPS:
+    from builder.modules.user import urls as urls_user
     urlpatterns += urls_user.urlpatterns
 
 """
 Company configuration
 """
-if "builder.applications.company" in settings.INSTALLED_APPS:
-    from builder.applications.company import urls as urls_company
+if "builder.modules.company" in settings.INSTALLED_APPS:
+    from builder.modules.company import urls as urls_company
     urlpatterns += urls_company.urlpatterns
 
 """
 Subscription configuration
 """
-if "builder.applications.subscription" in settings.INSTALLED_APPS:
-    from builder.applications.subscription import urls as urls_subscription
+if "builder.modules.subscription" in settings.INSTALLED_APPS:
+    from builder.modules.subscription import urls as urls_subscription
     urlpatterns += urls_subscription.urlpatterns

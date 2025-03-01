@@ -3,23 +3,23 @@ from django.conf import settings
 
 from builder import models as all_models
 
-if 'builder.applications.user' in settings.INSTALLED_APPS:
-    from builder.applications.user import admin as admin_user
+if 'builder.modules.user' in settings.INSTALLED_APPS:
+    from builder.modules.user import admin as admin_user
     @admin.register(all_models.User)
     class UserAdmin(admin_user.UserAdmin): pass
 
-if 'builder.applications.company' in settings.INSTALLED_APPS:
-    from builder.applications.company import admin as admin_company
+if 'builder.modules.company' in settings.INSTALLED_APPS:
+    from builder.modules.company import admin as admin_company
     @admin.register(all_models.Company)
     class CompanyAdmin(admin_company.CompanyAdmin): pass
 
-if 'builder.applications.messenger' in settings.INSTALLED_APPS:
-    from builder.applications.messenger import admin as admin_messenger
+if 'builder.modules.messenger' in settings.INSTALLED_APPS:
+    from builder.modules.messenger import admin as admin_messenger
     @admin.register(all_models.Missive)
     class MissiveAdmin(admin_messenger.MissiveAdmin): pass
 
-if 'builder.applications.subscription' in settings.INSTALLED_APPS:
-    from builder.applications.subscription import admin as admin_subscription
+if 'builder.modules.subscription' in settings.INSTALLED_APPS:
+    from builder.modules.subscription import admin as admin_subscription
     @admin.register(all_models.Feature)
     class FeatureAdmin(admin_subscription.FeatureAdmin): pass
 
@@ -29,7 +29,7 @@ if 'builder.applications.subscription' in settings.INSTALLED_APPS:
     @admin.register(all_models.Subscription)
     class SubscriptionAdmin(admin_subscription.SubscriptionAdmin): pass
 
-if 'builder.applications.shop' in settings.INSTALLED_APPS:
-    from builder.applications.shop import admin as admin_shop
+if 'builder.modules.shop' in settings.INSTALLED_APPS:
+    from builder.modules.shop import admin as admin_shop
     @admin.register(all_models.Customer)
     class CustomerAdmin(admin_shop.CustomerAdmin): pass
