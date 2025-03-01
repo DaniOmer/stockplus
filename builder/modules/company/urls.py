@@ -20,13 +20,13 @@ from builder.modules.company.interfaces.views.address import (
 
 urlpatterns = [
     # Company URLs
-    path('', CompanyCreateView.as_view(), name='company-create'),
-    path('<int:pk>/', CompanyDetailView.as_view(), name='company-detail'),
-    path('<int:pk>/activate/', CompanyActivateView.as_view(), name='company-activate'),
-    path('<int:pk>/deactivate/', CompanyDeactivateView.as_view(), name='company-deactivate'),
+    path('api/company/', CompanyCreateView.as_view(), name='company-create'),
+    path('api/company/<int:pk>/', CompanyDetailView.as_view(), name='company-detail'),
+    path('api/company/<int:pk>/activate/', CompanyActivateView.as_view(), name='company-activate'),
+    path('api/company/<int:pk>/deactivate/', CompanyDeactivateView.as_view(), name='company-deactivate'),
     
     # Company address URLs
-    path('<int:company_id>/addresses/', CompanyAddressListCreateView.as_view(), name='company-address-list'),
-    path('addresses/<int:pk>/', CompanyAddressDetailView.as_view(), name='company-address-detail'),
-    path('<int:company_id>/headquarters/', CompanyHeadquartersView.as_view(), name='company-headquarters'),
+    path('api/<int:company_id>/addresses/', CompanyAddressListCreateView.as_view(), name='company-address-list'),
+    path('api/addresses/<int:pk>/', CompanyAddressDetailView.as_view(), name='company-address-detail'),
+    path('api/company/<int:company_id>/headquarters/', CompanyHeadquartersView.as_view(), name='company-headquarters'),
 ]

@@ -3,171 +3,259 @@ Domain models for the user application.
 This module contains the domain models for the user application.
 """
 
-from datetime import datetime, timedelta
 import uuid
+import secrets
+from datetime import datetime, timedelta
+
+from django.conf import settings
 
 
 class User:
     """
     User domain model.
-    
-    This class represents a user in the system, with all its business rules and behaviors.
-    It is independent of any framework or infrastructure concerns.
     """
-    
-    def __init__(self, id=None, email=None, username=None, phone_number=None,
-                 first_name=None, last_name=None, date_of_birth=None,
-                 is_active=True, is_verified=False, first_connection=None,
-                 company_id=None, role=None, password_hash=None):
+
+    def __init__(self, id=None, email=None, phone_number=None, username=None,
+                 first_name=None, last_name=None, password_hash=None,
+                 is_active=True, is_verified=False, company_id=None, role=None,
+                 created_at=None, updated_at=None):
         """
         Initialize a new User instance.
-        
+
         Args:
-            id: The user's unique identifier
+            id: The user's ID
             email: The user's email address
-            username: The user's username
             phone_number: The user's phone number
+            username: The user's username
             first_name: The user's first name
             last_name: The user's last name
-            date_of_birth: The user's date of birth
+            password_hash: The user's password hash
             is_active: Whether the user is active
             is_verified: Whether the user is verified
-            first_connection: The date and time of the user's first connection
-            company_id: The ID of the company the user belongs to
+            company_id: The ID of the user's company
             role: The user's role in the company
-            password_hash: The user's hashed password
+            created_at: When the user was created
+            updated_at: When the user was last updated
         """
         self.id = id
         self.email = email
-        self.username = username
         self.phone_number = phone_number
+        self.username = username
         self.first_name = first_name
         self.last_name = last_name
-        self.date_of_birth = date_of_birth
+        self.password_hash = password_hash
         self.is_active = is_active
         self.is_verified = is_verified
-        self.first_connection = first_connection
         self.company_id = company_id
         self.role = role
-        self.password_hash = password_hash
-    
-    @property
-    def fullname(self):
-        """
-        Get the user's full name.
-        
-        Returns:
-            str: The user's full name
-        """
-        return f"{self.first_name or ''} {self.last_name or ''}".strip()
-    
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
+        self.verification_tokens = {}
+        self.password_reset_tokens = {}
+
     def verify(self):
         """
         Mark the user as verified.
         """
         self.is_verified = True
-    
-    def activate(self):
+        self.updated_at = datetime.now()
+
+    def update_profile(self, email=None, phone_number=None, first_name=None, last_name=None):
         """
-        Activate the user.
-        """
-        self.is_active = True
-    
-    def deactivate(self):
-        """
-        Deactivate the user.
-        """
-        self.is_active = False
-    
-    def update_profile(self, first_name=None, last_name=None, username=None, date_of_birth=None):
-        """
-        Update the user's profile information.
-        
+        Update the user's profile.
+
         Args:
+            email: The user's new email address
+            phone_number: The user's new phone number
             first_name: The user's new first name
             last_name: The user's new last name
-            username: The user's new username
-            date_of_birth: The user's new date of birth
         """
+        if email is not None:
+            self.email = email
+        if phone_number is not None:
+            self.phone_number = phone_number
         if first_name is not None:
             self.first_name = first_name
         if last_name is not None:
             self.last_name = last_name
-        if username is not None:
-            self.username = username
-        if date_of_birth is not None:
-            self.date_of_birth = date_of_birth
-    
+        self.updated_at = datetime.now()
+
     def assign_to_company(self, company_id, role):
         """
-        Assign the user to a company with a specific role.
-        
+        Assign the user to a company.
+
         Args:
-            company_id: The ID of the company
+            company_id: The ID of the company to assign the user to
             role: The user's role in the company
         """
         self.company_id = company_id
         self.role = role
-    
+        self.updated_at = datetime.now()
+
     def remove_from_company(self):
         """
         Remove the user from their company.
         """
         self.company_id = None
         self.role = None
-    
-    def record_first_connection(self):
+        self.updated_at = datetime.now()
+
+    def deactivate(self):
         """
-        Record the user's first connection.
+        Deactivate the user.
         """
-        if not self.first_connection:
-            self.first_connection = datetime.now()
+        self.is_active = False
+        self.updated_at = datetime.now()
+
+    def activate(self):
+        """
+        Activate the user.
+        """
+        self.is_active = True
+        self.updated_at = datetime.now()
+
+    def generate_verification_token(self, method='email'):
+        """
+        Generate a verification token for the user.
+
+        Args:
+            method: The verification method (email or sms)
+
+        Returns:
+            str: The verification token
+        """
+        token = ''.join(secrets.choice('0123456789') for _ in range(6))
+        expiry = datetime.now() + timedelta(hours=24)
+        
+        self.verification_tokens[token] = {
+            'method': method,
+            'expiry': expiry
+        }
+        
+        return token
+
+    def verify_token(self, token):
+        """
+        Verify a token.
+
+        Args:
+            token: The token to verify
+
+        Returns:
+            bool: Whether the token is valid
+        """
+        if token not in self.verification_tokens:
+            return False
+        
+        token_data = self.verification_tokens[token]
+        if token_data['expiry'] < datetime.now():
+            del self.verification_tokens[token]
+            return False
+        
+        # Token is valid, remove it and mark user as verified
+        del self.verification_tokens[token]
+        self.verify()
+        return True
+
+    def generate_password_reset_token(self, method='email'):
+        """
+        Generate a password reset token for the user.
+
+        Args:
+            method: The reset method (email or sms)
+
+        Returns:
+            str: The password reset token
+        """
+        token = ''.join(secrets.choice('0123456789') for _ in range(6))
+        expiry = datetime.now() + timedelta(hours=1)
+        
+        self.password_reset_tokens[token] = {
+            'method': method,
+            'expiry': expiry
+        }
+        
+        return token
+
+    def verify_password_reset_token(self, token):
+        """
+        Verify a password reset token.
+
+        Args:
+            token: The token to verify
+
+        Returns:
+            bool: Whether the token is valid
+        """
+        if token not in self.password_reset_tokens:
+            return False
+        
+        token_data = self.password_reset_tokens[token]
+        if token_data['expiry'] < datetime.now():
+            del self.password_reset_tokens[token]
+            return False
+        
+        return True
+
+    def clear_password_reset_token(self, token):
+        """
+        Clear a password reset token.
+
+        Args:
+            token: The token to clear
+        """
+        if token in self.password_reset_tokens:
+            del self.password_reset_tokens[token]
 
 
 class Invitation:
     """
     Invitation domain model.
-    
-    This class represents an invitation to join the system.
     """
-    
-    def __init__(self, id=None, email=None, sender_id=None, token=None,
-                 status='PENDING', expires_at=None):
+
+    def __init__(self, id=None, email=None, token=None, sender_id=None,
+                 status='PENDING', expires_at=None, created_at=None, updated_at=None):
         """
         Initialize a new Invitation instance.
-        
+
         Args:
-            id: The invitation's unique identifier
-            email: The email address of the invitee
-            sender_id: The ID of the user who sent the invitation
+            id: The invitation's ID
+            email: The email of the invitee
             token: The invitation token
-            status: The status of the invitation
-            expires_at: The date and time when the invitation expires
+            sender_id: The ID of the sender
+            status: The invitation status
+            expires_at: When the invitation expires
+            created_at: When the invitation was created
+            updated_at: When the invitation was last updated
         """
         self.id = id
         self.email = email
-        self.sender_id = sender_id
         self.token = token or str(uuid.uuid4())
+        self.sender_id = sender_id
         self.status = status
-        self.expires_at = expires_at or (datetime.now() + timedelta(hours=48))
-    
+        self.expires_at = expires_at or (datetime.now() + timedelta(days=7))
+        self.created_at = created_at or datetime.now()
+        self.updated_at = updated_at or datetime.now()
+
+    def is_valid(self):
+        """
+        Check if the invitation is valid.
+
+        Returns:
+            bool: Whether the invitation is valid
+        """
+        return self.status == 'PENDING' and self.expires_at > datetime.now()
+
     def mark_as_validated(self):
         """
         Mark the invitation as validated.
         """
         self.status = 'VALIDATED'
-    
+        self.updated_at = datetime.now()
+
     def mark_as_expired(self):
         """
         Mark the invitation as expired.
         """
         self.status = 'EXPIRED'
-    
-    def is_valid(self):
-        """
-        Check if the invitation is valid.
-        
-        Returns:
-            bool: True if the invitation is valid, False otherwise
-        """
-        return self.status == 'PENDING' and datetime.now() < self.expires_at
+        self.updated_at = datetime.now()
