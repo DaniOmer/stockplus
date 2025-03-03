@@ -32,7 +32,6 @@ class CompanyCreateView(generics.CreateAPIView):
         context = super().get_serializer_context()
         context['company_service'] = CompanyService(
             CompanyRepository(),
-            CompanyAddressRepository()
         )
         return context
 
@@ -53,7 +52,6 @@ class CompanyDetailView(generics.RetrieveUpdateAPIView):
         """
         company_service = CompanyService(
             CompanyRepository(),
-            CompanyAddressRepository()
         )
         
         # Get the company ID from the URL
@@ -76,7 +74,6 @@ class CompanyDetailView(generics.RetrieveUpdateAPIView):
         context = super().get_serializer_context()
         context['company_service'] = CompanyService(
             CompanyRepository(),
-            CompanyAddressRepository()
         )
         return context
 
@@ -100,7 +97,6 @@ class CompanyActivateView(APIView):
         """
         company_service = CompanyService(
             CompanyRepository(),
-            CompanyAddressRepository()
         )
         
         try:
@@ -130,7 +126,6 @@ class CompanyDeactivateView(APIView):
         """
         company_service = CompanyService(
             CompanyRepository(),
-            CompanyAddressRepository()
         )
         
         try:

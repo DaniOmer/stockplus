@@ -1,8 +1,7 @@
 from rest_framework import generics, serializers
 
 from builder.permissions import base_permissions
-from builder.models import Company, CompanyAddress
-from builder.modules.company.serializers import CompanySerializer, CompanyAddressSerializer
+from builder.modules.company.interfaces.serializers import CompanySerializer
 
 
 class CompanyCreateView(generics.CreateAPIView):

@@ -1,9 +1,8 @@
 from rest_framework import generics
 
 from builder.permissions import base_permissions
-from builder.models import Company, CompanyAddress
-from builder.modules.user.permissions import IsSelf
-from builder.modules.company.serializers import CompanySerializer
+from builder.models import Company
+from builder.modules.company.interfaces.serializers import CompanySerializer
 
 class CompanyDetailsView(generics.RetrieveUpdateAPIView):
     """
