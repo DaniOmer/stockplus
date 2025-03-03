@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from stockplus.modules.pointofsale.domain.models import PointOfSale
+from stockplus.modules.pointofsale.domain.entities import PointOfSale, PosPaymentMethod
 
 
 class PointOfSaleRepository(ABC):
@@ -95,5 +95,85 @@ class PointOfSaleRepository(ABC):
             
         Returns:
             The updated point of sale.
+        """
+        pass
+
+
+class PaymentMethodRepository(ABC):
+    """
+    Interface for the payment method repository.
+    """
+    @abstractmethod
+    def get_by_id(self, payment_method_id: int) -> Optional[PosPaymentMethod]:
+        """
+        Get a payment method by its ID.
+        
+        Args:
+            payment_method_id: The ID of the payment method to retrieve.
+            
+        Returns:
+            The payment method if found, None otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def get_by_point_of_sale_id(self, point_of_sale_id: int) -> List[PosPaymentMethod]:
+        """
+        Get all payment methods for a point of sale.
+        
+        Args:
+            point_of_sale_id: The ID of the point of sale.
+            
+        Returns:
+            A list of payment methods for the point of sale.
+        """
+        pass
+    
+    @abstractmethod
+    def create(self, payment_method: PosPaymentMethod) -> PosPaymentMethod:
+        """
+        Create a new payment method.
+        
+        Args:
+            payment_method: The payment method to create.
+            
+        Returns:
+            The created payment method.
+        """
+        pass
+    
+    @abstractmethod
+    def update(self, payment_method: PosPaymentMethod) -> PosPaymentMethod:
+        """
+        Update an existing payment method.
+        
+        Args:
+            payment_method: The payment method to update.
+            
+        Returns:
+            The updated payment method.
+        """
+        pass
+    
+    @abstractmethod
+    def delete(self, payment_method_id: int) -> None:
+        """
+        Delete a payment method.
+        
+        Args:
+            payment_method_id: The ID of the payment method to delete.
+        """
+        pass
+    
+    @abstractmethod
+    def toggle_status(self, payment_method_id: int) -> PosPaymentMethod:
+        """
+        Toggle the active status of a payment method.
+        
+        Args:
+            payment_method_id: The ID of the payment method.
+            
+        Returns:
+            The updated payment method.
         """
         pass

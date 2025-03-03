@@ -25,3 +25,16 @@ class CompanyNotFoundError(PointOfSaleError):
         self.company_id = company_id
         self.message = message or f"Company with id {company_id} not found."
         super().__init__(self.message)
+
+
+class PaymentMethodError(Exception):
+    """Base exception for all payment method related errors."""
+    pass
+
+
+class PaymentMethodNotFoundError(PaymentMethodError):
+    """Raised when a payment method is not found."""
+    def __init__(self, payment_method_id: int = None, message: str = None):
+        self.payment_method_id = payment_method_id
+        self.message = message or f"Payment method with id {payment_method_id} not found."
+        super().__init__(self.message)

@@ -2,7 +2,7 @@ from stockplus.modules.product.interfaces.serializers.brand_serializer import Br
 from stockplus.modules.product.interfaces.serializers.product_category_serializer import ProductCategorySerializer
 from stockplus.modules.product.interfaces.serializers.product_serializer import (
     ProductSerializer, ProductFeatureSerializer, 
-    ProductVariantSerializer, PointOfSaleProductVariantSerializer
+    ProductVariantSerializer
 )
 
 __all__ = [
@@ -11,5 +11,4 @@ __all__ = [
     'ProductSerializer',
     'ProductFeatureSerializer',
     'ProductVariantSerializer',
-    'PointOfSaleProductVariantSerializer',
 ]

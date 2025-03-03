@@ -1,25 +1,23 @@
 """
-User profile serializers for the user application.
-This module contains the user profile serializers for the user application.
+Profile serializers for the user application.
 """
-
 from rest_framework import serializers
 
-from builder.modules.user.domain.models import User
+from builder.models import User
 
 
-class UserProfileSerializer(serializers.Serializer):
+class UserProfileSerializer(serializers.ModelSerializer):
     """
-    Serializer for the User profile.
+    Serializer for the user profile.
     """
-    id = serializers.IntegerField(read_only=True)
-    email = serializers.EmailField(required=False)
-    phone_number = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    first_name = serializers.CharField(required=False)
-    last_name = serializers.CharField(required=False)
-    is_verified = serializers.BooleanField(read_only=True)
-    company_id = serializers.IntegerField(read_only=True)
-    role = serializers.CharField(read_only=True)
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'phone_number', 'first_name', 'last_name',
+            'is_verified', 'company_id', 'role', 'avatar'
+        ]
+        read_only_fields = ['id', 'is_verified', 'company_id', 'role']
     
     def update(self, instance, validated_data):
         """
@@ -44,5 +42,10 @@ class UserProfileSerializer(serializers.Serializer):
             first_name=validated_data.get('first_name', instance.first_name),
             last_name=validated_data.get('last_name', instance.last_name)
         )
+        
+        # Update the avatar if provided
+        if 'avatar' in validated_data:
+            instance.avatar = validated_data['avatar']
+            instance.save()
         
         return user

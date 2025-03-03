@@ -1,10 +1,9 @@
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from stockplus.modules.product.application.services import ProductService
 from stockplus.modules.product.domain.exceptions import ProductNotFoundError
-from stockplus.modules.product.infrastructure.orm import Product as ProductORM
+from stockplus.infrastructure.models import Product as ProductORM
 from stockplus.modules.product.interfaces.serializers import ProductSerializer
 
 

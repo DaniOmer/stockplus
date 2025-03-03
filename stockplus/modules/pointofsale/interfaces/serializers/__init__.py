@@ -1,4 +1,4 @@
-from stockplus.modules.pointofsale.interfaces.serializers.point_of_sale_serializer import (
+from stockplus.modules.pointofsale.interfaces.serializers.pos_serializer import (
     PointOfSaleSerializer, PointOfSaleAddCollaboratorSerializer
 )
 

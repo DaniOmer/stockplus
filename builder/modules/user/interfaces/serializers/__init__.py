@@ -13,3 +13,25 @@ from builder.modules.user.interfaces.serializers.auth import (
     EmailVerifySerializer,
     ResendVerificationEmailSerializer
 )
+from builder.modules.user.interfaces.serializers.password import ChangePasswordSerializer
+from builder.modules.user.interfaces.serializers.notification import (
+    NotificationSerializer,
+    NotificationListSerializer,
+    NotificationCreateSerializer
+)
+
+
+__all__ = [
+    UserSerializer,
+    UserProfileSerializer,
+    InvitationSerializer,
+    LoginSerializer,
+    ForgotPasswordSerializer,
+    ResetPasswordSerializer,
+    EmailVerifySerializer,
+    ResendVerificationEmailSerializer,
+    ChangePasswordSerializer,
+    NotificationSerializer,
+    NotificationListSerializer,
+    NotificationCreateSerializer
+]

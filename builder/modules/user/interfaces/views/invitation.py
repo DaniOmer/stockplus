@@ -7,14 +7,12 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from builder.modules.user.interfaces.serializers import InvitationSerializer
-from builder.modules.user.application.services import InvitationService, UserService
+from builder.modules.user.application.services import InvitationService
 from builder.modules.user.infrastructure.repositories import InvitationRepository, UserRepository
 from builder.modules.user.domain.exceptions import (
     InvitationNotFoundException,
     InvitationExpiredException,
     InvitationAlreadyValidatedException,
-    UserAlreadyExistsException,
-    ValidationException
 )
 
 

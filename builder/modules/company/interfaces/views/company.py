@@ -9,14 +9,9 @@ from rest_framework.views import APIView
 
 from builder.modules.company.interfaces.serializers import CompanySerializer
 from builder.modules.company.application.services import CompanyService
-from builder.modules.company.infrastructure.repositories import (
-    CompanyRepository,
-    CompanyAddressRepository
-)
+from builder.modules.company.infrastructure.repositories.company_repository import CompanyRepository
 from builder.modules.company.domain.exceptions import (
     CompanyNotFoundException,
-    CompanyAlreadyExistsException,
-    ValidationException
 )
 
 

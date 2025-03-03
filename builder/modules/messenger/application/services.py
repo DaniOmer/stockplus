@@ -1,113 +1,221 @@
 """
-Services for the messenger application.
+Application services for the messenger application.
+This module contains the application services for the messenger application.
 """
-import logging
-from typing import Optional, Dict, Any, List
 
-from builder.modules.messenger.application.interfaces import MissiveRepositoryInterface
-from builder.modules.messenger.domain.exceptions import MissiveDeliveryException
+import logging
+from typing import List, Optional, Dict, Any
+
+from builder.modules.messenger.domain.models.missive import Missive
+from builder.modules.messenger.domain.exceptions import (
+    MissiveNotFoundException,
+    InvalidMissiveStatusException,
+)
+from builder.modules.messenger.application.interfaces import  MissiveRepositoryInterface
+from builder.modules.messenger import choices
 
 logger = logging.getLogger(__name__)
 
 
 class MessengerService:
-    """Service for handling messenger operations."""
-    
+    """
+    Messenger service.
+
+    This class implements the application logic for the messenger module. It uses the missive repository
+    to access and manipulate missive data and enforces business rules.
+    """
+
     def __init__(self, missive_repository: MissiveRepositoryInterface):
-        self.missive_repository = missive_repository
-    
-    def send_email(self, to_email: str, subject: str, message: str, 
-                  html_message: Optional[str] = None, **kwargs) -> Any:
         """
-        Send an email.
-        
+        Initialize a new MessengerService instance.
+
+        Args:
+            missive_repository: The missive repository to use
+        """
+        self.missive_repository = missive_repository
+
+    def get_missive_by_id(self, missive_id) -> Optional[Missive]:
+        """
+        Get a missive by ID.
+
+        Args:
+            missive_id: The ID of the missive to retrieve
+
+        Returns:
+            Missive: The missive with the given ID or None if not found
+        """
+        return self.missive_repository.get_by_id(missive_id)
+
+    def get_missives_by_status(self, status) -> List[Missive]:
+        """
+        Get all missives with a given status.
+
+        Args:
+            status: The status to filter by
+
+        Returns:
+            List[Missive]: A list of missives with the given status
+        """
+        return self.missive_repository.get_by_status(status)
+
+    def get_missives_by_mode(self, mode) -> List[Missive]:
+        """
+        Get all missives with a given mode.
+
+        Args:
+            mode: The mode to filter by (EMAIL, SMS, etc.)
+
+        Returns:
+            List[Missive]: A list of missives with the given mode
+        """
+        return self.missive_repository.get_by_mode(mode)
+
+    def get_missives_by_target(self, target) -> List[Missive]:
+        """
+        Get all missives for a given target.
+
+        Args:
+            target: The target (email, phone number, etc.)
+
+        Returns:
+            List[Missive]: A list of missives for the given target
+        """
+        return self.missive_repository.get_by_target(target)
+
+    def create_email_missive(self, to_email, subject, message, html_message=None, **kwargs) -> Missive:
+        """
+        Create a new email missive.
+
         Args:
             to_email: The recipient's email address
             subject: The email subject
             message: The email message (plain text)
             html_message: The email message (HTML)
-            **kwargs: Additional parameters for the missive
-            
+            **kwargs: Additional missive data
+
         Returns:
-            The created missive object
-            
-        Raises:
-            MissiveDeliveryException: If the email could not be sent
+            Missive: The created missive
         """
-        try:
-            missive = self.missive_repository.create_email_missive(
-                target=to_email,
-                subject=subject,
-                message=message,
-                html_message=html_message or message,
-                **kwargs
-            )
-            logger.info(f"Email missive created for {to_email}")
-            return missive
-        except Exception as e:
-            logger.error(f"Failed to create email missive for {to_email}: {str(e)}")
-            raise MissiveDeliveryException(f"Failed to send email: {str(e)}")
-    
-    def send_sms(self, to_phone: str, message: str, **kwargs) -> Any:
-        """
-        Send an SMS.
+        data = {
+            "mode": choices.MODE_EMAIL,
+            "status": choices.STATUS_PREPARE,
+            "target": to_email,
+            "subject": subject,
+            "txt": message,
+            "html": html_message or message,
+            **kwargs
+        }
         
+        missive = Missive(**data)
+        return self.missive_repository.save(missive)
+
+    def create_sms_missive(self, to_phone, message, **kwargs) -> Missive:
+        """
+        Create a new SMS missive.
+
         Args:
             to_phone: The recipient's phone number
             message: The SMS message
-            **kwargs: Additional parameters for the missive
-            
+            **kwargs: Additional missive data
+
         Returns:
-            The created missive object
-            
+            Missive: The created missive
+        """
+        data = {
+            "mode": choices.MODE_SMS,
+            "status": choices.STATUS_PREPARE,
+            "target": to_phone,
+            "subject": "SMS Message",
+            "txt": message,
+            "html": "not used for sms",
+            **kwargs
+        }
+        
+        missive = Missive(**data)
+        return self.missive_repository.save(missive)
+
+    def send_missive(self, missive_id) -> bool:
+        """
+        Send a missive.
+
+        Args:
+            missive_id: The ID of the missive to send
+
+        Returns:
+            bool: True if the missive was sent successfully, False otherwise
+
         Raises:
-            MissiveDeliveryException: If the SMS could not be sent
+            MissiveNotFoundException: If the missive is not found
+            InvalidMissiveStatusException: If the missive is not in the PREPARE status
         """
+        missive = self.missive_repository.get_by_id(missive_id)
+        if not missive:
+            raise MissiveNotFoundException(f"Missive with ID {missive_id} not found")
+        
+        if missive.status != choices.STATUS_PREPARE:
+            raise InvalidMissiveStatusException(f"Missive with ID {missive_id} is not in PREPARE status")
+        
         try:
-            missive = self.missive_repository.create_sms_missive(
-                target=to_phone,
-                message=message,
-                **kwargs
-            )
-            logger.info(f"SMS missive created for {to_phone}")
-            return missive
+            backend = missive.get_backend()
+            
+            if missive.mode == choices.MODE_EMAIL:
+                success = backend.send_email(missive)
+            elif missive.mode == choices.MODE_SMS:
+                success = backend.send_sms(missive)
+            else:
+                logger.error(f"Unsupported missive mode: {missive.mode}")
+                missive.to_error()
+                self.missive_repository.save(missive)
+                return False
+            
+            if success:
+                missive.to_sent()
+            else:
+                missive.to_error()
+            
+            self.missive_repository.save(missive)
+            return success
         except Exception as e:
-            logger.error(f"Failed to create SMS missive for {to_phone}: {str(e)}")
-            raise MissiveDeliveryException(f"Failed to send SMS: {str(e)}")
-    
-    def get_missive(self, missive_id: int) -> Any:
+            logger.error(f"Error sending missive: {str(e)}")
+            missive.to_error()
+            missive.trace = str(e)
+            self.missive_repository.save(missive)
+            return False
+
+    def check_missive_status(self, missive_id) -> Dict[str, Any]:
         """
-        Get a missive by ID.
-        
+        Check the status of a missive.
+
         Args:
-            missive_id: The ID of the missive
-            
+            missive_id: The ID of the missive to check
+
         Returns:
-            The missive object
+            Dict[str, Any]: The status information
+
+        Raises:
+            MissiveNotFoundException: If the missive is not found
         """
-        return self.missive_repository.get_missive_by_id(missive_id)
-    
-    def update_missive_status(self, missive_id: int, status: str) -> Any:
-        """
-        Update a missive's status.
+        missive = self.missive_repository.get_by_id(missive_id)
+        if not missive:
+            raise MissiveNotFoundException(f"Missive with ID {missive_id} not found")
         
+        try:
+            return missive.check_status()
+        except Exception as e:
+            logger.error(f"Error checking missive status: {str(e)}")
+            return {
+                "status": "ERROR",
+                "error": str(e)
+            }
+
+    def delete_missive(self, missive_id) -> bool:
+        """
+        Delete a missive.
+
         Args:
-            missive_id: The ID of the missive
-            status: The new status
-            
+            missive_id: The ID of the missive to delete
+
         Returns:
-            The updated missive object
+            bool: True if the missive was deleted, False otherwise
         """
-        return self.missive_repository.update_missive_status(missive_id, status)
-    
-    def list_missives(self, filters: Optional[Dict[str, Any]] = None) -> List[Any]:
-        """
-        List missives with optional filters.
-        
-        Args:
-            filters: Optional filters for the missives
-            
-        Returns:
-            A list of missive objects
-        """
-        return self.missive_repository.list_missives(filters)
+        return self.missive_repository.delete(missive_id)

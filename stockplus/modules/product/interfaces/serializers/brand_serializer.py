@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from stockplus.modules.product.domain.models import Brand
-from stockplus.modules.product.infrastructure.orm import BrandORM
+from stockplus.modules.product.domain.entities import Brand
+from stockplus.infrastructure.models import Brand as BrandORM
 
 
-class BrandSerializer(serializers.ModelSerializer):
+class BrandSerializer(serializers.Serializer):
     """
     Serializer for the brand model.
     """

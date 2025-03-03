@@ -1,71 +1,146 @@
 """
 Serializers for the address application.
+This module contains the serializers for the address application.
 """
+
 from rest_framework import serializers
+
+from builder.models import UserAddress, CompanyAddress
 
 
 class AddressSerializer(serializers.Serializer):
-    """Serializer for address objects."""
-    
+    """
+    Base serializer for address entities.
+    """
     id = serializers.IntegerField(read_only=True)
-    address = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    complement = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    city = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    postal_code = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    state = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    state_code = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    country = serializers.CharField()
-    country_code = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    cedex = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    cedex_code = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    special = serializers.CharField(required=False, allow_null=True, allow_blank=True)
-    index = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    address = serializers.CharField(required=True)
+    complement = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    city = serializers.CharField(required=True)
+    postal_code = serializers.CharField(required=True)
+    state = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    state_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    country = serializers.CharField(required=True)
+    country_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    cedex = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    cedex_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    special = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    index = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     latitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
     longitude = serializers.DecimalField(max_digits=9, decimal_places=6, required=False, allow_null=True)
-    created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(read_only=True)
-    
-    class Meta:
-        fields = [
-            'id', 'address', 'complement', 'city', 'postal_code',
-            'state', 'state_code', 'country', 'country_code',
-            'cedex', 'cedex_code', 'special', 'index',
-            'latitude', 'longitude', 'created_at', 'updated_at'
-        ]
 
 
 class UserAddressSerializer(AddressSerializer):
-    """Serializer for user address objects."""
+    """
+    Serializer for user address entities.
+    """
+    user_id = serializers.IntegerField(required=True)
+    is_default = serializers.BooleanField(required=False, default=False)
     
-    user_id = serializers.IntegerField()
+    def create(self, validated_data):
+        """
+        Create a new user address.
+        
+        Args:
+            validated_data: The validated data
+            
+        Returns:
+            UserAddress: The created user address
+        """
+        address_service = self.context.get('address_service')
+        if not address_service:
+            raise ValueError('Address service is required')
+        
+        # Create the address
+        address = address_service.create_address(**validated_data)
+        
+        return address
     
-    class Meta(AddressSerializer.Meta):
-        fields = AddressSerializer.Meta.fields + ['user_id']
+    def update(self, instance, validated_data):
+        """
+        Update a user address.
+        
+        Args:
+            instance: The user address instance
+            validated_data: The validated data
+            
+        Returns:
+            UserAddress: The updated user address
+        """
+        address_service = self.context.get('address_service')
+        if not address_service:
+            raise ValueError('Address service is required')
+        
+        # Update the address
+        address = address_service.update_address(instance.id, **validated_data)
+        
+        return address
 
 
 class CompanyAddressSerializer(AddressSerializer):
-    """Serializer for company address objects."""
+    """
+    Serializer for company address entities.
+    """
+    company_id = serializers.IntegerField(required=True)
     
-    company_id = serializers.IntegerField()
+    def create(self, validated_data):
+        """
+        Create a new company address.
+        
+        Args:
+            validated_data: The validated data
+            
+        Returns:
+            CompanyAddress: The created company address
+        """
+        address_service = self.context.get('address_service')
+        if not address_service:
+            raise ValueError('Address service is required')
+        
+        # Create the address
+        address = address_service.create_address(**validated_data)
+        
+        return address
     
-    class Meta(AddressSerializer.Meta):
-        fields = AddressSerializer.Meta.fields + ['company_id']
+    def update(self, instance, validated_data):
+        """
+        Update a company address.
+        
+        Args:
+            instance: The company address instance
+            validated_data: The validated data
+            
+        Returns:
+            CompanyAddress: The updated company address
+        """
+        address_service = self.context.get('address_service')
+        if not address_service:
+            raise ValueError('Address service is required')
+        
+        # Update the address
+        address = address_service.update_address(instance.id, **validated_data)
+        
+        return address
 
 
-class GeocodeAddressSerializer(serializers.Serializer):
-    """Serializer for geocoding an address."""
-    
-    address_id = serializers.IntegerField()
+class UserAddressListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing user addresses.
+    """
     
     class Meta:
-        fields = ['address_id']
+        model = UserAddress
+        fields = [
+            'id', 'address', 'city', 'postal_code', 'country', 'is_default'
+        ]
 
 
-class ReverseGeocodeSerializer(serializers.Serializer):
-    """Serializer for reverse geocoding coordinates."""
-    
-    latitude = serializers.FloatField()
-    longitude = serializers.FloatField()
+class CompanyAddressListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for listing company addresses.
+    """
     
     class Meta:
-        fields = ['latitude', 'longitude']
+        model = CompanyAddress
+        fields = [
+            'id', 'address', 'city', 'postal_code', 'country'
+        ]

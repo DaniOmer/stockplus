@@ -6,16 +6,16 @@ This module contains the application interfaces for the user application.
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from builder.modules.user.domain.models import User, Invitation
-
 
 class UserRepositoryInterface(ABC):
     """
     User repository interface.
+
+    This interface defines the methods that a user repository must implement.
     """
 
     @abstractmethod
-    def get_by_id(self, user_id) -> Optional[User]:
+    def get_by_id(self, user_id):
         """
         Get a user by ID.
 
@@ -28,7 +28,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_email(self, email) -> Optional[User]:
+    def get_by_email(self, email):
         """
         Get a user by email.
 
@@ -41,7 +41,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_phone_number(self, phone_number) -> Optional[User]:
+    def get_by_phone_number(self, phone_number):
         """
         Get a user by phone number.
 
@@ -54,7 +54,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_username(self, username) -> Optional[User]:
+    def get_by_username(self, username):
         """
         Get a user by username.
 
@@ -67,7 +67,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_company_id(self, company_id) -> List[User]:
+    def get_by_company_id(self, company_id):
         """
         Get all users for a company.
 
@@ -80,7 +80,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def save(self, user: User) -> User:
+    def save(self, user):
         """
         Save a user.
 
@@ -93,35 +93,7 @@ class UserRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def update_password(self, user_id, new_password) -> User:
-        """
-        Update a user's password.
-
-        Args:
-            user_id: The ID of the user to update
-            new_password: The new password
-
-        Returns:
-            User: The updated user
-        """
-        pass
-
-    @abstractmethod
-    def verify_password(self, user_id, password) -> bool:
-        """
-        Verify a user's password.
-
-        Args:
-            user_id: The ID of the user
-            password: The password to verify
-
-        Returns:
-            bool: Whether the password is correct
-        """
-        pass
-
-    @abstractmethod
-    def delete(self, user_id) -> bool:
+    def delete(self, user_id):
         """
         Delete a user.
 
@@ -133,14 +105,44 @@ class UserRepositoryInterface(ABC):
         """
         pass
 
+    @abstractmethod
+    def verify_password(self, user_id, password):
+        """
+        Verify a user's password.
+
+        Args:
+            user_id: The ID of the user
+            password: The password to verify
+
+        Returns:
+            bool: True if the password is correct, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def update_password(self, user_id, new_password):
+        """
+        Update a user's password.
+
+        Args:
+            user_id: The ID of the user
+            new_password: The new password
+
+        Returns:
+            User: The updated user
+        """
+        pass
+
 
 class InvitationRepositoryInterface(ABC):
     """
     Invitation repository interface.
+
+    This interface defines the methods that an invitation repository must implement.
     """
 
     @abstractmethod
-    def get_by_id(self, invitation_id) -> Optional[Invitation]:
+    def get_by_id(self, invitation_id):
         """
         Get an invitation by ID.
 
@@ -153,7 +155,7 @@ class InvitationRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_email(self, email) -> Optional[Invitation]:
+    def get_by_email(self, email):
         """
         Get an invitation by email.
 
@@ -166,7 +168,7 @@ class InvitationRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_token(self, token) -> Optional[Invitation]:
+    def get_by_token(self, token):
         """
         Get an invitation by token.
 
@@ -179,7 +181,7 @@ class InvitationRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def get_by_sender_id(self, sender_id) -> List[Invitation]:
+    def get_by_sender_id(self, sender_id):
         """
         Get all invitations sent by a user.
 
@@ -192,7 +194,7 @@ class InvitationRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def save(self, invitation: Invitation) -> Invitation:
+    def save(self, invitation):
         """
         Save an invitation.
 
@@ -205,7 +207,7 @@ class InvitationRepositoryInterface(ABC):
         pass
 
     @abstractmethod
-    def delete(self, invitation_id) -> bool:
+    def delete(self, invitation_id):
         """
         Delete an invitation.
 
@@ -218,79 +220,171 @@ class InvitationRepositoryInterface(ABC):
         pass
 
 
+class NotificationRepositoryInterface(ABC):
+    """
+    Notification repository interface.
+
+    This interface defines the methods that a notification repository must implement.
+    """
+
+    @abstractmethod
+    def get_by_id(self, notification_id):
+        """
+        Get a notification by ID.
+
+        Args:
+            notification_id: The ID of the notification to retrieve
+
+        Returns:
+            Notification: The notification with the given ID or None if not found
+        """
+        pass
+
+    @abstractmethod
+    def get_by_user_id(self, user_id, read=None, limit=None, offset=None):
+        """
+        Get all notifications for a user.
+
+        Args:
+            user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+            limit: Maximum number of notifications to return
+            offset: Number of notifications to skip
+
+        Returns:
+            List[Notification]: A list of notifications for the user
+        """
+        pass
+
+    @abstractmethod
+    def create(self, user_id, title, message, type='INFO', link=None):
+        """
+        Create a notification.
+
+        Args:
+            user_id: The ID of the user
+            title: The notification title
+            message: The notification message
+            type: The notification type
+            link: Optional URL link
+
+        Returns:
+            Notification: The created notification
+        """
+        pass
+
+    @abstractmethod
+    def mark_as_read(self, notification_id):
+        """
+        Mark a notification as read.
+
+        Args:
+            notification_id: The ID of the notification
+
+        Returns:
+            Notification: The updated notification
+        """
+        pass
+
+    @abstractmethod
+    def mark_all_as_read(self, user_id):
+        """
+        Mark all notifications for a user as read.
+
+        Args:
+            user_id: The ID of the user
+
+        Returns:
+            int: The number of notifications marked as read
+        """
+        pass
+
+    @abstractmethod
+    def delete(self, notification_id):
+        """
+        Delete a notification.
+
+        Args:
+            notification_id: The ID of the notification to delete
+
+        Returns:
+            bool: True if the notification was deleted, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def delete_all_for_user(self, user_id, read=None):
+        """
+        Delete all notifications for a user.
+
+        Args:
+            user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+
+        Returns:
+            int: The number of notifications deleted
+        """
+        pass
+
+
 class TokenRepositoryInterface(ABC):
     """
     Token repository interface.
+
+    This interface defines the methods that a token repository must implement.
     """
 
     @abstractmethod
-    def store_verification_token(self, user_id, token, expiry, method='email'):
+    def create_token(self, user_id, token_type, expires_in=None):
         """
-        Store a verification token.
+        Create a token for a user.
 
         Args:
             user_id: The ID of the user
-            token: The token
-            expiry: When the token expires
-            method: The verification method (email or sms)
-        """
-        pass
-
-    @abstractmethod
-    def get_verification_token(self, token):
-        """
-        Get a verification token.
-
-        Args:
-            token: The token to retrieve
+            token_type: The type of token to create
+            expires_in: The number of seconds until the token expires
 
         Returns:
-            dict: The token data or None if not found
+            str: The created token
         """
         pass
 
     @abstractmethod
-    def delete_verification_token(self, token):
+    def validate_token(self, token, token_type):
         """
-        Delete a verification token.
+        Validate a token.
 
         Args:
-            token: The token to delete
-        """
-        pass
-
-    @abstractmethod
-    def store_password_reset_token(self, user_id, token, expiry, method='email'):
-        """
-        Store a password reset token.
-
-        Args:
-            user_id: The ID of the user
-            token: The token
-            expiry: When the token expires
-            method: The reset method (email or sms)
-        """
-        pass
-
-    @abstractmethod
-    def get_password_reset_token(self, token):
-        """
-        Get a password reset token.
-
-        Args:
-            token: The token to retrieve
+            token: The token to validate
+            token_type: The expected token type
 
         Returns:
-            dict: The token data or None if not found
+            dict: The token payload if valid, None otherwise
         """
         pass
 
     @abstractmethod
-    def delete_password_reset_token(self, token):
+    def invalidate_token(self, token):
         """
-        Delete a password reset token.
+        Invalidate a token.
 
         Args:
-            token: The token to delete
+            token: The token to invalidate
+
+        Returns:
+            bool: True if the token was invalidated, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def get_user_id_from_token(self, token):
+        """
+        Get the user ID from a token.
+
+        Args:
+            token: The token to extract the user ID from
+
+        Returns:
+            int: The user ID if the token is valid, None otherwise
         """
         pass

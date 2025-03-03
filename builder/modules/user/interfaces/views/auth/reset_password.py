@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from builder.modules.user.application.services import UserService
 from builder.modules.user.infrastructure.repositories import UserRepository
-from builder.modules.user.infrastructure.token_repository import get_token_repository
+from builder.modules.user.infrastructure.repositories.token_repository import get_token_repository
 from builder.modules.user.interfaces.serializers import ResetPasswordSerializer
 from builder.modules.user.domain.exceptions import (
     UserNotFoundException,

@@ -1,145 +1,237 @@
 """
 Views for the messenger application.
+This module contains the views for the messenger application.
 """
-from rest_framework import status
+
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 
 from builder.modules.messenger.application.services import MessengerService
-from builder.modules.messenger.infrastructure.repositories import MissiveRepository
+from builder.modules.messenger.domain.exceptions import (
+    MissiveNotFoundException,
+    InvalidMissiveStatusException
+)
+from builder.modules.messenger.infrastructure.repositories.missive_repository import MissiveRepository
 from builder.modules.messenger.interfaces.serializers.missive import (
+    MissiveSerializer,
+    MissiveListSerializer,
     EmailMissiveSerializer,
     SMSMissiveSerializer,
-    MissiveSerializer
+    MissiveStatusSerializer
 )
-from builder.modules.messenger.domain.exceptions import MissiveDeliveryException
 
 
-class SendEmailView(APIView):
-    """View for sending emails."""
-    
+class MissiveViewSet(viewsets.ViewSet):
+    """
+    ViewSet for missives.
+    """
     permission_classes = [IsAuthenticated]
     
-    def post(self, request):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.messenger_service = MessengerService(
+            missive_repository=MissiveRepository()
+        )
+    
+    def list(self, request):
+        """
+        List all missives.
+        """
+        # Get query parameters
+        status = request.query_params.get('status')
+        mode = request.query_params.get('mode')
+        target = request.query_params.get('target')
+        
+        # Filter missives based on query parameters
+        if status:
+            missives = self.messenger_service.get_missives_by_status(status)
+        elif mode:
+            missives = self.messenger_service.get_missives_by_mode(mode)
+        elif target:
+            missives = self.messenger_service.get_missives_by_target(target)
+        else:
+            # Get all missives (this could be paginated in a real implementation)
+            missives = []
+            for status_value in ['PREPARE', 'SENT', 'ERROR']:
+                missives.extend(self.messenger_service.get_missives_by_status(status_value))
+        
+        serializer = MissiveListSerializer(missives, many=True)
+        return Response(serializer.data)
+    
+    def retrieve(self, request, pk=None):
+        """
+        Retrieve a specific missive.
+        """
+        missive = self.messenger_service.get_missive_by_id(pk)
+        if not missive:
+            return Response(
+                {"detail": f"Missive with ID {pk} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = MissiveSerializer(missive)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'])
+    def send_email(self, request):
         """
         Send an email.
-        
-        Args:
-            request: The HTTP request
-            
-        Returns:
-            Response: The HTTP response
         """
-        serializer = EmailMissiveSerializer(data=request.data)
+        serializer = EmailMissiveSerializer(
+            data=request.data,
+            context={'messenger_service': self.messenger_service}
+        )
         
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            messenger_service = MessengerService(MissiveRepository())
-            missive = messenger_service.send_email(
-                to_email=serializer.validated_data['to_email'],
-                subject=serializer.validated_data['subject'],
-                message=serializer.validated_data['message'],
-                html_message=serializer.validated_data.get('html_message')
-            )
+        if serializer.is_valid():
+            missive = serializer.save()
             
-            return Response(
-                {'message': 'Email sent successfully', 'missive_id': missive.id},
-                status=status.HTTP_201_CREATED
-            )
-        except MissiveDeliveryException as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class SendSMSView(APIView):
-    """View for sending SMS."""
+            # Send the missive
+            try:
+                success = self.messenger_service.send_missive(missive.id)
+                if success:
+                    return Response(
+                        MissiveSerializer(missive).data,
+                        status=status.HTTP_201_CREATED
+                    )
+                else:
+                    return Response(
+                        {"detail": "Failed to send email"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            except Exception as e:
+                return Response(
+                    {"detail": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
+    @action(detail=False, methods=['post'])
+    def send_sms(self, request):
         """
         Send an SMS.
-        
-        Args:
-            request: The HTTP request
-            
-        Returns:
-            Response: The HTTP response
         """
-        serializer = SMSMissiveSerializer(data=request.data)
+        serializer = SMSMissiveSerializer(
+            data=request.data,
+            context={'messenger_service': self.messenger_service}
+        )
         
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        try:
-            messenger_service = MessengerService(MissiveRepository())
-            missive = messenger_service.send_sms(
-                to_phone=serializer.validated_data['to_phone'],
-                message=serializer.validated_data['message']
-            )
+        if serializer.is_valid():
+            missive = serializer.save()
             
+            # Send the missive
+            try:
+                success = self.messenger_service.send_missive(missive.id)
+                if success:
+                    return Response(
+                        MissiveSerializer(missive).data,
+                        status=status.HTTP_201_CREATED
+                    )
+                else:
+                    return Response(
+                        {"detail": "Failed to send SMS"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            except Exception as e:
+                return Response(
+                    {"detail": str(e)},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['post'])
+    def resend(self, request, pk=None):
+        """
+        Resend a missive.
+        """
+        missive = self.messenger_service.get_missive_by_id(pk)
+        if not missive:
             return Response(
-                {'message': 'SMS sent successfully', 'missive_id': missive.id},
-                status=status.HTTP_201_CREATED
+                {"detail": f"Missive with ID {pk} not found"},
+                status=status.HTTP_404_NOT_FOUND
             )
-        except MissiveDeliveryException as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-class MissiveListView(APIView):
-    """View for listing missives."""
-    
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request):
-        """
-        List missives.
         
-        Args:
-            request: The HTTP request
-            
-        Returns:
-            Response: The HTTP response
-        """
-        messenger_service = MessengerService(MissiveRepository())
-        missives = messenger_service.list_missives()
+        # Prepare the missive for resending
+        missive.prepare()
+        self.messenger_service.missive_repository.save(missive)
         
-        serializer = MissiveSerializer(missives, many=True)
-        return Response(serializer.data)
-
-
-class MissiveDetailView(APIView):
-    """View for retrieving a missive."""
-    
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, missive_id):
-        """
-        Get a missive by ID.
-        
-        Args:
-            request: The HTTP request
-            missive_id: The ID of the missive
-            
-        Returns:
-            Response: The HTTP response
-        """
+        # Send the missive
         try:
-            messenger_service = MessengerService(MissiveRepository())
-            missive = messenger_service.get_missive(missive_id)
-            
-            serializer = MissiveSerializer(missive)
-            return Response(serializer.data)
+            success = self.messenger_service.send_missive(missive.id)
+            if success:
+                return Response(MissiveSerializer(missive).data)
+            else:
+                return Response(
+                    {"detail": "Failed to resend missive"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except InvalidMissiveStatusException as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             return Response(
-                {'error': str(e)},
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['get'])
+    def check_status(self, request, pk=None):
+        """
+        Check the status of a missive.
+        """
+        try:
+            status_info = self.messenger_service.check_missive_status(pk)
+            return Response(status_info)
+        except MissiveNotFoundException:
+            return Response(
+                {"detail": f"Missive with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """
+        Update the status of a missive.
+        """
+        missive = self.messenger_service.get_missive_by_id(pk)
+        if not missive:
+            return Response(
+                {"detail": f"Missive with ID {pk} not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = MissiveStatusSerializer(missive, data=request.data, partial=True)
+        if serializer.is_valid():
+            updated_missive = serializer.save()
+            return Response(MissiveSerializer(updated_missive).data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def destroy(self, request, pk=None):
+        """
+        Delete a missive.
+        """
+        try:
+            success = self.messenger_service.delete_missive(pk)
+            if success:
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            else:
+                return Response(
+                    {"detail": f"Missive with ID {pk} not found"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        except Exception as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

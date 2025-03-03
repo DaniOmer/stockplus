@@ -3,9 +3,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from builder.models import Company
+from stockplus.infrastructure.models import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
-from stockplus.modules.pointofsale.domain.exceptions import CompanyNotFoundError
-from stockplus.modules.pointofsale.infrastructure.orm.orm import PointOfSaleORM
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleSerializer
 
 
@@ -13,7 +12,7 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
     """
     API view for listing and creating points of sale.
     """
-    queryset = PointOfSaleORM.objects.all()
+    queryset = PointOfSale.objects.all()
     serializer_class = PointOfSaleSerializer
     
     def __init__(self, **kwargs):
@@ -47,9 +46,9 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
             raise ValidationError("You must create a company to continue.")
         
         try:
-            return PointOfSaleORM.objects.filter(company=company)
+            return PointOfSale.objects.filter(company=company)
         except Company.DoesNotExist:
-            return PointOfSaleORM.objects.none()
+            return PointOfSale.objects.none()
         
     def perform_create(self, serializer):
         """

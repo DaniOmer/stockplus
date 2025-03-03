@@ -1,26 +1,24 @@
 from typing import List, Optional
 
 from stockplus.modules.product.application.interfaces import (
-    BrandRepository, ProductCategoryRepository, 
-    ProductRepository, PointOfSaleProductVariantRepository
+    IBrandRepository, IProductCategoryRepository, 
+    IProductRepository
 )
 from stockplus.modules.product.domain.exceptions import (
     BrandNotFoundError, ProductCategoryNotFoundError, 
-    ProductNotFoundError, ProductFeatureNotFoundError,
-    ProductVariantNotFoundError, PointOfSaleProductVariantNotFoundError,
-    DuplicateBrandError, DuplicateProductCategoryError, DuplicateProductError
+    ProductNotFoundError,DuplicateBrandError, 
+    DuplicateProductCategoryError, DuplicateProductError
 )
-from stockplus.modules.product.domain.models import (
+from stockplus.modules.product.domain.entities import (
     Brand, Product, ProductCategory, ProductFeature, 
-    ProductVariant, PointOfSaleProductVariant
+    ProductVariant
 )
-
 
 class BrandService:
     """
     Service for managing brands.
     """
-    def __init__(self, brand_repository: BrandRepository):
+    def __init__(self, brand_repository: IBrandRepository):
         self.brand_repository = brand_repository
     
     def get_brand(self, brand_id: int) -> Brand:
@@ -144,7 +142,7 @@ class ProductCategoryService:
     """
     Service for managing product categories.
     """
-    def __init__(self, category_repository: ProductCategoryRepository):
+    def __init__(self, category_repository: IProductCategoryRepository):
         self.category_repository = category_repository
     
     def get_category(self, category_id: int) -> ProductCategory:
@@ -280,7 +278,7 @@ class ProductService:
     Service for managing products.
     """
     def __init__(self, 
-                product_repository: ProductRepository,
+                product_repository: IProductRepository,
                 brand_service: BrandService,
                 category_service: ProductCategoryService):
         self.product_repository = product_repository
@@ -588,121 +586,3 @@ class ProductService:
             ProductVariantNotFoundError: If the variant is not found.
         """
         self.product_repository.delete_variant(variant_id)
-
-
-class PointOfSaleProductVariantService:
-    """
-    Service for managing point of sale product variants.
-    """
-    def __init__(self, pos_variant_repository: PointOfSaleProductVariantRepository):
-        self.pos_variant_repository = pos_variant_repository
-    
-    def get_pos_variant(self, pos_variant_id: int) -> PointOfSaleProductVariant:
-        """
-        Get a point of sale product variant by its ID.
-        
-        Args:
-            pos_variant_id: The ID of the point of sale product variant to retrieve.
-            
-        Returns:
-            The point of sale product variant.
-            
-        Raises:
-            PointOfSaleProductVariantNotFoundError: If the point of sale product variant is not found.
-        """
-        pos_variant = self.pos_variant_repository.get_by_id(pos_variant_id)
-        if not pos_variant:
-            raise PointOfSaleProductVariantNotFoundError(pos_variant_id)
-        return pos_variant
-    
-    def get_point_of_sale_variants(self, point_of_sale_id: int) -> List[PointOfSaleProductVariant]:
-        """
-        Get all product variants for a point of sale.
-        
-        Args:
-            point_of_sale_id: The ID of the point of sale.
-            
-        Returns:
-            A list of product variants for the point of sale.
-        """
-        return self.pos_variant_repository.get_by_point_of_sale_id(point_of_sale_id)
-    
-    def get_product_variant_pos_variants(self, product_variant_id: int) -> List[PointOfSaleProductVariant]:
-        """
-        Get all point of sale product variants for a product variant.
-        
-        Args:
-            product_variant_id: The ID of the product variant.
-            
-        Returns:
-            A list of point of sale product variants for the product variant.
-        """
-        return self.pos_variant_repository.get_by_product_variant_id(product_variant_id)
-    
-    def create_pos_variant(self, 
-                          point_of_sale_id: int,
-                          product_variant_id: int,
-                          stock: int = 0,
-                          price: Optional[float] = None) -> PointOfSaleProductVariant:
-        """
-        Create a new point of sale product variant.
-        
-        Args:
-            point_of_sale_id: The ID of the point of sale.
-            product_variant_id: The ID of the product variant.
-            stock: The stock of the product variant at the point of sale.
-            price: The price of the product variant at the point of sale.
-            
-        Returns:
-            The created point of sale product variant.
-        """
-        pos_variant = PointOfSaleProductVariant(
-            point_of_sale_id=point_of_sale_id,
-            product_variant_id=product_variant_id,
-            stock=stock,
-            price=price
-        )
-        return self.pos_variant_repository.create(pos_variant)
-    
-    def update_pos_variant(self, 
-                          pos_variant_id: int,
-                          stock: Optional[int] = None,
-                          price: Optional[float] = None) -> PointOfSaleProductVariant:
-        """
-        Update an existing point of sale product variant.
-        
-        Args:
-            pos_variant_id: The ID of the point of sale product variant to update.
-            stock: The new stock of the product variant at the point of sale.
-            price: The new price of the product variant at the point of sale.
-            
-        Returns:
-            The updated point of sale product variant.
-            
-        Raises:
-            PointOfSaleProductVariantNotFoundError: If the point of sale product variant is not found.
-        """
-        pos_variant = self.get_pos_variant(pos_variant_id)
-        
-        if stock is not None:
-            pos_variant.stock = stock
-        
-        if price is not None:
-            pos_variant.price = price
-        
-        return self.pos_variant_repository.update(pos_variant)
-    
-    def delete_pos_variant(self, pos_variant_id: int) -> None:
-        """
-        Delete a point of sale product variant.
-        
-        Args:
-            pos_variant_id: The ID of the point of sale product variant to delete.
-            
-        Raises:
-            PointOfSaleProductVariantNotFoundError: If the point of sale product variant is not found.
-        """
-        # Check if the point of sale product variant exists
-        self.get_pos_variant(pos_variant_id)
-        
-        self.pos_variant_repository.delete(pos_variant_id)

@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
-from stockplus.modules.product.domain.models import (
+from stockplus.modules.product.domain.entities import (
     Brand, Product, ProductCategory, ProductFeature, 
-    ProductVariant, PointOfSaleProductVariant
+    ProductVariant
 )
 
 
-class BrandRepository(ABC):
+class IBrandRepository(ABC):
     """
     Interface for the brand repository.
     """
@@ -74,7 +74,7 @@ class BrandRepository(ABC):
         pass
 
 
-class ProductCategoryRepository(ABC):
+class IProductCategoryRepository(ABC):
     """
     Interface for the product category repository.
     """
@@ -141,7 +141,7 @@ class ProductCategoryRepository(ABC):
         pass
 
 
-class ProductRepository(ABC):
+class IProductRepository(ABC):
     """
     Interface for the product repository.
     """
@@ -278,85 +278,5 @@ class ProductRepository(ABC):
         
         Args:
             variant_id: The ID of the variant to delete.
-        """
-        pass
-
-
-class PointOfSaleProductVariantRepository(ABC):
-    """
-    Interface for the point of sale product variant repository.
-    """
-    @abstractmethod
-    def get_by_id(self, pos_variant_id: int) -> Optional[PointOfSaleProductVariant]:
-        """
-        Get a point of sale product variant by its ID.
-        
-        Args:
-            pos_variant_id: The ID of the point of sale product variant to retrieve.
-            
-        Returns:
-            The point of sale product variant if found, None otherwise.
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_point_of_sale_id(self, point_of_sale_id: int) -> List[PointOfSaleProductVariant]:
-        """
-        Get all product variants for a point of sale.
-        
-        Args:
-            point_of_sale_id: The ID of the point of sale.
-            
-        Returns:
-            A list of product variants for the point of sale.
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_product_variant_id(self, product_variant_id: int) -> List[PointOfSaleProductVariant]:
-        """
-        Get all point of sale product variants for a product variant.
-        
-        Args:
-            product_variant_id: The ID of the product variant.
-            
-        Returns:
-            A list of point of sale product variants for the product variant.
-        """
-        pass
-    
-    @abstractmethod
-    def create(self, pos_variant: PointOfSaleProductVariant) -> PointOfSaleProductVariant:
-        """
-        Create a new point of sale product variant.
-        
-        Args:
-            pos_variant: The point of sale product variant to create.
-            
-        Returns:
-            The created point of sale product variant.
-        """
-        pass
-    
-    @abstractmethod
-    def update(self, pos_variant: PointOfSaleProductVariant) -> PointOfSaleProductVariant:
-        """
-        Update an existing point of sale product variant.
-        
-        Args:
-            pos_variant: The point of sale product variant to update.
-            
-        Returns:
-            The updated point of sale product variant.
-        """
-        pass
-    
-    @abstractmethod
-    def delete(self, pos_variant_id: int) -> None:
-        """
-        Delete a point of sale product variant.
-        
-        Args:
-            pos_variant_id: The ID of the point of sale product variant to delete.
         """
         pass

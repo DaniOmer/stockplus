@@ -1,221 +1,170 @@
 """
-Services for the address application.
+Application services for the address application.
+This module contains the application services for the address application.
 """
-import logging
-from typing import Optional, Dict, Any, List, Tuple
 
+from typing import List, Optional, Tuple
+
+from builder.modules.address.domain.entities.address import Address
+from builder.modules.address.domain.exceptions import AddressNotFoundException
 from builder.modules.address.application.interfaces import (
     AddressRepositoryInterface,
     GeolocationServiceInterface
 )
-from builder.modules.address.domain.exceptions import (
-    InvalidAddressException,
-    AddressNotFoundException,
-    GeolocationException
-)
-
-logger = logging.getLogger(__name__)
-
 
 class AddressService:
-    """Service for handling address operations."""
-    
-    def __init__(
-        self, 
-        address_repository: AddressRepositoryInterface,
-        geolocation_service: Optional[GeolocationServiceInterface] = None
-    ):
+    """
+    Address service.
+
+    This class implements the application logic for addresses. It uses the address repository
+    to access and manipulate address data and enforces business rules.
+    """
+
+    def __init__(self, address_repository: AddressRepositoryInterface, 
+                 geolocation_service: GeolocationServiceInterface = None):
+        """
+        Initialize a new AddressService instance.
+
+        Args:
+            address_repository: The address repository to use
+            geolocation_service: The geolocation service to use (optional)
+        """
         self.address_repository = address_repository
         self.geolocation_service = geolocation_service
-    
-    def create_address(self, address_data: Dict[str, Any]) -> Any:
-        """
-        Create an address.
-        
-        Args:
-            address_data: The address data
-            
-        Returns:
-            The created address object
-            
-        Raises:
-            InvalidAddressException: If the address data is invalid
-        """
-        try:
-            # Validate required fields
-            if 'country' not in address_data:
-                raise InvalidAddressException("Country is required")
-            
-            # If geolocation service is available and coordinates are not provided,
-            # try to geocode the address
-            if (
-                self.geolocation_service and 
-                'latitude' not in address_data and 
-                'longitude' not in address_data
-            ):
-                try:
-                    # Create a temporary address object for geocoding
-                    temp_address = type('TempAddress', (), address_data)
-                    latitude, longitude = self.geolocation_service.geocode_address(temp_address)
-                    address_data['latitude'] = latitude
-                    address_data['longitude'] = longitude
-                except Exception as e:
-                    logger.warning(f"Failed to geocode address: {str(e)}")
-                    # Continue without coordinates
-            
-            return self.address_repository.create_address(address_data)
-        except Exception as e:
-            logger.error(f"Failed to create address: {str(e)}")
-            if isinstance(e, InvalidAddressException):
-                raise
-            raise InvalidAddressException(f"Failed to create address: {str(e)}")
-    
-    def get_address(self, address_id: int) -> Any:
+
+    def get_address_by_id(self, address_id) -> Optional[Address]:
         """
         Get an address by ID.
-        
+
         Args:
-            address_id: The ID of the address
-            
+            address_id: The ID of the address to retrieve
+
         Returns:
-            The address object
-            
-        Raises:
-            AddressNotFoundException: If the address cannot be found
+            Address: The address with the given ID or None if not found
         """
-        try:
-            return self.address_repository.get_address_by_id(address_id)
-        except Exception as e:
-            logger.error(f"Failed to get address {address_id}: {str(e)}")
-            raise AddressNotFoundException(f"Address with ID {address_id} not found")
-    
-    def update_address(self, address_id: int, address_data: Dict[str, Any]) -> Any:
+        return self.address_repository.get_by_id(address_id)
+
+    def get_addresses_by_user_id(self, user_id) -> List[Address]:
+        """
+        Get all addresses for a user.
+
+        Args:
+            user_id: The ID of the user
+
+        Returns:
+            List[Address]: A list of addresses for the user
+        """
+        return self.address_repository.get_by_user_id(user_id)
+
+    def get_addresses_by_company_id(self, company_id) -> List[Address]:
+        """
+        Get all addresses for a company.
+
+        Args:
+            company_id: The ID of the company
+
+        Returns:
+            List[Address]: A list of addresses for the company
+        """
+        return self.address_repository.get_by_company_id(company_id)
+
+    def create_address(self, **kwargs) -> Address:
+        """
+        Create a new address.
+
+        Args:
+            **kwargs: The address data
+
+        Returns:
+            Address: The created address
+        """
+        address = Address(**kwargs)
+        
+        # If geolocation service is available, try to geocode the address
+        if self.geolocation_service and not (address.latitude and address.longitude):
+            try:
+                latitude, longitude = self.geolocation_service.geocode(address.get_full_address())
+                address.latitude = latitude
+                address.longitude = longitude
+            except Exception:
+                # If geocoding fails, continue without coordinates
+                pass
+        
+        return self.address_repository.save(address)
+
+    def update_address(self, address_id, **kwargs) -> Address:
         """
         Update an address.
-        
+
         Args:
-            address_id: The ID of the address
-            address_data: The updated address data
-            
+            address_id: The ID of the address to update
+            **kwargs: The address data to update
+
         Returns:
-            The updated address object
-            
+            Address: The updated address
+
         Raises:
-            AddressNotFoundException: If the address cannot be found
-            InvalidAddressException: If the address data is invalid
+            AddressNotFoundException: If the address is not found
         """
-        try:
-            # Check if the address exists
-            self.get_address(address_id)
-            
-            # If geolocation service is available and coordinates are not provided,
-            # but address fields have changed, try to geocode the address
-            if (
-                self.geolocation_service and 
-                'latitude' not in address_data and 
-                'longitude' not in address_data and
-                any(field in address_data for field in ['address', 'city', 'postal_code', 'country'])
-            ):
-                try:
-                    # Get the current address
-                    current_address = self.get_address(address_id)
-                    
-                    # Create a temporary address object with updated fields for geocoding
-                    temp_data = {
-                        'address': address_data.get('address', getattr(current_address, 'address', None)),
-                        'city': address_data.get('city', getattr(current_address, 'city', None)),
-                        'postal_code': address_data.get('postal_code', getattr(current_address, 'postal_code', None)),
-                        'country': address_data.get('country', getattr(current_address, 'country', None))
-                    }
-                    
-                    temp_address = type('TempAddress', (), temp_data)
-                    latitude, longitude = self.geolocation_service.geocode_address(temp_address)
-                    address_data['latitude'] = latitude
-                    address_data['longitude'] = longitude
-                except Exception as e:
-                    logger.warning(f"Failed to geocode updated address: {str(e)}")
-                    # Continue without updating coordinates
-            
-            return self.address_repository.update_address(address_id, address_data)
-        except AddressNotFoundException:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to update address {address_id}: {str(e)}")
-            if isinstance(e, InvalidAddressException):
-                raise
-            raise InvalidAddressException(f"Failed to update address: {str(e)}")
-    
-    def delete_address(self, address_id: int) -> bool:
+        address = self.address_repository.get_by_id(address_id)
+        if not address:
+            raise AddressNotFoundException(f"Address with ID {address_id} not found")
+        
+        # Update address fields
+        for key, value in kwargs.items():
+            if hasattr(address, key):
+                setattr(address, key, value)
+        
+        # If geolocation service is available and address has changed, try to geocode the address
+        if self.geolocation_service and ('address' in kwargs or 'city' in kwargs or 
+                                         'postal_code' in kwargs or 'country' in kwargs):
+            try:
+                latitude, longitude = self.geolocation_service.geocode(address.get_full_address())
+                address.latitude = latitude
+                address.longitude = longitude
+            except Exception:
+                # If geocoding fails, continue without coordinates
+                pass
+        
+        return self.address_repository.save(address)
+
+    def delete_address(self, address_id) -> bool:
         """
         Delete an address.
-        
+
         Args:
-            address_id: The ID of the address
-            
+            address_id: The ID of the address to delete
+
         Returns:
             bool: True if the address was deleted, False otherwise
-            
-        Raises:
-            AddressNotFoundException: If the address cannot be found
         """
-        try:
-            # Check if the address exists
-            self.get_address(address_id)
-            
-            return self.address_repository.delete_address(address_id)
-        except AddressNotFoundException:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to delete address {address_id}: {str(e)}")
-            return False
-    
-    def list_addresses(self, filters: Optional[Dict[str, Any]] = None) -> List[Any]:
-        """
-        List addresses with optional filters.
-        
-        Args:
-            filters: Optional filters for the addresses
-            
-        Returns:
-            A list of address objects
-        """
-        try:
-            return self.address_repository.list_addresses(filters)
-        except Exception as e:
-            logger.error(f"Failed to list addresses: {str(e)}")
-            return []
-    
-    def geocode_address(self, address_id: int) -> Tuple[float, float]:
+        return self.address_repository.delete(address_id)
+
+    def geocode_address(self, address_id) -> Tuple[float, float]:
         """
         Geocode an address.
-        
+
         Args:
-            address_id: The ID of the address
-            
+            address_id: The ID of the address to geocode
+
         Returns:
-            Tuple[float, float]: The latitude and longitude
-            
+            Tuple[float, float]: The latitude and longitude of the address
+
         Raises:
-            AddressNotFoundException: If the address cannot be found
-            GeolocationException: If the address cannot be geocoded
+            AddressNotFoundException: If the address is not found
         """
         if not self.geolocation_service:
-            raise GeolocationException("Geolocation service not available")
+            raise ValueError("Geolocation service is not available")
         
-        try:
-            address = self.get_address(address_id)
-            
-            latitude, longitude = self.geolocation_service.geocode_address(address)
-            
-            # Update the address with the coordinates
-            self.update_address(address_id, {
-                'latitude': latitude,
-                'longitude': longitude
-            })
-            
-            return latitude, longitude
-        except AddressNotFoundException:
-            raise
-        except Exception as e:
-            logger.error(f"Failed to geocode address {address_id}: {str(e)}")
-            raise GeolocationException(f"Failed to geocode address: {str(e)}")
+        address = self.address_repository.get_by_id(address_id)
+        if not address:
+            raise AddressNotFoundException(f"Address with ID {address_id} not found")
+        
+        latitude, longitude = self.geolocation_service.geocode(address.get_full_address())
+        
+        # Update address with coordinates
+        address.latitude = latitude
+        address.longitude = longitude
+        self.address_repository.save(address)
+        
+        return latitude, longitude

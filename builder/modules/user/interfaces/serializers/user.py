@@ -5,9 +5,6 @@ This module contains the user serializers for the user application.
 
 from rest_framework import serializers
 
-from builder.modules.user.domain.models import User
-
-
 class UserSerializer(serializers.Serializer):
     """
     Serializer for the User model.

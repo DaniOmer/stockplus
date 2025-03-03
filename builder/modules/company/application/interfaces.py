@@ -4,9 +4,9 @@ This module contains the repository interfaces for the company application.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
-from builder.modules.company.domain.models import Company, CompanyAddress
+from builder.modules.company.domain.entities.company_entity import Company
 
 
 class CompanyRepositoryInterface(ABC):
@@ -121,82 +121,5 @@ class CompanyRepositoryInterface(ABC):
             
         Returns:
             bool: True if the company was deleted, False otherwise
-        """
-        pass
-
-
-class CompanyAddressRepositoryInterface(ABC):
-    """
-    Interface for the company address repository.
-    
-    This interface defines the contract that any company address repository implementation must fulfill.
-    It follows the Repository pattern, which abstracts the data access layer from the domain layer.
-    """
-    
-    @abstractmethod
-    def get_by_id(self, company_address_id) -> Optional[CompanyAddress]:
-        """
-        Get a company address by ID.
-        
-        Args:
-            company_address_id: The ID of the company address to retrieve
-            
-        Returns:
-            CompanyAddress: The company address with the given ID, or None if not found
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_company_id(self, company_id) -> List[CompanyAddress]:
-        """
-        Get all addresses for a company.
-        
-        Args:
-            company_id: The ID of the company
-            
-        Returns:
-            List[CompanyAddress]: A list of company addresses for the company
-        """
-        pass
-    
-    @abstractmethod
-    def get_headquarters_by_company_id(self, company_id) -> Optional[CompanyAddress]:
-        """
-        Get the headquarters address for a company.
-        
-        Args:
-            company_id: The ID of the company
-            
-        Returns:
-            CompanyAddress: The headquarters address for the company, or None if not found
-        """
-        pass
-    
-    @abstractmethod
-    def save(self, company_address: CompanyAddress) -> CompanyAddress:
-        """
-        Save a company address.
-        
-        This method creates a new company address if the company address doesn't have an ID,
-        or updates an existing company address if the company address has an ID.
-        
-        Args:
-            company_address: The company address to save
-            
-        Returns:
-            CompanyAddress: The saved company address with updated information
-        """
-        pass
-    
-    @abstractmethod
-    def delete(self, company_address_id) -> bool:
-        """
-        Delete a company address.
-        
-        Args:
-            company_address_id: The ID of the company address to delete
-            
-        Returns:
-            bool: True if the company address was deleted, False otherwise
         """
         pass

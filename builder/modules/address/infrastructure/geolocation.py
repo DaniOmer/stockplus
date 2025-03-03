@@ -1,228 +1,167 @@
 """
-Geolocation services for the address application.
+Geolocation service for the address application.
+This module contains the geolocation service for the address application.
 """
+
 import logging
-from typing import Dict, Any, Tuple, Optional
-import requests
+from typing import Dict, Tuple, Optional
+
+from django.conf import settings
 
 from builder.modules.address.application.interfaces import GeolocationServiceInterface
-from builder.modules.address.domain.exceptions import GeolocationException
+from builder.modules.address.domain.exceptions import (
+    GeolocationServiceUnavailableException,
+    InvalidCoordinatesException
+)
 
 logger = logging.getLogger(__name__)
 
 
 class GoogleMapsGeolocationService(GeolocationServiceInterface):
-    """Geolocation service using Google Maps API."""
-    
-    def __init__(self, api_key: str):
+    """
+    Google Maps geolocation service implementation.
+
+    This class implements the GeolocationServiceInterface using the Google Maps API.
+    """
+
+    def __init__(self, api_key=None):
         """
-        Initialize the service with an API key.
-        
+        Initialize a new GoogleMapsGeolocationService instance.
+
         Args:
-            api_key: The Google Maps API key
+            api_key: The Google Maps API key (optional, defaults to settings.GOOGLE_MAPS_API_KEY)
         """
-        self.api_key = api_key
-        self.geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
-    
-    def geocode_address(self, address: Any) -> Tuple[float, float]:
+        self.api_key = api_key or getattr(settings, 'GOOGLE_MAPS_API_KEY', None)
+        if not self.api_key:
+            logger.warning("Google Maps API key not provided. Geocoding will not work.")
+
+    def geocode(self, address: str) -> Tuple[float, float]:
         """
-        Convert an address to coordinates.
-        
+        Geocode an address.
+
         Args:
             address: The address to geocode
-            
+
         Returns:
-            Tuple[float, float]: The latitude and longitude
-            
+            Tuple[float, float]: The latitude and longitude of the address
+
         Raises:
-            GeolocationException: If the address cannot be geocoded
+            GeolocationServiceUnavailableException: If the geolocation service is unavailable
+            InvalidCoordinatesException: If the coordinates are invalid
         """
+        if not self.api_key:
+            raise GeolocationServiceUnavailableException("Google Maps API key not provided")
+
         try:
-            # Build the address string
-            address_str = self._build_address_string(address)
+            # Import here to avoid dependency if not used
+            import googlemaps
             
-            # Make the API request
-            params = {
-                'address': address_str,
-                'key': self.api_key
-            }
+            # Create client
+            gmaps = googlemaps.Client(key=self.api_key)
             
-            response = requests.get(self.geocode_url, params=params)
-            response.raise_for_status()
+            # Geocode address
+            geocode_result = gmaps.geocode(address)
             
-            data = response.json()
+            if not geocode_result:
+                raise InvalidCoordinatesException(f"Could not geocode address: {address}")
             
-            if data['status'] != 'OK':
-                raise GeolocationException(f"Geocoding failed: {data['status']}")
+            # Get location
+            location = geocode_result[0]['geometry']['location']
             
-            if not data['results']:
-                raise GeolocationException("No results found")
-            
-            location = data['results'][0]['geometry']['location']
             return location['lat'], location['lng']
+        except ImportError:
+            logger.error("googlemaps package not installed. Install with pip install googlemaps")
+            raise GeolocationServiceUnavailableException("googlemaps package not installed")
         except Exception as e:
-            logger.error(f"Failed to geocode address: {str(e)}")
-            raise GeolocationException(f"Failed to geocode address: {str(e)}")
-    
-    def reverse_geocode(self, latitude: float, longitude: float) -> Dict[str, Any]:
+            logger.error(f"Error geocoding address: {str(e)}")
+            raise GeolocationServiceUnavailableException(f"Error geocoding address: {str(e)}")
+
+    def reverse_geocode(self, latitude: float, longitude: float) -> Dict[str, str]:
         """
-        Convert coordinates to an address.
-        
+        Reverse geocode coordinates.
+
         Args:
             latitude: The latitude
             longitude: The longitude
-            
+
         Returns:
-            Dict[str, Any]: The address data
-            
+            Dict[str, str]: The address components
+
         Raises:
-            GeolocationException: If the coordinates cannot be reverse geocoded
+            GeolocationServiceUnavailableException: If the geolocation service is unavailable
+            InvalidCoordinatesException: If the coordinates are invalid
         """
+        if not self.api_key:
+            raise GeolocationServiceUnavailableException("Google Maps API key not provided")
+
         try:
-            # Make the API request
-            params = {
-                'latlng': f"{latitude},{longitude}",
-                'key': self.api_key
-            }
+            # Import here to avoid dependency if not used
+            import googlemaps
             
-            response = requests.get(self.geocode_url, params=params)
-            response.raise_for_status()
+            # Create client
+            gmaps = googlemaps.Client(key=self.api_key)
             
-            data = response.json()
+            # Reverse geocode
+            reverse_geocode_result = gmaps.reverse_geocode((latitude, longitude))
             
-            if data['status'] != 'OK':
-                raise GeolocationException(f"Reverse geocoding failed: {data['status']}")
-            
-            if not data['results']:
-                raise GeolocationException("No results found")
-            
-            result = data['results'][0]
+            if not reverse_geocode_result:
+                raise InvalidCoordinatesException(f"Could not reverse geocode coordinates: {latitude}, {longitude}")
             
             # Extract address components
-            address_data = {}
+            result = reverse_geocode_result[0]
+            address_components = result['address_components']
             
-            for component in result['address_components']:
-                types = component['types']
-                
-                if 'street_number' in types:
-                    address_data['street_number'] = component['long_name']
-                elif 'route' in types:
-                    address_data['route'] = component['long_name']
-                elif 'locality' in types:
-                    address_data['city'] = component['long_name']
-                elif 'postal_code' in types:
-                    address_data['postal_code'] = component['long_name']
-                elif 'administrative_area_level_1' in types:
-                    address_data['state'] = component['long_name']
-                    address_data['state_code'] = component['short_name']
-                elif 'country' in types:
-                    address_data['country'] = component['long_name']
-                    address_data['country_code'] = component['short_name']
+            # Build address dict
+            address = {}
             
-            # Build the address string
-            address_parts = []
-            if 'street_number' in address_data:
-                address_parts.append(address_data['street_number'])
-            if 'route' in address_data:
-                address_parts.append(address_data['route'])
+            # Map Google address components to our model fields
+            component_mapping = {
+                'street_number': 'street_number',
+                'route': 'street',
+                'locality': 'city',
+                'administrative_area_level_1': 'state',
+                'country': 'country',
+                'postal_code': 'postal_code'
+            }
             
-            address_data['address'] = ' '.join(address_parts) if address_parts else result['formatted_address']
+            for component in address_components:
+                for component_type in component['types']:
+                    if component_type in component_mapping:
+                        address[component_mapping[component_type]] = component['long_name']
+                        
+                        # Also store short name for state and country
+                        if component_type == 'administrative_area_level_1':
+                            address['state_code'] = component['short_name']
+                        elif component_type == 'country':
+                            address['country_code'] = component['short_name']
             
-            return address_data
+            # Combine street number and street
+            if 'street_number' in address and 'street' in address:
+                address['address'] = f"{address.pop('street_number')} {address.pop('street')}"
+            elif 'street' in address:
+                address['address'] = address.pop('street')
+            
+            # Add formatted address
+            address['formatted_address'] = result['formatted_address']
+            
+            return address
+        except ImportError:
+            logger.error("googlemaps package not installed. Install with pip install googlemaps")
+            raise GeolocationServiceUnavailableException("googlemaps package not installed")
         except Exception as e:
-            logger.error(f"Failed to reverse geocode coordinates: {str(e)}")
-            raise GeolocationException(f"Failed to reverse geocode coordinates: {str(e)}")
-    
-    def _build_address_string(self, address: Any) -> str:
-        """
-        Build an address string from an address object.
-        
-        Args:
-            address: The address object
-            
-        Returns:
-            str: The address string
-        """
-        parts = []
-        
-        # Add the street address
-        if hasattr(address, 'address') and address.address:
-            parts.append(address.address)
-        
-        # Add the city and postal code
-        city_parts = []
-        if hasattr(address, 'postal_code') and address.postal_code:
-            city_parts.append(address.postal_code)
-        
-        if hasattr(address, 'city') and address.city:
-            city_parts.append(address.city)
-        
-        if city_parts:
-            parts.append(' '.join(city_parts))
-        
-        # Add the state
-        if hasattr(address, 'state') and address.state:
-            parts.append(address.state)
-        
-        # Add the country
-        if hasattr(address, 'country') and address.country:
-            parts.append(address.country)
-        
-        return ', '.join(parts)
-
-
-class DummyGeolocationService(GeolocationServiceInterface):
-    """Dummy geolocation service for testing."""
-    
-    def geocode_address(self, address: Any) -> Tuple[float, float]:
-        """
-        Convert an address to coordinates.
-        
-        Args:
-            address: The address to geocode
-            
-        Returns:
-            Tuple[float, float]: The latitude and longitude
-        """
-        # Return dummy coordinates
-        return 0.0, 0.0
-    
-    def reverse_geocode(self, latitude: float, longitude: float) -> Dict[str, Any]:
-        """
-        Convert coordinates to an address.
-        
-        Args:
-            latitude: The latitude
-            longitude: The longitude
-            
-        Returns:
-            Dict[str, Any]: The address data
-        """
-        # Return dummy address data
-        return {
-            'address': '123 Main St',
-            'city': 'Anytown',
-            'postal_code': '12345',
-            'state': 'State',
-            'state_code': 'ST',
-            'country': 'Country',
-            'country_code': 'CO'
-        }
+            logger.error(f"Error reverse geocoding coordinates: {str(e)}")
+            raise GeolocationServiceUnavailableException(f"Error reverse geocoding coordinates: {str(e)}")
 
 
 def get_geolocation_service() -> Optional[GeolocationServiceInterface]:
     """
-    Get the configured geolocation service.
-    
+    Get the geolocation service.
+
     Returns:
-        Optional[GeolocationServiceInterface]: The geolocation service, or None if not configured
+        GeolocationServiceInterface: The geolocation service or None if not available
     """
-    from django.conf import settings
-    
-    if hasattr(settings, 'GOOGLE_MAPS_API_KEY') and settings.GOOGLE_MAPS_API_KEY:
-        return GoogleMapsGeolocationService(settings.GOOGLE_MAPS_API_KEY)
-    
-    if hasattr(settings, 'USE_DUMMY_GEOLOCATION') and settings.USE_DUMMY_GEOLOCATION:
-        return DummyGeolocationService()
-    
-    return None
+    try:
+        return GoogleMapsGeolocationService()
+    except Exception as e:
+        logger.error(f"Error creating geolocation service: {str(e)}")
+        return None

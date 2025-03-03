@@ -5,16 +5,14 @@ This module contains the application services for the company application.
 
 from typing import List, Optional
 
-from builder.modules.company.domain.models import Company, CompanyAddress
+from builder.modules.company.domain.entities.company_entity import Company
 from builder.modules.company.domain.exceptions import (
     CompanyNotFoundException,
     CompanyAlreadyExistsException,
-    CompanyAddressNotFoundException,
     ValidationException
 )
 from builder.modules.company.application.interfaces import (
     CompanyRepositoryInterface,
-    CompanyAddressRepositoryInterface
 )
 
 
@@ -26,17 +24,13 @@ class CompanyService:
     to access and manipulate company data, and enforces business rules.
     """
     
-    def __init__(self, company_repository: CompanyRepositoryInterface,
-                 company_address_repository: CompanyAddressRepositoryInterface):
+    def __init__(self, company_repository: CompanyRepositoryInterface):
         """
         Initialize a new CompanyService instance.
         
-        Args:
-            company_repository: The company repository to use
-            company_address_repository: The company address repository to use
+        Args: company_repository: The company repository to use
         """
         self.company_repository = company_repository
-        self.company_address_repository = company_address_repository
     
     def get_company_by_id(self, company_id) -> Optional[Company]:
         """
@@ -278,129 +272,3 @@ class CompanyService:
             bool: True if the company was deleted, False otherwise
         """
         return self.company_repository.delete(company_id)
-    
-    def get_company_address_by_id(self, company_address_id) -> Optional[CompanyAddress]:
-        """
-        Get a company address by ID.
-        
-        Args:
-            company_address_id: The ID of the company address to retrieve
-            
-        Returns:
-            CompanyAddress: The company address with the given ID, or None if not found
-        """
-        return self.company_address_repository.get_by_id(company_address_id)
-    
-    def get_company_addresses(self, company_id) -> List[CompanyAddress]:
-        """
-        Get all addresses for a company.
-        
-        Args:
-            company_id: The ID of the company
-            
-        Returns:
-            List[CompanyAddress]: A list of company addresses for the company
-        """
-        return self.company_address_repository.get_by_company_id(company_id)
-    
-    def get_company_headquarters(self, company_id) -> Optional[CompanyAddress]:
-        """
-        Get the headquarters address for a company.
-        
-        Args:
-            company_id: The ID of the company
-            
-        Returns:
-            CompanyAddress: The headquarters address for the company, or None if not found
-        """
-        return self.company_address_repository.get_headquarters_by_company_id(company_id)
-    
-    def add_company_address(self, company_id, address_id, is_siege=False) -> CompanyAddress:
-        """
-        Add an address to a company.
-        
-        Args:
-            company_id: The ID of the company
-            address_id: The ID of the address
-            is_siege: Whether this address is the company's headquarters
-            
-        Returns:
-            CompanyAddress: The newly created company address
-            
-        Raises:
-            CompanyNotFoundException: If the company is not found
-        """
-        # Check if company exists
-        company = self.company_repository.get_by_id(company_id)
-        if not company:
-            raise CompanyNotFoundException(f"Company with ID {company_id} not found")
-        
-        # Create new company address
-        company_address = CompanyAddress(
-            company_id=company_id,
-            address_id=address_id,
-            is_siege=is_siege
-        )
-        
-        # Save company address
-        return self.company_address_repository.save(company_address)
-    
-    def set_company_headquarters(self, company_address_id) -> CompanyAddress:
-        """
-        Set a company address as the company's headquarters.
-        
-        Args:
-            company_address_id: The ID of the company address to set as headquarters
-            
-        Returns:
-            CompanyAddress: The updated company address
-            
-        Raises:
-            CompanyAddressNotFoundException: If the company address is not found
-        """
-        # Get company address
-        company_address = self.company_address_repository.get_by_id(company_address_id)
-        if not company_address:
-            raise CompanyAddressNotFoundException(f"Company address with ID {company_address_id} not found")
-        
-        # Set as headquarters
-        company_address.set_as_headquarters()
-        
-        # Save company address
-        return self.company_address_repository.save(company_address)
-    
-    def unset_company_headquarters(self, company_address_id) -> CompanyAddress:
-        """
-        Unset a company address as the company's headquarters.
-        
-        Args:
-            company_address_id: The ID of the company address to unset as headquarters
-            
-        Returns:
-            CompanyAddress: The updated company address
-            
-        Raises:
-            CompanyAddressNotFoundException: If the company address is not found
-        """
-        # Get company address
-        company_address = self.company_address_repository.get_by_id(company_address_id)
-        if not company_address:
-            raise CompanyAddressNotFoundException(f"Company address with ID {company_address_id} not found")
-        
-        # Unset as headquarters
-        company_address.unset_as_headquarters()
-        
-        # Save company address
-        return self.company_address_repository.save(company_address)
-    
-    def delete_company_address(self, company_address_id) -> bool:
-        """
-        Delete a company address.
-        
-        Args:
-            company_address_id: The ID of the company address to delete
-            
-        Returns:
-            bool: True if the company address was deleted, False otherwise
-        """
-        return self.company_address_repository.delete(company_address_id)

@@ -13,7 +13,7 @@ class LogoutView(generics.GenericAPIView):
     """
     API endpoint to logout a user.
     """
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         """
@@ -26,7 +26,7 @@ class LogoutView(generics.GenericAPIView):
             Response: The response
         """
         try:
-            refresh_token = request.data.get('refresh')
+            refresh_token = request.data.get('refresh_token')
             if not refresh_token:
                 return Response({
                     'message': 'Refresh token is required'

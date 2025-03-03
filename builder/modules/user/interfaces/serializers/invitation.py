@@ -5,12 +5,10 @@ This module contains the invitation serializers for the user application.
 
 from rest_framework import serializers
 
-from builder.modules.user.domain.models import Invitation
 from builder.modules.user.domain.exceptions import (
     UserAlreadyExistsException,
     ValidationException
 )
-
 
 class InvitationSerializer(serializers.Serializer):
     """

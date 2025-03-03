@@ -1,16 +1,14 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from stockplus.modules.product.domain.models import (
-    Product, ProductFeature, ProductVariant, PointOfSaleProductVariant
+from stockplus.modules.product.domain.entities import (
+    Product, ProductFeature, ProductVariant
 )
-from stockplus.modules.product.infrastructure.orm import (
-    ProductORM,
-    ProductFeatureORM,
-    ProductVariantORM,
-    PointOfSaleProductVariantORM
+from stockplus.infrastructure.models import (
+    Product as ProductORM,
+    ProductFeature as ProductFeatureORM,
+    ProductVariant as ProductVariantORM,
 )
-
 
 class ProductFeatureSerializer(serializers.ModelSerializer):
     """
@@ -36,40 +34,15 @@ class ProductFeatureSerializer(serializers.ModelSerializer):
         )
 
 
-class PointOfSaleProductVariantSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the point of sale product variant model.
-    """
-    class Meta:
-        model = PointOfSaleProductVariantORM
-        fields = ['id', 'uid', 'point_of_sale', 'stock', 'price']
-        read_only_fields = ['id', 'uid']
-
-    def to_domain(self) -> PointOfSaleProductVariant:
-        """
-        Convert the serializer data to a domain model.
-        
-        Returns:
-            A domain model instance.
-        """
-        validated_data = self.validated_data
-        
-        return PointOfSaleProductVariant(
-            point_of_sale_id=validated_data.get('point_of_sale').id,
-            stock=validated_data.get('stock', 0),
-            price=validated_data.get('price')
-        )
-
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     """
     Serializer for the product variant model.
     """
-    point_of_sale_variants = PointOfSaleProductVariantSerializer(many=True, required=False)
     
     class Meta:
         model = ProductVariantORM
-        fields = ['id', 'uid', 'name', 'color', 'size', 'price', 'buy_price', 'sku', 'point_of_sale_variants']
+        fields = ['id', 'uid', 'name', 'color', 'size', 'price', 'buy_price', 'sku']
         read_only_fields = ['id', 'uid']
 
     def to_domain(self) -> ProductVariant:
@@ -172,10 +145,7 @@ class ProductSerializer(serializers.ModelSerializer):
         for variant_data in variants_data:
             point_of_sale_variants_data = variant_data.pop('point_of_sale_variants', [])
             variant = ProductVariantORM.objects.create(product=product, **variant_data)
-            
-            # Create point of sale variants
-            for pos_variant_data in point_of_sale_variants_data:
-                PointOfSaleProductVariantORM.objects.create(product_variant=variant, **pos_variant_data)
+
         
         return product
     
@@ -216,8 +186,4 @@ class ProductSerializer(serializers.ModelSerializer):
                 point_of_sale_variants_data = variant_data.pop('point_of_sale_variants', [])
                 variant = ProductVariantORM.objects.create(product=instance, **variant_data)
                 
-                # Create point of sale variants
-                for pos_variant_data in point_of_sale_variants_data:
-                    PointOfSaleProductVariantORM.objects.create(product_variant=variant, **pos_variant_data)
-        
         return instance

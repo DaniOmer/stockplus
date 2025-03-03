@@ -1,12 +1,12 @@
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
-from stockplus.modules.pointofsale.infrastructure.repositories.repositories import DjangoPointOfSaleRepository
+from stockplus.modules.pointofsale.infrastructure.repositories import PointOfSaleRepository
 
 from stockplus.modules.product.application.services import (
-    BrandService, ProductCategoryService, ProductService, PointOfSaleProductVariantService
+    BrandService, ProductCategoryService, ProductService
 )
 from stockplus.modules.product.infrastructure.repositories import (
     DjangoBrandRepository, DjangoProductCategoryRepository, 
-    DjangoProductRepository, DjangoPointOfSaleProductVariantRepository
+    DjangoProductRepository
 )
 
 
@@ -18,7 +18,7 @@ def get_point_of_sale_repository():
     Returns:
         The point of sale repository.
     """
-    return DjangoPointOfSaleRepository()
+    return PointOfSaleRepository()
 
 
 def get_point_of_sale_service():
@@ -97,23 +97,3 @@ def get_product_service():
     category_service = get_product_category_service()
     return ProductService(repository, brand_service, category_service)
 
-
-def get_point_of_sale_product_variant_repository():
-    """
-    Get the point of sale product variant repository.
-    
-    Returns:
-        The point of sale product variant repository.
-    """
-    return DjangoPointOfSaleProductVariantRepository()
-
-
-def get_point_of_sale_product_variant_service():
-    """
-    Get the point of sale product variant service.
-    
-    Returns:
-        The point of sale product variant service.
-    """
-    repository = get_point_of_sale_product_variant_repository()
-    return PointOfSaleProductVariantService(repository)

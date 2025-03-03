@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from builder.modules.user.application.services import UserService
 from builder.modules.user.infrastructure.repositories import UserRepository
-from builder.modules.user.infrastructure.token_repository import get_token_repository
+from builder.modules.user.infrastructure.repositories.token_repository import get_token_repository
 from builder.modules.user.interfaces.serializers import ForgotPasswordSerializer
 from builder.modules.user.domain.exceptions import UserNotFoundException
 from builder.modules import messenger

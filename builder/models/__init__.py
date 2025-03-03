@@ -1,19 +1,23 @@
 from django.conf import settings
 
 if 'builder.modules.messenger' in settings.INSTALLED_APPS:
-    from builder.modules.messenger import models as models_messenger
+    from builder.modules.messenger.infrastructure import models as models_messenger
     class Missive(models_messenger.Missive): pass
 
 if 'builder.modules.user' in settings.INSTALLED_APPS:
-    from builder.modules.user import models as models_user
+    from builder.modules.user.infrastructure import models as models_user
     class User(models_user.User): pass
-    class UserAddress(models_user.UserAddress): pass
     class Invitation(models_user.Invitation): pass
+    class Notification(models_user.Notification): pass
 
 if 'builder.modules.company' in settings.INSTALLED_APPS:
-    from builder.modules.company import models as models_company
+    from builder.modules.company.infrastructure import models as models_company
     class Company(models_company.Company): pass
-    class CompanyAddress(models_company.CompanyAddress): pass
+
+if 'builder.modules.address' in settings.INSTALLED_APPS:
+    from builder.modules.address.infrastructure import models as models_address
+    class UserAddress(models_address.UserAddress): pass
+    class CompanyAddress(models_address.CompanyAddress): pass
 
 if 'builder.modules.subscription' in settings.INSTALLED_APPS:
     from builder.modules.subscription import models as models_subscription

@@ -1,10 +1,9 @@
-from rest_framework import generics, status
+from rest_framework import generics
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
 
+from stockplus.infrastructure.models import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
 from stockplus.modules.pointofsale.domain.exceptions import PointOfSaleNotFoundError
-from stockplus.modules.pointofsale.infrastructure.orm.orm import PointOfSaleORM
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleSerializer
 
 
@@ -12,7 +11,7 @@ class PointOfSaleRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
     """
     API view for retrieving, updating, and deleting a point of sale.
     """
-    queryset = PointOfSaleORM.objects.all()
+    queryset = PointOfSale.objects.all()
     serializer_class = PointOfSaleSerializer
     
     def __init__(self, **kwargs):
@@ -39,7 +38,7 @@ class PointOfSaleRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
             The queryset.
         """
         company = self.request.user.company
-        return PointOfSaleORM.objects.filter(company=company)
+        return PointOfSale.objects.filter(company=company)
     
     def get_object(self):
         """

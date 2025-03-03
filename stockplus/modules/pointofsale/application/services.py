@@ -1,10 +1,11 @@
 from typing import List, Optional
 
-from stockplus.modules.pointofsale.application.interfaces import PointOfSaleRepository
+from stockplus.modules.pointofsale.application.interfaces import PointOfSaleRepository, PaymentMethodRepository
 from stockplus.modules.pointofsale.domain.exceptions import (
-    PointOfSaleNotFoundError, CollaboratorNotFoundError, CompanyNotFoundError
+    PointOfSaleNotFoundError,
+    PaymentMethodNotFoundError
 )
-from stockplus.modules.pointofsale.domain.models import PointOfSale
+from stockplus.modules.pointofsale.domain.entities import PointOfSale, PosPaymentMethod
 
 
 class PointOfSaleService:
@@ -159,3 +160,150 @@ class PointOfSaleService:
         self.get_point_of_sale(point_of_sale_id)
         
         return self.point_of_sale_repository.remove_collaborator(point_of_sale_id, collaborator_id)
+
+
+class PaymentMethodService:
+    """
+    Service for managing payment methods.
+    """
+    def __init__(self, payment_method_repository: PaymentMethodRepository, point_of_sale_service: PointOfSaleService):
+        self.payment_method_repository = payment_method_repository
+        self.point_of_sale_service = point_of_sale_service
+    
+    def get_payment_method(self, payment_method_id: int) -> PosPaymentMethod:
+        """
+        Get a payment method by its ID.
+        
+        Args:
+            payment_method_id: The ID of the payment method to retrieve.
+            
+        Returns:
+            The payment method.
+            
+        Raises:
+            PaymentMethodNotFoundError: If the payment method is not found.
+        """
+        payment_method = self.payment_method_repository.get_by_id(payment_method_id)
+        if not payment_method:
+            raise PaymentMethodNotFoundError(payment_method_id)
+        return payment_method
+    
+    def get_point_of_sale_payment_methods(self, point_of_sale_id: int) -> List[PosPaymentMethod]:
+        """
+        Get all payment methods for a point of sale.
+        
+        Args:
+            point_of_sale_id: The ID of the point of sale.
+            
+        Returns:
+            A list of payment methods for the point of sale.
+            
+        Raises:
+            PointOfSaleNotFoundError: If the point of sale is not found.
+        """
+        # Check if the point of sale exists
+        self.point_of_sale_service.get_point_of_sale(point_of_sale_id)
+        
+        return self.payment_method_repository.get_by_point_of_sale_id(point_of_sale_id)
+    
+    def create_payment_method(self, 
+                             name: str, 
+                             point_of_sale_id: int, 
+                             description: Optional[str] = None,
+                             requires_confirmation: bool = False,
+                             confirmation_instructions: Optional[str] = None) -> PosPaymentMethod:
+        """
+        Create a new payment method.
+        
+        Args:
+            name: The name of the payment method.
+            point_of_sale_id: The ID of the point of sale.
+            description: The description of the payment method.
+            requires_confirmation: Whether the payment method requires confirmation.
+            confirmation_instructions: Instructions for confirming the payment.
+            
+        Returns:
+            The created payment method.
+            
+        Raises:
+            PointOfSaleNotFoundError: If the point of sale is not found.
+        """
+        # Check if the point of sale exists
+        self.point_of_sale_service.get_point_of_sale(point_of_sale_id)
+        
+        payment_method = PosPaymentMethod(
+            name=name,
+            point_of_sale_id=point_of_sale_id,
+            description=description,
+            requires_confirmation=requires_confirmation,
+            confirmation_instructions=confirmation_instructions
+        )
+        return self.payment_method_repository.create(payment_method)
+    
+    def update_payment_method(self, 
+                             payment_method_id: int,
+                             name: Optional[str] = None,
+                             description: Optional[str] = None,
+                             requires_confirmation: Optional[bool] = None,
+                             confirmation_instructions: Optional[str] = None) -> PosPaymentMethod:
+        """
+        Update an existing payment method.
+        
+        Args:
+            payment_method_id: The ID of the payment method to update.
+            name: The new name of the payment method.
+            description: The new description of the payment method.
+            requires_confirmation: Whether the payment method requires confirmation.
+            confirmation_instructions: Instructions for confirming the payment.
+            
+        Returns:
+            The updated payment method.
+            
+        Raises:
+            PaymentMethodNotFoundError: If the payment method is not found.
+        """
+        payment_method = self.get_payment_method(payment_method_id)
+        
+        if name is not None:
+            payment_method.name = name
+        if description is not None:
+            payment_method.description = description
+        if requires_confirmation is not None:
+            payment_method.requires_confirmation = requires_confirmation
+        if confirmation_instructions is not None:
+            payment_method.confirmation_instructions = confirmation_instructions
+        
+        return self.payment_method_repository.update(payment_method)
+    
+    def delete_payment_method(self, payment_method_id: int) -> None:
+        """
+        Delete a payment method.
+        
+        Args:
+            payment_method_id: The ID of the payment method to delete.
+            
+        Raises:
+            PaymentMethodNotFoundError: If the payment method is not found.
+        """
+        # Check if the payment method exists
+        self.get_payment_method(payment_method_id)
+        
+        self.payment_method_repository.delete(payment_method_id)
+    
+    def toggle_payment_method_status(self, payment_method_id: int) -> PosPaymentMethod:
+        """
+        Toggle the active status of a payment method.
+        
+        Args:
+            payment_method_id: The ID of the payment method.
+            
+        Returns:
+            The updated payment method.
+            
+        Raises:
+            PaymentMethodNotFoundError: If the payment method is not found.
+        """
+        # Check if the payment method exists
+        self.get_payment_method(payment_method_id)
+        
+        return self.payment_method_repository.toggle_status(payment_method_id)

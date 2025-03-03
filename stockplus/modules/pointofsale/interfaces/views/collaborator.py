@@ -6,7 +6,7 @@ from stockplus.modules.pointofsale.application.services import PointOfSaleServic
 from stockplus.modules.pointofsale.domain.exceptions import (
     PointOfSaleNotFoundError, CollaboratorNotFoundError
 )
-from stockplus.modules.pointofsale.infrastructure.orm.orm import PointOfSaleORM
+from stockplus.infrastructure.models import PointOfSale
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleAddCollaboratorSerializer
 
 
@@ -14,7 +14,7 @@ class PointOfSaleAddCollaboratorView(generics.GenericAPIView):
     """
     API view for adding a collaborator to a point of sale.
     """
-    queryset = PointOfSaleORM.objects.all()
+    queryset = PointOfSale.objects.all()
     serializer_class = PointOfSaleAddCollaboratorSerializer
     
     def __init__(self, **kwargs):
@@ -41,7 +41,7 @@ class PointOfSaleAddCollaboratorView(generics.GenericAPIView):
             The queryset.
         """
         company = self.request.user.company
-        return PointOfSaleORM.objects.filter(company=company)
+        return PointOfSale.objects.filter(company=company)
     
     def get_object(self):
         """

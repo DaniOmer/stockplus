@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from stockplus.modules.product.domain.models import ProductCategory
-from stockplus.modules.product.infrastructure.orm import ProductCategoryORM
+from stockplus.modules.product.domain.entities import ProductCategory
+from stockplus.infrastructure.models import ProductCategory as ProductCategoryORM
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):

@@ -5,7 +5,6 @@ This module contains the authentication serializers for the user application.
 
 from rest_framework import serializers
 
-
 class LoginSerializer(serializers.Serializer):
     """
     Serializer for user login.

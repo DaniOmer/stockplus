@@ -5,7 +5,8 @@ This module contains the application services for the user application.
 
 from typing import List, Optional
 
-from builder.modules.user.domain.models import User, Invitation
+from builder.modules.user.domain.entities import User, Invitation, Notification
+from builder.modules.user.domain.entities.notification import NotificationType
 from builder.modules.user.domain.exceptions import (
     UserNotFoundException,
     UserAlreadyExistsException,
@@ -16,7 +17,8 @@ from builder.modules.user.domain.exceptions import (
 )
 from builder.modules.user.application.interfaces import (
     UserRepositoryInterface,
-    InvitationRepositoryInterface
+    InvitationRepositoryInterface,
+    NotificationRepositoryInterface
 )
 
 
@@ -135,7 +137,7 @@ class UserService:
             username=username,
             first_name=first_name,
             last_name=last_name,
-            password_hash=password  # Note: The repository will handle password hashing
+            password_hash=password
         )
 
         # Save user
@@ -167,7 +169,6 @@ class UserService:
         if not user:
             return None
 
-        # Verify password
         if not self.user_repository.verify_password(user.id, password):
             return None
 
@@ -519,3 +520,148 @@ class InvitationService:
             bool: True if the invitation was deleted, False otherwise
         """
         return self.invitation_repository.delete(invitation_id)
+
+
+class NotificationService:
+    """
+    Notification service.
+
+    This class implements the application logic for notifications. It uses the notification repository
+    to access and manipulate notification data and enforces business rules.
+    """
+
+    def __init__(self, notification_repository: NotificationRepositoryInterface,
+                 user_repository: UserRepositoryInterface):
+        """
+        Initialize a new NotificationService instance.
+
+        Args:
+            notification_repository: The notification repository to use
+            user_repository: The user repository to use
+        """
+        self.notification_repository = notification_repository
+        self.user_repository = user_repository
+
+    def get_notification_by_id(self, notification_id) -> Optional[Notification]:
+        """
+        Get a notification by ID.
+
+        Args:
+            notification_id: The ID of the notification to retrieve
+
+        Returns:
+            Notification: The notification with the given ID or None if not found
+        """
+        return self.notification_repository.get_by_id(notification_id)
+
+    def get_notifications_for_user(self, user_id, read=None, limit=None, offset=None) -> List[Notification]:
+        """
+        Get all notifications for a user.
+
+        Args:
+            user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+            limit: Maximum number of notifications to return
+            offset: Number of notifications to skip
+
+        Returns:
+            List[Notification]: A list of notifications for the user
+
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        # Check if user exists
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+
+        return self.notification_repository.get_by_user_id(user_id, read, limit, offset)
+
+    def create_notification(self, user_id, title, message, type=NotificationType.INFO, link=None) -> Notification:
+        """
+        Create a notification.
+
+        Args:
+            user_id: The ID of the user
+            title: The notification title
+            message: The notification message
+            type: The notification type
+            link: Optional URL link
+
+        Returns:
+            Notification: The created notification
+
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        # Check if user exists
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+
+        return self.notification_repository.create(user_id, title, message, type, link)
+
+    def mark_notification_as_read(self, notification_id) -> Notification:
+        """
+        Mark a notification as read.
+
+        Args:
+            notification_id: The ID of the notification
+
+        Returns:
+            Notification: The updated notification
+        """
+        return self.notification_repository.mark_as_read(notification_id)
+
+    def mark_all_notifications_as_read(self, user_id) -> int:
+        """
+        Mark all notifications for a user as read.
+
+        Args:
+            user_id: The ID of the user
+
+        Returns:
+            int: The number of notifications marked as read
+
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        # Check if user exists
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+
+        return self.notification_repository.mark_all_as_read(user_id)
+
+    def delete_notification(self, notification_id) -> bool:
+        """
+        Delete a notification.
+
+        Args:
+            notification_id: The ID of the notification to delete
+
+        Returns:
+            bool: True if the notification was deleted, False otherwise
+        """
+        return self.notification_repository.delete(notification_id)
+
+    def delete_all_notifications_for_user(self, user_id, read=None) -> int:
+        """
+        Delete all notifications for a user.
+
+        Args:
+            user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+
+        Returns:
+            int: The number of notifications deleted
+
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        # Check if user exists
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+
+        return self.notification_repository.delete_all_for_user(user_id, read)

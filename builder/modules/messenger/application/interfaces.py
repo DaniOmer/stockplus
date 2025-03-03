@@ -1,59 +1,153 @@
 """
-Interfaces for the messenger application.
+Application interfaces for the messenger application.
+This module contains the application interfaces for the messenger application.
 """
+
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any, List
+from typing import List, Optional, Dict, Any
 
 
 class MissiveRepositoryInterface(ABC):
-    """Interface for missive repository."""
-    
+    """
+    Missive repository interface.
+
+    This interface defines the methods that a missive repository must implement.
+    """
+
     @abstractmethod
-    def create_email_missive(self, target: str, subject: str, message: str, 
-                            html_message: Optional[str] = None, **kwargs) -> Any:
-        """Create an email missive."""
+    def get_by_id(self, missive_id):
+        """
+        Get a missive by ID.
+
+        Args:
+            missive_id: The ID of the missive to retrieve
+
+        Returns:
+            Missive: The missive with the given ID or None if not found
+        """
         pass
-    
+
     @abstractmethod
-    def create_sms_missive(self, target: str, message: str, **kwargs) -> Any:
-        """Create an SMS missive."""
+    def get_by_status(self, status):
+        """
+        Get all missives with a given status.
+
+        Args:
+            status: The status to filter by
+
+        Returns:
+            List[Missive]: A list of missives with the given status
+        """
         pass
-    
+
     @abstractmethod
-    def get_missive_by_id(self, missive_id: int) -> Any:
-        """Get a missive by ID."""
+    def get_by_mode(self, mode):
+        """
+        Get all missives with a given mode.
+
+        Args:
+            mode: The mode to filter by (EMAIL, SMS, etc.)
+
+        Returns:
+            List[Missive]: A list of missives with the given mode
+        """
         pass
-    
+
     @abstractmethod
-    def update_missive_status(self, missive_id: int, status: str) -> Any:
-        """Update a missive's status."""
+    def get_by_target(self, target):
+        """
+        Get all missives for a given target.
+
+        Args:
+            target: The target (email, phone number, etc.)
+
+        Returns:
+            List[Missive]: A list of missives for the given target
+        """
         pass
-    
+
     @abstractmethod
-    def list_missives(self, filters: Optional[Dict[str, Any]] = None) -> List[Any]:
-        """List missives with optional filters."""
+    def save(self, missive):
+        """
+        Save a missive.
+
+        Args:
+            missive: The missive to save
+
+        Returns:
+            Missive: The saved missive
+        """
+        pass
+
+    @abstractmethod
+    def delete(self, missive_id):
+        """
+        Delete a missive.
+
+        Args:
+            missive_id: The ID of the missive to delete
+
+        Returns:
+            bool: True if the missive was deleted, False otherwise
+        """
         pass
 
 
-class BackendInterface(ABC):
-    """Interface for message backends."""
-    
+class MessengerBackendInterface(ABC):
+    """
+    Messenger backend interface.
+
+    This interface defines the methods that a messenger backend must implement.
+    """
+
     @abstractmethod
-    def send_email(self, missive: Any) -> bool:
-        """Send an email using the backend."""
+    def send_email(self, missive):
+        """
+        Send an email.
+
+        Args:
+            missive: The missive to send
+
+        Returns:
+            bool: True if the email was sent successfully, False otherwise
+        """
         pass
-    
+
     @abstractmethod
-    def send_sms(self, missive: Any) -> bool:
-        """Send an SMS using the backend."""
+    def send_sms(self, missive):
+        """
+        Send an SMS.
+
+        Args:
+            missive: The missive to send
+
+        Returns:
+            bool: True if the SMS was sent successfully, False otherwise
+        """
         pass
-    
+
     @abstractmethod
-    def check_email(self, missive: Any) -> str:
-        """Check the status of an email."""
+    def check_email(self, missive):
+        """
+        Check the status of an email.
+
+        Args:
+            missive: The missive to check
+
+        Returns:
+            Dict[str, Any]: The status information
+        """
         pass
-    
+
     @abstractmethod
-    def check_sms(self, missive: Any) -> str:
-        """Check the status of an SMS."""
+    def check_sms(self, missive):
+        """
+        Check the status of an SMS.
+
+        Args:
+            missive: The missive to check
+
+        Returns:
+            Dict[str, Any]: The status information
+        """
         pass
