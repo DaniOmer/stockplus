@@ -67,11 +67,17 @@ class PasswordResetRequestView(generics.GenericAPIView):
             
             # Send the password reset code
             if reset_method == 'email' and email:
+                # Create a reset URL
+                reset_url = f"/reset-password?token={token}"
+                
                 send_mail_message(
                     subject='Reset Your Password',
                     target=email,
                     template='password_reset_email.html',
-                    html=f'<p>Your password reset code is: <strong>{token}</strong></p>',
+                    context={
+                        'token': token,
+                        'reset_url': reset_url
+                    },
                     message=f'Your password reset code is: {token}'
                 )
             elif reset_method == 'sms' and phone_number:

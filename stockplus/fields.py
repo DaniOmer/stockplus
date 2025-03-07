@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.db import connection
 
 def RichTextField(*args, **kwargs):
     if "ckeditor" in settings.INSTALLED_APPS:

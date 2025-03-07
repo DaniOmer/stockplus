@@ -417,8 +417,8 @@ class UserService:
         # Generate a random token
         token = ''.join(secrets.choice('0123456789') for _ in range(6))
         
-        # Set the expiry time (1 hour from now)
-        expiry = datetime.now() + timedelta(hours=1)
+        # Set the expiry time (24 hours from now)
+        expiry = datetime.now() + timedelta(hours=24)
         
         # Store the token
         method = 'email' if email else 'sms'

@@ -21,6 +21,7 @@ from stockplus.modules.user.interfaces.views.password_reset import (
     PasswordResetVerifyView,
     PasswordResetConfirmView,
 )
+from stockplus.modules.user.interfaces.views.profile import UserProfileView
 
 urlpatterns = [
     # Authentication
@@ -40,4 +41,7 @@ urlpatterns = [
     path('api/auth/password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
     path('api/auth/password-reset/verify/', PasswordResetVerifyView.as_view(), name='password-reset-verify'),
     path('api/auth/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
+    
+    # User Profile
+    path('api/user/profile/', UserProfileView.as_view(), name='user-profile'),
 ]

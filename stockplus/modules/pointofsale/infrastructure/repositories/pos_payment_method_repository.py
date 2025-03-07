@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from stockplus.modules.pointofsale.application.interfaces import PaymentMethodRepository
 from stockplus.modules.pointofsale.domain.exceptions import PaymentMethodNotFoundError
-from stockplus.modules.pointofsale.domain.entities import PaymentMethod as PaymentMethodDomain
+from stockplus.modules.pointofsale.domain.entities import PosPaymentMethod as PaymentMethodDomain
 from stockplus.modules.pointofsale.infrastructure.models import PosPaymentMethod
 
 
