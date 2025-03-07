@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from stockplus.modules.product.domain.entities import Brand
-from stockplus.infrastructure.models import Brand as BrandORM
+from stockplus.modules.product.infrastructure.models import Brand as BrandORM
 
 
 class BrandSerializer(serializers.Serializer):

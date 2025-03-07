@@ -2,8 +2,8 @@ from rest_framework import generics, status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
-from builder.models import Company
-from stockplus.infrastructure.models import PointOfSale
+from stockplus.modules.company.infrastructure.models.company_model import Company
+from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleSerializer
 

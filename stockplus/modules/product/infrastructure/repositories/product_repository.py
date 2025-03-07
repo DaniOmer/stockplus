@@ -14,7 +14,7 @@ from stockplus.modules.product.domain.exceptions import (
     ProductVariantNotFoundError
 )
 from stockplus.modules.product.application.interfaces import ProductRepository
-from stockplus.infrastructure.models import (
+from stockplus.modules.product.infrastructure.models import (
     Product as ProductORM,
     ProductFeature as ProductFeatureORM,
     ProductVariant as ProductVariantORM,

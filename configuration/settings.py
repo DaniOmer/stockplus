@@ -147,32 +147,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 """
-Logger
-"""
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': False,
-#     'handlers': {
-#         'console': {
-#             'level': 'DEBUG',
-#             'class': 'logging.StreamHandler',
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#         'builder': {
-#             'handlers': ['console'],
-#             'level': 'DEBUG',
-#             'propagate': True,
-#         },
-#     },
-# }
-
-"""
 Ckeditor
 """
 CKEDITOR_5_CONFIGS = {
@@ -210,23 +184,22 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-"""
-Builder configuration
-"""
-MIGRATION_MODULES = {'builder': 'stockplus.migrations.builder'}
-AUTH_USER_MODEL = 'builder.User'
-AUTHENTICATION_BACKENDS  = [
-    'builder.auth.backends.EmailOrPhoneBackend',
-    'django.contrib.auth.backends.ModelBackend',
+INSTALLED_APPS += [
+    'stockplus',
+    'stockplus.modules.user.infrastructure.apps.UserConfig',
+    'stockplus.modules.shop.infrastructure.apps.ShopConfig',
+    'stockplus.modules.messenger.infrastructure.apps.MessengerConfig',
+    'stockplus.modules.pointofsale.infrastructure.apps.PointOfSaleConfig',
+    'stockplus.modules.product.infrastructure.apps.ProductConfig',
+    'stockplus.modules.company.infrastructure.apps.CompanyConfig',
+    'stockplus.modules.address.infrastructure.apps.AddressConfig',
+    'stockplus.modules.subscription.infrastructure.apps.SubscriptionConfig',
 ]
 
-INSTALLED_APPS += ["builder",] + [
-    'builder.modules.user',
-    'builder.modules.messenger',
-    'builder.modules.company',
-    'builder.modules.address',
-    'builder.modules.subscription',
-    'builder.modules.shop',
+AUTH_USER_MODEL = 'user.User'
+AUTHENTICATION_BACKENDS  = [
+    'stockplus.auth.backends.EmailOrPhoneBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Company configuration
@@ -243,7 +216,7 @@ User permissions settings
 """
 from stockplus.permissions import IsManager
 INVITATION_PERMISSION = IsManager
-ADDITIONAL_CRUD_PERMISSIONS = ['builder.modules.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
+ADDITIONAL_CRUD_PERMISSIONS = ['stockplus.modules.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
 # Subscription configuration
 SUBSCRIPTION_MODEL = [
@@ -258,21 +231,10 @@ SUBSCRIPTION_PERMISSIONS = [
     ('enterprise', 'Enterprise Permissions'),
 ]
 
-
-"""
-Stockplus configuration
-"""
-INSTALLED_APPS += [
-    'stockplus',
-    'stockplus.modules.pointofsale',
-    'stockplus.modules.product',
-    'stockplus.interfaces.admin',
-]
-
 # Configuration pour l'autodiscover des fichiers admin dans les interfaces
-ADMIN_AUTODISCOVER_MODULES = [
-    'stockplus.interfaces.admin',
-]
+# ADMIN_AUTODISCOVER_MODULES = [
+#     'stockplus.admin',
+# ]
 
 
 """
@@ -294,12 +256,12 @@ REST_FRAMEWORK = {
 ## Simple JWT Authentication
 """
 seconds_delta = config('TOKEN_LIFETIME', default=86400, cast=int)
-INSTALLED_APPS += ['rest_framework_simplejwt',]
+INSTALLED_APPS += ['rest_framework_simplejwt', 'rest_framework_simplejwt.token_blacklist']
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(seconds=seconds_delta),
     'REFRESH_TOKEN_LIFETIME': timedelta(seconds=seconds_delta),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': False,
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
 
     'ALGORITHM': 'HS256',
@@ -315,7 +277,7 @@ SIMPLE_JWT = {
 
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
-    'TOKEN_OBTAIN_SERIALIZER': 'builder.serializer.CustomTokenObtainPairSerializer',
+    'TOKEN_OBTAIN_SERIALIZER': 'stockplus.serializer.CustomTokenObtainPairSerializer',
 
     'JTI_CLAIM': 'jti',
 
@@ -332,8 +294,8 @@ EMAIL_VERIFICATION_TOKEN_LIFETIME = timedelta(seconds=seconds_delta)
 SENDINBLUE_APIKEY = config("SENDINBLUE_APIKEY")
 
 MISSIVE_SERVICE = config('MISSIVE_SERVICE', default=True)
-MISSIVE_BACKENDS = 'builder.modules.messenger.backends'
-MISSIVE_BACKEND_EMAIL = 'builder.modules.messenger.backends.email.sendinblue'
+MISSIVE_BACKENDS = 'stockplus.modules.messenger.backends'
+MISSIVE_BACKEND_EMAIL = 'stockplus.modules.messenger.backends.email.sendinblue'
 MESSENGER = {
     'sender_name': config('SENDER_NAME', default='contact'),
     'sender_email': config('SENDER_EMAIL', default='contact@stockplus.io'),

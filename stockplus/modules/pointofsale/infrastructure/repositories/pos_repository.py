@@ -3,7 +3,7 @@ from typing import List, Optional
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
-from builder.models import User
+from stockplus.modules.user.infrastructure.models import User
 from stockplus.modules.pointofsale.application.interfaces import PointOfSaleRepository
 from stockplus.modules.pointofsale.domain.exceptions import (
     PointOfSaleNotFoundError, CollaboratorNotFoundError

@@ -6,7 +6,7 @@ from stockplus.modules.pointofsale.application.services import PointOfSaleServic
 from stockplus.modules.pointofsale.domain.exceptions import (
     PointOfSaleNotFoundError, CollaboratorNotFoundError
 )
-from stockplus.infrastructure.models import PointOfSale
+from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleAddCollaboratorSerializer
 
 

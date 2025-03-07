@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
-from builder.models import User
-from stockplus.modules.pointofsale.domain.entities import PointOfSale
-from stockplus.infrastructure.models import PointOfSale
+from stockplus.modules.user.infrastructure.models.user_model import User
+from stockplus.modules.pointofsale.domain.entities import PointOfSale as PointOfSaleDomain
+from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 
 
 class PointOfSaleSerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class PointOfSaleSerializer(serializers.ModelSerializer):
         fields = ['id', 'uid', 'name', 'type', 'opening_hours', 'closing_hours', 'collaborators']
         read_only_fields = ['id', 'uid']
 
-    def to_domain(self) -> PointOfSale:
+    def to_domain(self) -> PointOfSaleDomain:
         """
         Convert the serializer data to a domain model.
         
@@ -28,7 +28,7 @@ class PointOfSaleSerializer(serializers.ModelSerializer):
         if 'collaborators' in validated_data:
             collaborator_ids = [c.id for c in validated_data['collaborators']]
         
-        return PointOfSale(
+        return PointOfSaleDomain(
             name=validated_data.get('name', ''),
             type=validated_data.get('type', 'store'),
             opening_hours=validated_data.get('opening_hours'),

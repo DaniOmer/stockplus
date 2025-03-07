@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from stockplus.modules.product.application.services import BrandService
 from stockplus.modules.product.domain.exceptions import BrandNotFoundError
-from stockplus.infrastructure.models import Brand as BrandORM
+from stockplus.modules.product.infrastructure.models.brand_model import Brand as BrandORM
 from stockplus.modules.product.interfaces.serializers import BrandSerializer
 
 

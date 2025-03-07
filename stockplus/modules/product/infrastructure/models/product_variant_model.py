@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from builder.models.base import Base
+from stockplus.models.base import Base
+from stockplus.modules.product.infrastructure.models import Product
     
 
 class ProductVariant(Base):
@@ -10,7 +11,7 @@ class ProductVariant(Base):
     """
     name = models.CharField(max_length=100, null=True, blank=True)
     product = models.ForeignKey(
-        'stockplus.Product',
+        Product,
         on_delete=models.CASCADE,
         related_name='product_variants',
         help_text=_('The product this variant belongs to.'),
@@ -26,7 +27,6 @@ class ProductVariant(Base):
         verbose_name = 'Product Variant'
         verbose_name_plural = 'Product Variants'
         unique_together = ('product', 'color', 'size')
-        abstract = True
 
     def __str__(self):
         return f"{self.product.name} - {self.color} {self.size}"

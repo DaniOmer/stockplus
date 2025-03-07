@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from builder.models.base import Base
+from stockplus.models.base import Base
+from stockplus.modules.company.infrastructure.models import Company as CompanyORM
 
 class Brand(Base):
     """
@@ -11,7 +12,7 @@ class Brand(Base):
     description = models.TextField(max_length=255, blank=True, null=True)
     logo_url = models.URLField(blank=True, null=True)
     company = models.ForeignKey(
-        'builder.Company',
+        CompanyORM,
         on_delete=models.CASCADE,
         related_name='company_brands',
         help_text=_('The company this brand belongs to.'),
@@ -21,7 +22,6 @@ class Brand(Base):
         db_table = 'stockplus_brand'
         verbose_name = 'Brand'
         verbose_name_plural = 'Brands'
-        abstract = True
 
     def __str__(self):
         return str(self.name)

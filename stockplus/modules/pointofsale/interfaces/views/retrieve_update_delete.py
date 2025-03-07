@@ -1,7 +1,7 @@
 from rest_framework import generics
 from rest_framework.exceptions import NotFound
 
-from stockplus.infrastructure.models import PointOfSale
+from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
 from stockplus.modules.pointofsale.domain.exceptions import PointOfSaleNotFoundError
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleSerializer

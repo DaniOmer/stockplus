@@ -1,7 +1,10 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from builder.models.base import Base
+from stockplus.models.base import Base
+from stockplus.modules.company.infrastructure.models import Company
+from stockplus.modules.pointofsale.infrastructure.models import PointOfSale
+from stockplus.modules.product.infrastructure.models import Brand, ProductCategory
 
 class Product(Base):
     """
@@ -10,7 +13,7 @@ class Product(Base):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True, null=True)
     brand = brand = models.ForeignKey(
-        'stockplus.Brand',
+        Brand,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -18,7 +21,7 @@ class Product(Base):
         help_text=_('The brand this product belongs to.'),
     )
     category = models.ForeignKey(
-        'stockplus.ProductCategory',
+        ProductCategory,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -26,13 +29,13 @@ class Product(Base):
         help_text=_('The category this product belongs to.'),
     )
     company = models.ForeignKey(
-        'builder.Company',
+        Company,
         on_delete=models.CASCADE,
         related_name='company_products',
         help_text=_('The company this product belongs to.'),
     )
     point_of_sale = models.ForeignKey(
-        'stockplus.PointOfSale',
+        PointOfSale,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -44,7 +47,6 @@ class Product(Base):
         db_table = 'stockplus_product'
         verbose_name = 'Product'
         verbose_name_plural = 'Products'
-        abstract = True
     
     def __str__(self):
         return str(self.name)

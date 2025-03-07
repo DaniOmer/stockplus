@@ -1,5 +1,0 @@
-INVITATION_STATUS = [
-    ('PENDING', 'PENDING'),
-    ('VALIDATED', 'VALIDATED'),
-    ('EXPIRED', 'EXPIRED'),
-]

@@ -14,18 +14,49 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
-from django.contrib import admin
-from django.urls import path, include
-
+from django.urls import path, include, re_path
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
-if 'stockplus.modules.pointofsale' in settings.INSTALLED_APPS:
-    from stockplus.modules.pointofsale import urls as urls_pointofsale
-    urlpatterns += urls_pointofsale.urlpatterns
+# CKEditor URLs
+urlpatterns += [path("ckeditor5/", include('django_ckeditor_5.urls')),]
+    
+# Swagger UI configuration
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+swagger_urlpatterns = [
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+]
+urlpatterns += swagger_urlpatterns
 
-if 'stockplus.modules.product' in settings.INSTALLED_APPS:
-    from stockplus.modules.product import urls as urls_product
-    urlpatterns += urls_product.urlpatterns
+# Simple JWT configuration
+from rest_framework_simplejwt.views import TokenRefreshView
+from stockplus.views import CustomTokenObtainPairView
+simplejwt_urlpatterns = [
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+urlpatterns += simplejwt_urlpatterns
+
+# User module URLs
+from stockplus.modules.user.interfaces import urls as urls_user
+urlpatterns += urls_user.urlpatterns
+
+# Company configuration
+from stockplus.modules.company.interfaces import urls as urls_company
+urlpatterns += urls_company.urlpatterns
+
+# Point of Sale URLs
+from stockplus.modules.pointofsale.interfaces import urls as urls_pointofsale
+urlpatterns += urls_pointofsale.urlpatterns
+
+# Product URLs
+from stockplus.modules.product.interfaces import urls as urls_product
+urlpatterns += urls_product.urlpatterns
+
+# Subscription configuration
+from stockplus.modules.subscription import urls as urls_subscription
+urlpatterns += urls_subscription.urlpatterns

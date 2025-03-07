@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from stockplus.modules.product.application.services import ProductCategoryService
 from stockplus.modules.product.domain.exceptions import ProductCategoryNotFoundError
-from stockplus.infrastructure.models import ProductCategory as ProductCategoryORM
+from stockplus.modules.product.infrastructure.models import ProductCategory as ProductCategoryORM
 from stockplus.modules.product.interfaces.serializers import ProductCategorySerializer
 
 

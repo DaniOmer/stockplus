@@ -4,7 +4,7 @@ from rest_framework.exceptions import ValidationError
 from stockplus.modules.product.domain.entities import (
     Product, ProductFeature, ProductVariant
 )
-from stockplus.infrastructure.models import (
+from stockplus.modules.product.infrastructure.models import (
     Product as ProductORM,
     ProductFeature as ProductFeatureORM,
     ProductVariant as ProductVariantORM,

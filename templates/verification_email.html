@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Your Email</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .container {
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        padding: 20px;
+        border: 1px solid #ddd;
+      }
+      .header {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+      }
+      .logo {
+        max-width: 150px;
+        margin-bottom: 20px;
+      }
+      .verification-code {
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin: 20px 0;
+        letter-spacing: 5px;
+      }
+      .button {
+        display: inline-block;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+      }
+      .footer {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #777;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          src="https://via.placeholder.com/150x50"
+          alt="StockPlus Logo"
+          class="logo"
+        />
+        <h1>Verify Your Email Address</h1>
+      </div>
+
+      <p>Hello,</p>
+
+      <p>
+        Thank you for registering with StockPlus. To complete your registration,
+        please use the verification code below:
+      </p>
+
+      <div class="verification-code">{{ token }}</div>
+
+      <p>This code will expire in 24 hours.</p>
+
+      <p>
+        If you did not create an account with StockPlus, please ignore this
+        email.
+      </p>
+
+      {% if verification_url %}
+      <p>Alternatively, you can click the button below to verify your email:</p>
+
+      <p style="text-align: center">
+        <a href="{{ verification_url }}" class="button">Verify Email</a>
+      </p>
+      {% endif %}
+
+      <p>Best regards,<br />The StockPlus Team</p>
+
+      <div class="footer">
+        <p>This is an automated message, please do not reply to this email.</p>
+        <p>&copy; 2025 StockPlus. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>

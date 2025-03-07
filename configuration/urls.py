@@ -26,11 +26,7 @@ urlpatterns = [
     # path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 
-## Builder
-from builder import urls as urls_builder
-urlpatterns += urls_builder.urlpatterns
-
-## Stockplus 
+## stockplus
 from stockplus import urls as urls_stockplus
 urlpatterns += urls_stockplus.urlpatterns
 
