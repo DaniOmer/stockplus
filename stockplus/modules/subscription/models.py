@@ -43,6 +43,9 @@ class SubscriptionPlan(Base):
                                             "codename__in": [x[0] for x in settings.SUBSCRIPTION_PERMISSIONS]
                                         })
     stripe_id = models.CharField(max_length=120, blank=True, null=True)
+    pos_limit = models.IntegerField(default=3, help_text="Maximum number of points of sale allowed for this plan. 0 means unlimited.")
+    is_free_trial = models.BooleanField(default=False, help_text="Indicates if this plan is for free trials.")
+    trial_days = models.IntegerField(default=30, help_text="Number of days for the free trial period.")
     class Meta:
         db_table = 'stockplus_subscriptionplan'
         permissions = settings.SUBSCRIPTION_PERMISSIONS

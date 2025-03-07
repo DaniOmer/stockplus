@@ -48,7 +48,8 @@ def create_company_and_pos_for_new_user(sender, instance, created, **kwargs):
                 type="store",
                 company_id=company.id,
                 collaborator_ids=[instance.id],
-                is_active=True
+                is_active=True,
+                is_default=True
             )
             pos_repository.create(pos_entity)
             
@@ -59,22 +60,29 @@ def create_company_and_pos_for_new_user(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def create_free_trial_subscription(sender, instance, created, **kwargs):
     """
-    Create a 30-day free trial subscription for a new user.
+    Create a free trial subscription for a new user.
     """
     if created and instance.company_id:
         try:
-            # Get the default subscription plan
-            default_plan = SubscriptionPlan.objects.filter(active=True).first()
+            # Get the free trial subscription plan
+            free_trial_plan = SubscriptionPlan.objects.filter(is_free_trial=True, active=True).first()
             
-            if default_plan:
+            # If no free trial plan exists, fall back to any active plan
+            if not free_trial_plan:
+                free_trial_plan = SubscriptionPlan.objects.filter(active=True).first()
+                trial_days = 30  # Default to 30 days if no free trial plan
+            else:
+                trial_days = free_trial_plan.trial_days
+            
+            if free_trial_plan:
                 # Create a subscription
                 start_date = datetime.now()
-                end_date = start_date + timedelta(days=30)
+                end_date = start_date + timedelta(days=trial_days)
                 
                 subscription = Subscription.objects.create(
                     user=instance,
                     company_id=instance.company_id,
-                    subscription_plan=default_plan,
+                    subscription_plan=free_trial_plan,
                     interval='month',
                     start_date=start_date,
                     end_date=end_date,
@@ -83,10 +91,10 @@ def create_free_trial_subscription(sender, instance, created, **kwargs):
                 )
                 
                 # Add user to the subscription plan's group
-                if default_plan.group:
-                    instance.groups.add(default_plan.group)
+                if free_trial_plan.group:
+                    instance.groups.add(free_trial_plan.group)
                 
-                logger.info(f"Successfully created 30-day free trial subscription for user {instance.email}")
+                logger.info(f"Successfully created {trial_days}-day free trial subscription for user {instance.email}")
             else:
                 logger.warning(f"No active subscription plan found for user {instance.email}")
         except Exception as e:

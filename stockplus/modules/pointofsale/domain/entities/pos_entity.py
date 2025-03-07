@@ -17,6 +17,7 @@ class PointOfSale:
     closing_hours: Optional[str] = None
     collaborator_ids: List[int] = field(default_factory=list)
     is_active: bool = True
+    is_default: bool = False
     
     @property
     def is_store(self) -> bool:

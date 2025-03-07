@@ -14,7 +14,7 @@ class SubscriptionPricingAdmin(admin.TabularInline):
 
 class SubscriptionPlanAdmin(admin.ModelAdmin):
     inlines = [SubscriptionPricingAdmin]
-    fields = ['name', 'description', 'stripe_id', 'active', 'features', 'group', 'permissions']
+    fields = ['name', 'description', 'stripe_id', 'active', 'pos_limit', 'is_free_trial', 'trial_days', 'features', 'group', 'permissions']
     readonly_fields = ['stripe_id',]
 
 class SubscriptionAdmin(admin.ModelAdmin):

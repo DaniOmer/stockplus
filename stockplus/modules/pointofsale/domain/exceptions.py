@@ -11,6 +11,16 @@ class PointOfSaleNotFoundError(PointOfSaleError):
         super().__init__(self.message)
 
 
+class PointOfSaleLimitExceededError(PointOfSaleError):
+    """Raised when the point of sale limit for a subscription plan is exceeded."""
+    def __init__(self, company_id: int = None, current_count: int = None, limit: int = None, message: str = None):
+        self.company_id = company_id
+        self.current_count = current_count
+        self.limit = limit
+        self.message = message or f"Point of sale limit exceeded. Current count: {current_count}, Limit: {limit}."
+        super().__init__(self.message)
+
+
 class CollaboratorNotFoundError(PointOfSaleError):
     """Raised when a collaborator is not found."""
     def __init__(self, email: str = None, message: str = None):

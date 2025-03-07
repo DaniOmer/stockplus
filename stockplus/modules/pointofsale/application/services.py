@@ -3,9 +3,11 @@ from typing import List, Optional
 from stockplus.modules.pointofsale.application.interfaces import PointOfSaleRepository, PaymentMethodRepository
 from stockplus.modules.pointofsale.domain.exceptions import (
     PointOfSaleNotFoundError,
-    PaymentMethodNotFoundError
+    PaymentMethodNotFoundError,
+    PointOfSaleLimitExceededError
 )
 from stockplus.modules.pointofsale.domain.entities import PointOfSale, PosPaymentMethod
+from stockplus.modules.subscription.services.subscription_service import SubscriptionService
 
 
 class PointOfSaleService:
@@ -14,6 +16,19 @@ class PointOfSaleService:
     """
     def __init__(self, point_of_sale_repository: PointOfSaleRepository):
         self.point_of_sale_repository = point_of_sale_repository
+        self.subscription_service = None
+    
+    def get_subscription_service(self):
+        """
+        Get the subscription service.
+        
+        Returns:
+            The subscription service.
+        """
+        if not self.subscription_service:
+            from stockplus.config.dependencies import get_subscription_service
+            self.subscription_service = get_subscription_service()
+        return self.subscription_service
     
     def get_point_of_sale(self, point_of_sale_id: int) -> PointOfSale:
         """
@@ -45,12 +60,45 @@ class PointOfSaleService:
         """
         return self.point_of_sale_repository.get_by_company_id(company_id)
     
+    def validate_pos_limit(self, company_id: int) -> None:
+        """
+        Validate that the company has not exceeded its point of sale limit.
+        
+        Args:
+            company_id: The ID of the company.
+            
+        Raises:
+            PointOfSaleLimitExceededError: If the company has exceeded its point of sale limit.
+        """
+        # Get the company's subscription
+        subscription_service = self.get_subscription_service()
+        subscription = subscription_service.get_company_subscription(company_id)
+        
+        if not subscription or not subscription.subscription_plan:
+            # If no subscription or no plan, assume free trial with default limit
+            pos_limit = 3
+        else:
+            # Get the POS limit from the subscription plan
+            pos_limit = subscription.subscription_plan.pos_limit
+        
+        # Count the company's active points of sale
+        pos_count = len(self.get_company_points_of_sale(company_id))
+        
+        # Check if the company has exceeded its limit (0 means unlimited)
+        if pos_limit > 0 and pos_count >= pos_limit:
+            raise PointOfSaleLimitExceededError(
+                company_id=company_id,
+                current_count=pos_count,
+                limit=pos_limit
+            )
+    
     def create_point_of_sale(self, 
                             name: str, 
                             company_id: int, 
                             type: str = "store",
                             opening_hours: Optional[str] = None,
-                            closing_hours: Optional[str] = None) -> PointOfSale:
+                            closing_hours: Optional[str] = None,
+                            is_default: bool = False) -> PointOfSale:
         """
         Create a new point of sale.
         
@@ -60,16 +108,24 @@ class PointOfSaleService:
             type: The type of the point of sale.
             opening_hours: The opening hours of the point of sale.
             closing_hours: The closing hours of the point of sale.
+            is_default: Whether this is the default point of sale.
             
         Returns:
             The created point of sale.
+            
+        Raises:
+            PointOfSaleLimitExceededError: If the company has exceeded its point of sale limit.
         """
+        # Validate that the company has not exceeded its point of sale limit
+        self.validate_pos_limit(company_id)
+        
         point_of_sale = PointOfSale(
             name=name,
             company_id=company_id,
             type=type,
             opening_hours=opening_hours,
-            closing_hours=closing_hours
+            closing_hours=closing_hours,
+            is_default=is_default
         )
         return self.point_of_sale_repository.create(point_of_sale)
     
@@ -78,7 +134,8 @@ class PointOfSaleService:
                             name: Optional[str] = None,
                             type: Optional[str] = None,
                             opening_hours: Optional[str] = None,
-                            closing_hours: Optional[str] = None) -> PointOfSale:
+                            closing_hours: Optional[str] = None,
+                            is_default: Optional[bool] = None) -> PointOfSale:
         """
         Update an existing point of sale.
         
@@ -88,6 +145,7 @@ class PointOfSaleService:
             type: The new type of the point of sale.
             opening_hours: The new opening hours of the point of sale.
             closing_hours: The new closing hours of the point of sale.
+            is_default: Whether this is the default point of sale.
             
         Returns:
             The updated point of sale.
@@ -105,6 +163,26 @@ class PointOfSaleService:
             point_of_sale.opening_hours = opening_hours
         if closing_hours is not None:
             point_of_sale.closing_hours = closing_hours
+        if is_default is not None:
+            point_of_sale.is_default = is_default
+        
+        return self.point_of_sale_repository.update(point_of_sale)
+    
+    def set_default_point_of_sale(self, point_of_sale_id: int) -> PointOfSale:
+        """
+        Set a point of sale as the default for a company.
+        
+        Args:
+            point_of_sale_id: The ID of the point of sale to set as default.
+            
+        Returns:
+            The updated point of sale.
+            
+        Raises:
+            PointOfSaleNotFoundError: If the point of sale is not found.
+        """
+        point_of_sale = self.get_point_of_sale(point_of_sale_id)
+        point_of_sale.is_default = True
         
         return self.point_of_sale_repository.update(point_of_sale)
     

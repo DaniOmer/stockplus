@@ -27,22 +27,10 @@ class SubscriptionPlanSerializer(serializers.ModelSerializer):
     """
     features = FeatureSerializer(many=True, read_only=True)
     pricing = SubscriptionPricingSerializer(many=True, read_only=True, source='pricing.all')
-    pos_limit = serializers.SerializerMethodField()
     
     class Meta:
         model = SubscriptionPlan
-        fields = ['id', 'name', 'description', 'features', 'pricing', 'pos_limit']
-    
-    def get_pos_limit(self, obj):
-        """
-        Get the Point of Sale limit for the subscription plan.
-        """
-        if obj.name == 'Starter':
-            return 3
-        elif obj.name == 'Premium':
-            return 10
-        else:
-            return 0
+        fields = ['id', 'name', 'description', 'features', 'pricing', 'pos_limit', 'is_free_trial', 'trial_days']
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

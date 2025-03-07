@@ -38,7 +38,8 @@ class PointOfSaleRepository(PointOfSaleRepository):
             opening_hours=orm_point_of_sale.opening_hours,
             closing_hours=orm_point_of_sale.closing_hours,
             collaborator_ids=collaborator_ids,
-            is_active=not orm_point_of_sale.is_disable
+            is_active=not orm_point_of_sale.is_disable,
+            is_default=orm_point_of_sale.is_default
         )
     
     def get_by_id(self, point_of_sale_id: int) -> Optional[PointOfSaleDomain]:
@@ -81,13 +82,22 @@ class PointOfSaleRepository(PointOfSaleRepository):
         Returns:
             The created point of sale.
         """
+        # If this is the first POS or is_default is True, make sure no other POS is default
+        if point_of_sale.is_default:
+            PointOfSale.objects.filter(company_id=point_of_sale.company_id).update(is_default=False)
+        
+        # If this is the first POS for the company, make it default
+        if not PointOfSale.objects.filter(company_id=point_of_sale.company_id).exists():
+            point_of_sale.is_default = True
+        
         orm_point_of_sale = PointOfSale.objects.create(
             name=point_of_sale.name,
             company_id=point_of_sale.company_id,
             type=point_of_sale.type,
             opening_hours=point_of_sale.opening_hours,
             closing_hours=point_of_sale.closing_hours,
-            is_disable=not point_of_sale.is_active
+            is_disable=not point_of_sale.is_active,
+            is_default=point_of_sale.is_default
         )
         
         # Add collaborators if any
@@ -116,11 +126,16 @@ class PointOfSaleRepository(PointOfSaleRepository):
         except ObjectDoesNotExist:
             raise PointOfSaleNotFoundError(point_of_sale.id)
         
+        # If setting this POS as default, unset all others
+        if point_of_sale.is_default and not orm_point_of_sale.is_default:
+            PointOfSale.objects.filter(company_id=orm_point_of_sale.company_id).exclude(id=point_of_sale.id).update(is_default=False)
+        
         orm_point_of_sale.name = point_of_sale.name
         orm_point_of_sale.type = point_of_sale.type
         orm_point_of_sale.opening_hours = point_of_sale.opening_hours
         orm_point_of_sale.closing_hours = point_of_sale.closing_hours
         orm_point_of_sale.is_disable = not point_of_sale.is_active
+        orm_point_of_sale.is_default = point_of_sale.is_default
         orm_point_of_sale.save()
         
         # Update collaborators if provided
@@ -130,6 +145,7 @@ class PointOfSaleRepository(PointOfSaleRepository):
         
         return self._to_domain(orm_point_of_sale)
     
+    @transaction.atomic
     def delete(self, point_of_sale_id: int) -> None:
         """
         Delete a point of sale.
@@ -142,6 +158,18 @@ class PointOfSaleRepository(PointOfSaleRepository):
         """
         try:
             orm_point_of_sale = PointOfSale.objects.get(id=point_of_sale_id)
+            
+            # Check if this is the default POS
+            if orm_point_of_sale.is_default:
+                # Find another POS to set as default
+                other_pos = PointOfSale.objects.filter(
+                    company_id=orm_point_of_sale.company_id
+                ).exclude(id=point_of_sale_id).first()
+                
+                if other_pos:
+                    other_pos.is_default = True
+                    other_pos.save()
+            
             orm_point_of_sale.delete()
         except ObjectDoesNotExist:
             raise PointOfSaleNotFoundError(point_of_sale_id)

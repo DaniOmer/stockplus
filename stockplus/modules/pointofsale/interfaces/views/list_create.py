@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from stockplus.modules.company.infrastructure.models.company_model import Company
 from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
+from stockplus.modules.pointofsale.domain.exceptions import PointOfSaleLimitExceededError
 from stockplus.modules.pointofsale.interfaces.serializers import PointOfSaleSerializer
 
 
@@ -59,6 +60,7 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
             
         Raises:
             ValidationError: If the user does not have a company.
+            ValidationError: If the company has exceeded its point of sale limit.
         """
         company = self.request.user.company
         if not company:
@@ -70,17 +72,23 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
         
         # Create the point of sale using the service
         service = self.get_point_of_sale_service()
-        created_point_of_sale = service.create_point_of_sale(
-            name=point_of_sale.name,
-            company_id=point_of_sale.company_id,
-            type=point_of_sale.type,
-            opening_hours=point_of_sale.opening_hours,
-            closing_hours=point_of_sale.closing_hours
-        )
         
-        # Add collaborators if any
-        for collaborator_id in point_of_sale.collaborator_ids:
-            service.add_collaborator(created_point_of_sale.id, collaborator_id)
+        try:
+            created_point_of_sale = service.create_point_of_sale(
+                name=point_of_sale.name,
+                company_id=point_of_sale.company_id,
+                type=point_of_sale.type,
+                opening_hours=point_of_sale.opening_hours,
+                closing_hours=point_of_sale.closing_hours,
+                is_default=point_of_sale.is_default
+            )
+            
+            # Add collaborators if any
+            for collaborator_id in point_of_sale.collaborator_ids:
+                service.add_collaborator(created_point_of_sale.id, collaborator_id)
+                
+        except PointOfSaleLimitExceededError as e:
+            raise ValidationError(str(e))
         
     def list(self, request, *args, **kwargs):
         """

@@ -5,6 +5,7 @@ from stockplus.modules.pointofsale.interfaces.views import (
     PointOfSaleRetrieveUpdateDeleteView,
     PointOfSaleAddCollaboratorView
 )
+from stockplus.modules.pointofsale.interfaces.views.default import SetDefaultPointOfSaleView
 from stockplus.modules.pointofsale.interfaces.views.payment_method import (
     PaymentMethodListCreateView,
     PaymentMethodRetrieveUpdateDeleteView,
@@ -17,6 +18,7 @@ urlpatterns = [
         path('point-of-sale/', PointOfSaleListCreateView.as_view(), name='point_of_sale_list_create'),
         path('point-of-sale/<int:pk>/', PointOfSaleRetrieveUpdateDeleteView.as_view(), name='point_of_sale_retrieve_update_delete'),
         path('point-of-sale/<int:pk>/add-collaborator/', PointOfSaleAddCollaboratorView.as_view(), name='point_of_sale_add_collaborator'),
+        path('point-of-sale/<int:pk>/set-default/', SetDefaultPointOfSaleView.as_view(), name='point_of_sale_set_default'),
         
         # Payment Method endpoints
         path('point-of-sale/<int:point_of_sale_id>/payment-methods/', PaymentMethodListCreateView.as_view(), name='payment_method_list_create'),

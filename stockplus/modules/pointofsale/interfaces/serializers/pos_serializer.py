@@ -11,7 +11,7 @@ class PointOfSaleSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = PointOfSale
-        fields = ['id', 'uid', 'name', 'type', 'opening_hours', 'closing_hours', 'collaborators']
+        fields = ['id', 'uid', 'name', 'type', 'opening_hours', 'closing_hours', 'collaborators', 'is_default']
         read_only_fields = ['id', 'uid']
 
     def to_domain(self) -> PointOfSaleDomain:
@@ -33,7 +33,8 @@ class PointOfSaleSerializer(serializers.ModelSerializer):
             type=validated_data.get('type', 'store'),
             opening_hours=validated_data.get('opening_hours'),
             closing_hours=validated_data.get('closing_hours'),
-            collaborator_ids=collaborator_ids
+            collaborator_ids=collaborator_ids,
+            is_default=validated_data.get('is_default', False)
         )
 
 

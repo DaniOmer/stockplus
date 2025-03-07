@@ -1,5 +1,6 @@
-from rest_framework import generics
-from rest_framework.exceptions import NotFound
+from rest_framework import generics, status
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.response import Response
 
 from stockplus.modules.pointofsale.infrastructure.models.pos_model import PointOfSale
 from stockplus.modules.pointofsale.application.services import PointOfSaleService
@@ -72,7 +73,8 @@ class PointOfSaleRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
                 name=point_of_sale.name,
                 type=point_of_sale.type,
                 opening_hours=point_of_sale.opening_hours,
-                closing_hours=point_of_sale.closing_hours
+                closing_hours=point_of_sale.closing_hours,
+                is_default=point_of_sale.is_default
             )
             
             # Update collaborators if any
@@ -97,7 +99,14 @@ class PointOfSaleRetrieveUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView)
         
         Args:
             instance: The point of sale to delete.
+            
+        Raises:
+            ValidationError: If trying to delete the default point of sale.
         """
+        # Check if this is the default POS
+        if instance.is_default:
+            raise ValidationError("Cannot delete the default point of sale. Set another point of sale as default first.")
+        
         service = self.get_point_of_sale_service()
         try:
             service.delete_point_of_sale(instance.id)

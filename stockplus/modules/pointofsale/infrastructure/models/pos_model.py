@@ -28,6 +28,7 @@ class PointOfSale(Base):
     collaborators = models.ManyToManyField(User, related_name='assigned_point_of_sales')
     opening_hours = models.CharField(max_length=255, blank=True, null=True)
     closing_hours = models.CharField(max_length=255, blank=True, null=True)
+    is_default = models.BooleanField(default=False, help_text=_('Whether this is the default point of sale for quick sales.'))
 
     class Meta:
         db_table = 'stockplus_pointofsale'
