@@ -1,24 +1,89 @@
-from typing import List
 from rest_framework import serializers
 
-# Removed imports since models are abstract
-# from stockplus.models import SubscriptionPlan, SubscriptionPricing, Feature
+from stockplus.modules.subscription.models import SubscriptionPlan, SubscriptionPricing, Feature, Subscription
 
-class FeatureSerializer(serializers.Serializer):
-    name = serializers.CharField()
 
-class SubscriptionPricingSerializer(serializers.Serializer):
-    interval = serializers.CharField()
-    price = serializers.DecimalField(max_digits=10, decimal_places=2)
-    currency = serializers.CharField()
+class FeatureSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Feature model.
+    """
+    class Meta:
+        model = Feature
+        fields = ['id', 'name', 'description']
 
-class SubscriptionPlanSerializer(serializers.Serializer):
-    name = serializers.CharField()
-    description = serializers.CharField(allow_null=True, required=False)
+
+class SubscriptionPricingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the SubscriptionPricing model.
+    """
+    class Meta:
+        model = SubscriptionPricing
+        fields = ['id', 'interval', 'price', 'currency']
+
+
+class SubscriptionPlanSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the SubscriptionPlan model.
+    """
     features = FeatureSerializer(many=True, read_only=True)
-    pricing = serializers.SerializerMethodField()
+    pricing = SubscriptionPricingSerializer(many=True, read_only=True, source='pricing.all')
+    pos_limit = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = SubscriptionPlan
+        fields = ['id', 'name', 'description', 'features', 'pricing', 'pos_limit']
+    
+    def get_pos_limit(self, obj):
+        """
+        Get the Point of Sale limit for the subscription plan.
+        """
+        if obj.name == 'Starter':
+            return 3
+        elif obj.name == 'Premium':
+            return 10
+        else:
+            return 0
 
-    def get_pricing(self, obj) -> List[dict]:
-        # Since we're using abstract models, we'll return an empty list
-        # This is just a placeholder to make the schema generation work
-        return []
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Subscription model.
+    """
+    plan = SubscriptionPlanSerializer(source='subscription_plan', read_only=True)
+    
+    class Meta:
+        model = Subscription
+        fields = ['id', 'plan', 'interval', 'start_date', 'end_date', 'renewal_date', 'status']
+
+
+class PaymentHistorySerializer(serializers.Serializer):
+    """
+    Serializer for payment history.
+    """
+    id = serializers.CharField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField()
+    status = serializers.CharField()
+    date = serializers.DateTimeField()
+    invoice_url = serializers.URLField(required=False)
+
+
+# Action serializers for Swagger documentation
+
+class SubscribeSerializer(serializers.Serializer):
+    """
+    Serializer for the subscribe action.
+    """
+    plan_id = serializers.UUIDField(help_text="The ID of the subscription plan")
+    interval = serializers.ChoiceField(
+        choices=['month', 'semester', 'year'],
+        default='month',
+        help_text="The subscription interval"
+    )
+
+
+class ChangePlanSerializer(serializers.Serializer):
+    """
+    Serializer for the change_plan action.
+    """
+    plan_id = serializers.UUIDField(help_text="The ID of the new subscription plan")

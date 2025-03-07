@@ -1,5 +1,8 @@
-from stockplus.modules.subscription.views.list_retrieve import SubscriptionPlanViewSet
+"""
+Views for the subscription application.
+"""
 
-__all__ = (
+from stockplus.modules.subscription.views.subscription_views import (
     SubscriptionPlanViewSet,
+    SubscriptionViewSet
 )

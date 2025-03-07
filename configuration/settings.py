@@ -307,7 +307,7 @@ MESSENGER = {
 """
 STRIPE Configuration
 """
-STRIPE_API_KEY = config('STRIPE_API_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 
 
 """
