@@ -70,3 +70,15 @@ from stockplus.modules.shop.interfaces import urls as urls_shop
 urlpatterns += [
     path('api/shop/', include(urls_shop)),
 ]
+
+# Collaborator URLs
+from stockplus.modules.collaborator.interfaces import urls as urls_collaborator
+urlpatterns += [
+    path('api/collaborator/', include(urls_collaborator)),
+]
+
+# Reports URLs
+from stockplus.modules.reports.interfaces import urls as urls_reports
+urlpatterns += [
+    path('api/reports/', include(urls_reports)),
+]

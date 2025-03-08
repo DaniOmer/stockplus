@@ -4,11 +4,11 @@ from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 
 from stockplus.modules.product.domain.entities import Brand as BrandDomain
-from stockplus.modules.product.application.interfaces import BrandRepository
+from stockplus.modules.product.application.interfaces import IBrandRepository
 from stockplus.modules.product.infrastructure.models import Brand as BrandORM
 from stockplus.modules.product.domain.exceptions import BrandNotFoundError
 
-class BrandRepository(BrandRepository):
+class BrandRepository(IBrandRepository):
     """
     Django implementation of the brand repository.
     """

@@ -21,6 +21,11 @@ from stockplus.modules.shop.infrastructure.repositories import (
     ProductRepository as ShopProductRepository,
     PriceRepository
 )
+from stockplus.modules.reports.application.services import (
+    ReportService,
+    ExportService,
+    DashboardService
+)
 
 
 def get_product_service() -> ProductCatalogService:
@@ -102,3 +107,67 @@ def get_price_service() -> PriceService:
     price_repository = PriceRepository()
     product_repository = ShopProductRepository()
     return PriceService(price_repository, product_repository)
+
+
+def get_report_service() -> ReportService:
+    """
+    Get the report service.
+    
+    Returns:
+        The report service.
+    """
+    return ReportService()
+
+
+def get_export_service() -> ExportService:
+    """
+    Get the export service.
+    
+    Returns:
+        The export service.
+    """
+    return ExportService()
+
+
+def get_dashboard_service() -> DashboardService:
+    """
+    Get the dashboard service.
+    
+    Returns:
+        The dashboard service.
+    """
+    return DashboardService()
+
+
+def get_service(service_class):
+    """
+    Get a service instance by its class.
+    
+    Args:
+        service_class: The service class.
+        
+    Returns:
+        The service instance.
+    """
+    if service_class == ReportService:
+        return get_report_service()
+    elif service_class == ExportService:
+        return get_export_service()
+    elif service_class == DashboardService:
+        return get_dashboard_service()
+    elif service_class == SaleService:
+        return get_sale_service()
+    elif service_class == InvoiceService:
+        return get_invoice_service()
+    elif service_class == SubscriptionService:
+        return get_subscription_service()
+    elif service_class == CustomerService:
+        return get_shop_customer_service()
+    elif service_class == ShopProductService:
+        return get_shop_product_service()
+    elif service_class == PriceService:
+        return get_price_service()
+    elif service_class == ProductCatalogService:
+        return get_product_service()
+    else:
+        raise ValueError(f"Unknown service class: {service_class}")

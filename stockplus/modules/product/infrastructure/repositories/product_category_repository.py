@@ -5,10 +5,10 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from stockplus.modules.product.domain.exceptions import ProductCategoryNotFoundError
 from stockplus.modules.product.domain.entities import ProductCategory as ProductCategoryDomain
-from stockplus.modules.product.application.interfaces import ProductCategoryRepository
+from stockplus.modules.product.application.interfaces import IProductCategoryRepository
 from stockplus.modules.product.infrastructure.models import ProductCategory as ProductCategoryORM
 
-class ProductCategoryRepository(ProductCategoryRepository):
+class ProductCategoryRepository(IProductCategoryRepository):
     """
     Django implementation of the product category repository.
     """

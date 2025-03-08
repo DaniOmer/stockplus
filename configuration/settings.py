@@ -196,6 +196,8 @@ INSTALLED_APPS += [
     'stockplus.modules.company.infrastructure.apps.CompanyConfig',
     'stockplus.modules.address.infrastructure.apps.AddressConfig',
     'stockplus.modules.subscription.infrastructure.apps.SubscriptionConfig',
+    'stockplus.modules.reports.apps.ReportsConfig',
+    'stockplus.modules.collaborator.apps.CollaboratorConfig',
 ]
 
 AUTH_USER_MODEL = 'user.User'

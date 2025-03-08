@@ -13,14 +13,14 @@ from stockplus.modules.product.domain.exceptions import (
     ProductNotFoundError, ProductFeatureNotFoundError,
     ProductVariantNotFoundError
 )
-from stockplus.modules.product.application.interfaces import ProductRepository
+from stockplus.modules.product.application.interfaces import IProductRepository
 from stockplus.modules.product.infrastructure.models import (
     Product as ProductORM,
     ProductFeature as ProductFeatureORM,
     ProductVariant as ProductVariantORM,
 )
 
-class ProductRepository(ProductRepository):
+class ProductRepository(IProductRepository):
     """
     Django implementation of the product repository.
     """
