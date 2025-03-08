@@ -319,6 +319,8 @@ class ProductService:
                       name: str, 
                       company_id: int, 
                       description: Optional[str] = None,
+                      stock: int = 0,
+                      low_stock_threshold: int = 5,
                       brand_id: Optional[int] = None,
                       category_id: Optional[int] = None) -> Product:
         """
@@ -328,6 +330,8 @@ class ProductService:
             name: The name of the product.
             company_id: The ID of the company.
             description: The description of the product.
+            stock: The initial stock level of the product.
+            low_stock_threshold: The threshold for low stock alerts.
             brand_id: The ID of the brand.
             category_id: The ID of the category.
             
@@ -356,6 +360,8 @@ class ProductService:
             name=name,
             company_id=company_id,
             description=description,
+            stock=stock,
+            low_stock_threshold=low_stock_threshold,
             brand_id=brand_id,
             category_id=category_id
         )
@@ -365,6 +371,8 @@ class ProductService:
                       product_id: int,
                       name: Optional[str] = None,
                       description: Optional[str] = None,
+                      stock: Optional[int] = None,
+                      low_stock_threshold: Optional[int] = None,
                       brand_id: Optional[int] = None,
                       category_id: Optional[int] = None) -> Product:
         """
@@ -374,6 +382,8 @@ class ProductService:
             product_id: The ID of the product to update.
             name: The new name of the product.
             description: The new description of the product.
+            stock: The new stock level of the product.
+            low_stock_threshold: The new threshold for low stock alerts.
             brand_id: The new ID of the brand.
             category_id: The new ID of the category.
             
@@ -397,6 +407,12 @@ class ProductService:
         
         if description is not None:
             product.description = description
+        
+        if stock is not None:
+            product.stock = stock
+        
+        if low_stock_threshold is not None:
+            product.low_stock_threshold = low_stock_threshold
         
         if brand_id is not None and brand_id != product.brand_id:
             # Check if the brand exists

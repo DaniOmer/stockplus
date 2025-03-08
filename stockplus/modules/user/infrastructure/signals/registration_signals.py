@@ -15,6 +15,7 @@ from stockplus.modules.company.infrastructure.repositories.company_repository im
 from stockplus.modules.pointofsale.domain.entities import PointOfSale as PointOfSaleEntity
 from stockplus.modules.pointofsale.infrastructure.repositories.pos_repository import PointOfSaleRepository
 from stockplus.modules.subscription.models import Subscription, SubscriptionPlan
+from stockplus.modules.address.infrastructure.models import CompanyAddress, UserAddress
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,32 @@ def create_company_and_pos_for_new_user(sender, instance, created, **kwargs):
             logger.info(f"Successfully created company and default Point of Sale for user {instance.email}")
         except Exception as e:
             logger.error(f"Failed to create company and Point of Sale for user {instance.email}: {e}")
+
+@receiver(post_save, sender=UserAddress)
+def create_company_address_from_user_address(sender, instance, created, **kwargs):
+    """
+    Create a company address from the user's address.
+    """
+    if created and instance.user and instance.user.company_id:
+        try:
+            # Check if the company already has an address
+            if not CompanyAddress.objects.filter(company_id=instance.user.company_id).exists():
+                # Create a company address based on the user's address
+                CompanyAddress.objects.create(
+                    company_id=instance.user.company_id,
+                    address=instance.address,
+                    complement=instance.complement,
+                    city=instance.city,
+                    postal_code=instance.postal_code,
+                    state=instance.state,
+                    country=instance.country,
+                    country_code=instance.country_code
+                )
+                
+                logger.info(f"Successfully created company address for company {instance.user.company_id}")
+        except Exception as e:
+            logger.error(f"Failed to create company address: {e}")
+
 
 @receiver(post_save, sender=User)
 def create_free_trial_subscription(sender, instance, created, **kwargs):

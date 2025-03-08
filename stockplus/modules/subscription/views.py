@@ -3,8 +3,8 @@ Subscription views for the subscription application.
 This module contains the views for the subscription application.
 """
 
-# Import the views from the views directory
-from stockplus.modules.subscription.views.subscription_views import (
+# Import the views from the interfaces directory
+from stockplus.modules.subscription.interfaces.views import (
     SubscriptionPlanViewSet,
     SubscriptionViewSet
 )

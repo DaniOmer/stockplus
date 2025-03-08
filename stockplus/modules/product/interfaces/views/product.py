@@ -1,10 +1,12 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from stockplus.modules.product.application.services import ProductService
 from stockplus.modules.product.domain.exceptions import ProductNotFoundError
 from stockplus.modules.product.infrastructure.models import Product as ProductORM
 from stockplus.modules.product.interfaces.serializers import ProductSerializer
+from stockplus.modules.product.permissions import IsAdminOrReadOnly
 
 
 class ProductViewSet(viewsets.ModelViewSet):
@@ -13,6 +15,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     queryset = ProductORM.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -64,6 +67,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 name=product.name,
                 company_id=product.company_id,
                 description=product.description,
+                stock=product.stock,
+                low_stock_threshold=product.low_stock_threshold,
                 brand_id=product.brand_id,
                 category_id=product.category_id
             )
@@ -118,6 +123,8 @@ class ProductViewSet(viewsets.ModelViewSet):
                 product_id=product.id,
                 name=product.name,
                 description=product.description,
+                stock=product.stock,
+                low_stock_threshold=product.low_stock_threshold,
                 brand_id=product.brand_id,
                 category_id=product.category_id
             )

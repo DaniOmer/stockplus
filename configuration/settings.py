@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_ckeditor_5',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -191,6 +192,7 @@ INSTALLED_APPS += [
     'stockplus.modules.messenger.infrastructure.apps.MessengerConfig',
     'stockplus.modules.pointofsale.infrastructure.apps.PointOfSaleConfig',
     'stockplus.modules.product.infrastructure.apps.ProductConfig',
+    'stockplus.modules.sales.infrastructure.apps.SalesConfig',
     'stockplus.modules.company.infrastructure.apps.CompanyConfig',
     'stockplus.modules.address.infrastructure.apps.AddressConfig',
     'stockplus.modules.subscription.infrastructure.apps.SubscriptionConfig',

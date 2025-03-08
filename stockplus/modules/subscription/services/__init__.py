@@ -1,5 +1,7 @@
 """
-Services for the subscription application.
+Subscription services for the subscription application.
+This module contains the services for the subscription application.
 """
 
-from stockplus.modules.subscription.services.subscription_service import SubscriptionService
+# Import the services from the application directory
+from stockplus.modules.subscription.application.services import SubscriptionService

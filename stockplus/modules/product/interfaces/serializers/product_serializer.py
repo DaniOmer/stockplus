@@ -70,11 +70,13 @@ class ProductSerializer(serializers.ModelSerializer):
     """
     features = ProductFeatureSerializer(many=True, required=False)
     variants = ProductVariantSerializer(many=True, required=False)
+    is_low_stock = serializers.BooleanField(read_only=True)
     
     class Meta:
         model = ProductORM
-        fields = ['id', 'uid', 'name', 'description', 'brand', 'category', 'features', 'variants']
-        read_only_fields = ['id', 'uid']
+        fields = ['id', 'uid', 'name', 'description', 'barcode', 'stock', 'low_stock_threshold', 
+                 'brand', 'category', 'features', 'variants', 'is_low_stock']
+        read_only_fields = ['id', 'uid', 'barcode', 'is_low_stock']
 
     def to_domain(self) -> Product:
         """
@@ -104,6 +106,8 @@ class ProductSerializer(serializers.ModelSerializer):
         return Product(
             name=validated_data.get('name', ''),
             description=validated_data.get('description'),
+            stock=validated_data.get('stock', 0),
+            low_stock_threshold=validated_data.get('low_stock_threshold', 5),
             brand_id=validated_data.get('brand').id if 'brand' in validated_data else None,
             category_id=validated_data.get('category').id if 'category' in validated_data else None,
             features=features,

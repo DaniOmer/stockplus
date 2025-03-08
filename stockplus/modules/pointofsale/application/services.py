@@ -7,7 +7,6 @@ from stockplus.modules.pointofsale.domain.exceptions import (
     PointOfSaleLimitExceededError
 )
 from stockplus.modules.pointofsale.domain.entities import PointOfSale, PosPaymentMethod
-from stockplus.modules.subscription.services.subscription_service import SubscriptionService
 
 
 class PointOfSaleService:

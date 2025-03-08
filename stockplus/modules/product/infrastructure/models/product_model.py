@@ -1,5 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from stockplus.models.base import Base
 from stockplus.modules.company.infrastructure.models import Company
@@ -12,7 +14,15 @@ class Product(Base):
     """
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(max_length=255, blank=True, null=True)
-    brand = brand = models.ForeignKey(
+    barcode = models.CharField(max_length=13, unique=True, blank=True, null=True, 
+                              help_text=_('EAN-13 barcode for the product.'))
+    barcode_image = models.ImageField(upload_to='barcodes/', blank=True, null=True, 
+                                    help_text=_('Generated barcode image.'))
+    stock = models.PositiveIntegerField(default=0, 
+                                       help_text=_('Current stock level of the product.'))
+    low_stock_threshold = models.PositiveIntegerField(default=5, 
+                                                    help_text=_('Threshold for low stock alerts.'))
+    brand = models.ForeignKey(
         Brand,
         on_delete=models.SET_NULL,
         null=True,
@@ -42,6 +52,16 @@ class Product(Base):
         related_name='pos_products',
         help_text=_('The point of sale this product belongs to.'),
     )
+    
+    @property
+    def is_low_stock(self):
+        """
+        Check if the product has low stock.
+        
+        Returns:
+            True if the stock is less than or equal to the low stock threshold, False otherwise.
+        """
+        return self.stock <= self.low_stock_threshold
 
     class Meta:
         db_table = 'stockplus_product'

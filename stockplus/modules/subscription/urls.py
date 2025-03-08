@@ -1,10 +1,7 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
 
-from stockplus.modules.subscription import views
+# Import the URLs from the interfaces directory
+from stockplus.modules.subscription.interfaces.urls import urlpatterns
 
-router = DefaultRouter()
-router.register(r'api/subscription/plan', views.SubscriptionPlanViewSet, basename='subscription_plan')
-router.register(r'api/subscription', views.SubscriptionViewSet, basename='subscription')
-
-urlpatterns = router.urls
+# Re-export the urlpatterns
+__all__ = ['urlpatterns']

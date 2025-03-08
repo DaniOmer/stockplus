@@ -57,6 +57,16 @@ urlpatterns += urls_pointofsale.urlpatterns
 from stockplus.modules.product.interfaces import urls as urls_product
 urlpatterns += urls_product.urlpatterns
 
+# Sales URLs
+from stockplus.modules.sales.interfaces import urls as urls_sales
+urlpatterns += urls_sales.urlpatterns
+
 # Subscription configuration
 from stockplus.modules.subscription import urls as urls_subscription
 urlpatterns += urls_subscription.urlpatterns
+
+# Shop URLs
+from stockplus.modules.shop.interfaces import urls as urls_shop
+urlpatterns += [
+    path('api/shop/', include(urls_shop)),
+]

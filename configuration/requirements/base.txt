@@ -11,3 +11,5 @@ stripe==10.12.0
 drf-spectacular
 python-dateutil
 sib-api-v3-sdk
+python-barcode
+Pillow  # Required for image generation
