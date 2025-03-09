@@ -29,7 +29,6 @@ def send_mail_message(subject, target, template, html, message, **kwargs):
         missive_repository=MissiveRepository()
     )
         
-        # Create email missive
     missive = messenger_service.create_email_missive(
         to_email=target,
         subject=subject,
@@ -41,7 +40,7 @@ def send_mail_message(subject, target, template, html, message, **kwargs):
     )
         
         # Send the missive
-    success = messenger_service.send_missive(missive.id)
+    # success = messenger_service.send_missive(missive.id)
         
         # if success:
         #     logger.info(f"Email sent to {target}")

@@ -72,7 +72,7 @@ class Missive:
 
     def prepare_email(self):
         if not self.sender:
-            self.sender = 'default_sender@example.com'
+            self.sender = 'ddaniomer95@gmail.com'
 
     def prepare_web(self):
         pass
@@ -82,7 +82,6 @@ class Missive:
             self.backend = 'email_backend'
         elif self.mode == Mode.SMS:
             self.backend = 'sms_backend'
-        # Ajoutez d'autres backends selon les besoins
 
     def clear_errors(self):
         self.trace = None
@@ -103,7 +102,6 @@ class Missive:
             return check_method(self)
 
     def send_missive(self):
-        # Implémentez la logique pour envoyer la missive
         pass
 
     def to_json(self):

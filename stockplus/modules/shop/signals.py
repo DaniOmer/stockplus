@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from stockplus.modules.shop.models import Customer
+from stockplus.modules.shop.infrastructure.models import Customer
 
 @receiver(post_save, sender=Customer)
 def create_stripe_customer(sender, instance, created, **kwargs):

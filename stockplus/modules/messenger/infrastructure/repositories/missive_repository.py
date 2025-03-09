@@ -76,9 +76,23 @@ class MissiveRepository(MissiveRepositoryInterface):
         Returns:
             Missive: The saved missive
         """
-        created_missive = Missive.objects.create(**missive.to_json())
-        created_missive.save()
-        return created_missive
+        try:
+            # Convert the domain entity to a dict for creating the ORM model
+            missive_data = missive.to_json()
+                
+            # Create the missive
+            created_missive = Missive(**missive_data)
+            created_missive.save()
+            
+            return created_missive
+        except Exception as e:
+            # Log the error
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to save missive: {str(e)}")
+            
+            # Re-raise the exception
+            raise
 
     def delete(self, missive_id) -> bool:
         """

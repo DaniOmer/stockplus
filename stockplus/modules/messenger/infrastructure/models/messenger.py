@@ -86,6 +86,10 @@ class Messenger(Base):
         if self.mode == choices.MODE_SMS:
             self.backend = missive_backend_sms()
 
+    def save(self, *args, **kwargs):
+        self.pre_save()
+        super().save(*args, **kwargs)
+        
     @property
     def preheader(self):
         return self.txt

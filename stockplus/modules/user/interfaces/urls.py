@@ -10,8 +10,8 @@ from rest_framework_simplejwt.views import (
     TokenVerifyView,
 )
 
-# Import from the auth.py file
-from stockplus.modules.user.interfaces.views.auth_file import RegisterView, LoginView
+from stockplus.modules.user.interfaces.views.auth.register import RegisterView
+from stockplus.modules.user.interfaces.views.auth.login import LoginView
 from stockplus.modules.user.interfaces.views.email_verify import (
     EmailVerifyView,
     ResendVerificationEmailView,

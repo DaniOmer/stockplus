@@ -49,8 +49,8 @@ class UserSerializer(serializers.Serializer):
             'country': validated_data.pop('country', None)
         }
         
-        # Create the user
-        user = user_service.create_user(
+        # Create the user domain entity
+        user_entity = user_service.create_user(
             email=validated_data.get('email'),
             phone_number=validated_data.get('phone_number'),
             password=validated_data.get('password'),
@@ -58,10 +58,15 @@ class UserSerializer(serializers.Serializer):
             last_name=validated_data.get('last_name')
         )
         
+        # Get the ORM User instance
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user_orm = User.objects.get(email=user_entity.email)
+        
         # Create user address if country is provided
         if address_data['country']:
             UserAddress.objects.create(
-                user=user,
+                user=user_orm,  # Use the ORM User instance
                 address=address_data['address'],
                 complement=address_data['complement'],
                 city=address_data['city'],
@@ -70,7 +75,7 @@ class UserSerializer(serializers.Serializer):
                 country=address_data['country']
             )
         
-        return user
+        return user_entity
     
     def update(self, instance, validated_data):
         """
@@ -97,8 +102,8 @@ class UserSerializer(serializers.Serializer):
             'country': validated_data.pop('country', None)
         }
         
-        # Update the user
-        user = user_service.update_user(
+        # Update the user domain entity
+        user_entity = user_service.update_user(
             user_id=instance.id,
             email=validated_data.get('email', instance.email),
             phone_number=validated_data.get('phone_number', instance.phone_number),
@@ -108,12 +113,17 @@ class UserSerializer(serializers.Serializer):
         
         # Update the password if provided
         if 'password' in validated_data:
-            user_service.update_password(user.id, validated_data['password'])
+            user_service.update_password(user_entity.id, validated_data['password'])
+        
+        # Get the ORM User instance
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        user_orm = User.objects.get(id=user_entity.id)
         
         # Update or create user address if country is provided
         if address_data['country']:
             user_address, created = UserAddress.objects.get_or_create(
-                user=user,
+                user=user_orm,
                 defaults={
                     'address': address_data['address'],
                     'complement': address_data['complement'],
