@@ -6,9 +6,9 @@ This module contains the reset password view for the user application.
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.domain.entities import TokenType
+from stockplus.modules.user.application import UserService, TokenService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
-from stockplus.modules.user.infrastructure.repositories.token_repository import get_token_repository
 from stockplus.modules.user.interfaces.serializers import ResetPasswordSerializer
 from stockplus.modules.user.domain.exceptions import (
     UserNotFoundException,
@@ -44,7 +44,7 @@ class ResetPasswordView(generics.GenericAPIView):
         
         # Get the repositories
         user_service = UserService(UserRepository())
-        token_repository = get_token_repository()
+        token_service = TokenService(TokenService())
         
         try:
             # Get the user
@@ -53,18 +53,13 @@ class ResetPasswordView(generics.GenericAPIView):
                 raise UserNotFoundException(f"User with ID {user_id} not found")
             
             # Verify the code
-            token_data = token_repository.get_password_reset_token(code)
-            if not token_data:
-                raise TokenInvalidException("Invalid or expired code")
-            
-            if str(token_data['user_id']) != str(user_id):
-                raise TokenInvalidException("Invalid code for this user")
+            token_data = token_service.verify_token(code, TokenType.PASSWORD_RESET)
             
             # Reset the password
             user_service.update_password(user_id, new_password)
             
             # Delete the token
-            token_repository.delete_password_reset_token(code)
+            token_service.delete_password_reset_token(code)
             
             return Response({
                 'message': 'Password reset successfully'

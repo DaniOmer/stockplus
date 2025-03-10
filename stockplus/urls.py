@@ -32,15 +32,6 @@ swagger_urlpatterns = [
 ]
 urlpatterns += swagger_urlpatterns
 
-# Simple JWT configuration
-from rest_framework_simplejwt.views import TokenRefreshView
-from stockplus.views import CustomTokenObtainPairView
-simplejwt_urlpatterns = [
-    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-]
-urlpatterns += simplejwt_urlpatterns
-
 # User module URLs
 from stockplus.modules.user.interfaces import urls as urls_user
 urlpatterns += urls_user.urlpatterns

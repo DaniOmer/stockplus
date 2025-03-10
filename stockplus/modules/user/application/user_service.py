@@ -4,19 +4,16 @@ This module contains the application services for the user application.
 """
 
 import logging
-import secrets
-from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 
 from stockplus.modules.user.domain.entities import User
-from stockplus.modules.user.application.interfaces import UserRepositoryInterface, TokenRepositoryInterface
+from stockplus.modules.user.application.interfaces import UserRepositoryInterface
 from stockplus.modules.user.domain.exceptions import (
     UserNotFoundException,
     InvalidCredentialsException,
     TokenInvalidException,
-    TokenExpiredException,
 )
-from stockplus.modules.user.infrastructure.repositories.token_repository import get_token_repository
+from stockplus.modules.user.infrastructure.repositories.token_repository import TokenRepository
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +26,7 @@ class UserService:
     to access and manipulate user data and enforces business rules.
     """
     
-    def __init__(self, user_repository: UserRepositoryInterface, token_repository=None):
+    def __init__(self, user_repository: UserRepositoryInterface):
         """
         Initialize a new UserService instance.
         
@@ -38,7 +35,7 @@ class UserService:
             token_repository: The token repository to use (optional)
         """
         self.user_repository = user_repository
-        self.token_repository = token_repository or get_token_repository()
+        self.token_repository = TokenRepository()
     
     def get_user_by_id(self, user_id) -> Optional[User]:
         """
@@ -128,15 +125,6 @@ class UserService:
         
         # Save the user
         created_user = self.user_repository.save(user)
-        
-        # Generate and store a verification token
-        if email or phone_number:
-            method = 'email' if email else 'sms'
-            token = self._generate_verification_token(created_user.id, method)
-            
-            # Return the created user and token
-            return created_user
-        
         return created_user
     
     def update_user(self, user_id, email=None, phone_number=None, first_name=None, last_name=None, **extra_fields) -> User:
@@ -354,23 +342,15 @@ class UserService:
         Returns:
             str: The verification token
         """
-        # Generate a random token
-        token = ''.join(secrets.choice('0123456789') for _ in range(6))
-        
-        # Set the expiry time (24 hours from now)
-        expiry = datetime.now() + timedelta(hours=24)
-        
-        # Store the token
-        self.token_repository.store_verification_token(user_id, token, expiry, method)
-        
-        return token
+        # Use the token repository to generate and store a token
+        return self.token_repository.create_verification_token(user_id, method=method)
     
-    def verify_token(self, token) -> Dict[str, Any]:
+    def verify_token(self, token_value) -> Dict[str, Any]:
         """
         Verify a token.
         
         Args:
-            token: The token to verify
+            token_value: The token value to verify
             
         Returns:
             Dict[str, Any]: The token data
@@ -379,16 +359,21 @@ class UserService:
             TokenInvalidException: If the token is invalid
             TokenExpiredException: If the token has expired
         """
-        # Get the token data
-        token_data = self.token_repository.get_verification_token(token)
+        # Get the token
+        token = self.token_repository.get_verification_token(token_value)
         
-        if not token_data:
+        if not token:
             raise TokenInvalidException("Invalid or expired token")
         
         # Delete the token
-        self.token_repository.delete_verification_token(token)
+        self.token_repository.delete_verification_token(token_value)
         
-        return token_data
+        # Convert token to dict for backward compatibility
+        return {
+            'user_id': token.user_id,
+            'method': token.method,
+            'type': token.token_type.value
+        }
     
     def generate_password_reset_token(self, email=None, phone_number=None) -> str:
         """
@@ -396,7 +381,7 @@ class UserService:
         
         Args:
             email: The user's email address
-            phone_number: The user's phone number
+            phone_number: The user's phone number (not used, password reset is email only)
             
         Returns:
             str: The password reset token
@@ -404,34 +389,24 @@ class UserService:
         Raises:
             UserNotFoundException: If the user is not found
         """
-        user = None
+        # Password reset is only via email
+        if not email:
+            raise ValueError("Email is required for password reset")
         
-        if email:
-            user = self.user_repository.get_by_email(email)
-        elif phone_number:
-            user = self.user_repository.get_by_phone_number(phone_number)
+        user = self.user_repository.get_by_email(email)
         
         if not user:
             raise UserNotFoundException("User not found")
         
-        # Generate a random token
-        token = ''.join(secrets.choice('0123456789') for _ in range(6))
-        
-        # Set the expiry time (24 hours from now)
-        expiry = datetime.now() + timedelta(hours=24)
-        
-        # Store the token
-        method = 'email' if email else 'sms'
-        self.token_repository.store_password_reset_token(user.id, token, expiry, method)
-        
-        return token
+        # Use the token repository to generate and store a token
+        return self.token_repository.store_password_reset_token(user.id)
     
-    def verify_password_reset_token(self, token) -> Dict[str, Any]:
+    def verify_password_reset_token(self, token_value) -> Dict[str, Any]:
         """
         Verify a password reset token.
         
         Args:
-            token: The token to verify
+            token_value: The token value to verify
             
         Returns:
             Dict[str, Any]: The token data
@@ -440,20 +415,25 @@ class UserService:
             TokenInvalidException: If the token is invalid
             TokenExpiredException: If the token has expired
         """
-        # Get the token data
-        token_data = self.token_repository.get_password_reset_token(token)
+        # Get the token
+        token = self.token_repository.get_password_reset_token(token_value)
         
-        if not token_data:
+        if not token:
             raise TokenInvalidException("Invalid or expired token")
         
-        return token_data
+        # Convert token to dict for backward compatibility
+        return {
+            'user_id': token.user_id,
+            'method': token.method,
+            'type': token.token_type.value
+        }
     
-    def reset_password(self, token, new_password) -> User:
+    def reset_password(self, token_value, new_password) -> User:
         """
         Reset a user's password.
         
         Args:
-            token: The password reset token
+            token_value: The password reset token value
             new_password: The new password
             
         Returns:
@@ -465,7 +445,7 @@ class UserService:
             UserNotFoundException: If the user is not found
         """
         # Verify the token
-        token_data = self.verify_password_reset_token(token)
+        token_data = self.verify_password_reset_token(token_value)
         
         # Get the user
         user_id = token_data['user_id']
@@ -478,6 +458,6 @@ class UserService:
         user = self.user_repository.update_password(user_id, new_password)
         
         # Delete the token
-        self.token_repository.delete_password_reset_token(token)
+        self.token_repository.delete_password_reset_token(token_value)
         
         return user

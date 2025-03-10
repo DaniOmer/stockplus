@@ -1,10 +1,12 @@
 """
-User application interfaces.
-This module contains the interfaces for the user application.
+Application interfaces for the user application.
+This module contains the application interfaces for the user application.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+
+from stockplus.modules.user.domain.entities import User, Token, Invitation, Notification, NotificationType
 
 
 class UserRepositoryInterface(ABC):
@@ -15,7 +17,7 @@ class UserRepositoryInterface(ABC):
     """
     
     @abstractmethod
-    def get_by_id(self, user_id):
+    def get_by_id(self, user_id) -> Optional[User]:
         """
         Get a user by ID.
         
@@ -28,7 +30,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_email(self, email):
+    def get_by_email(self, email) -> Optional[User]:
         """
         Get a user by email.
         
@@ -41,7 +43,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_phone_number(self, phone_number):
+    def get_by_phone_number(self, phone_number) -> Optional[User]:
         """
         Get a user by phone number.
         
@@ -54,20 +56,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_username(self, username):
-        """
-        Get a user by username.
-        
-        Args:
-            username: The username of the user to retrieve
-            
-        Returns:
-            User: The user with the given username or None if not found
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_company_id(self, company_id):
+    def get_by_company_id(self, company_id) -> List[User]:
         """
         Get all users for a company.
         
@@ -80,7 +69,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def save(self, user):
+    def save(self, user: User) -> User:
         """
         Save a user.
         
@@ -93,7 +82,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def update_password(self, user_id, new_password):
+    def update_password(self, user_id, new_password) -> User:
         """
         Update a user's password.
         
@@ -107,7 +96,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def verify_password(self, user_id, password):
+    def verify_password(self, user_id, password) -> bool:
         """
         Verify a user's password.
         
@@ -121,7 +110,7 @@ class UserRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def delete(self, user_id):
+    def delete(self, user_id) -> bool:
         """
         Delete a user.
         
@@ -134,7 +123,7 @@ class UserRepositoryInterface(ABC):
         pass
 
 
-class TokenRepositoryInterface(ABC):
+class ITokenRepository(ABC):
     """
     Token repository interface.
     
@@ -142,86 +131,82 @@ class TokenRepositoryInterface(ABC):
     """
     
     @abstractmethod
-    def store_verification_token(self, user_id, token, expiry, method='email'):
+    def get_by_value(self, token_value) -> Optional[Token]:
         """
-        Store a verification token.
+        Get a token by value.
+        
+        Args:
+            token_value: The value of the token to retrieve
+            
+        Returns:
+            Token: The token with the given value or None if not found
+        """
+        pass
+    
+    @abstractmethod
+    def get_by_user_and_type(self, user_id, token_type) -> List[Token]:
+        """
+        Get all tokens for a user with a given type.
         
         Args:
             user_id: The ID of the user
-            token: The verification token
-            expiry: The expiry datetime
-            method: The verification method (email or sms)
+            token_type: The type of token to retrieve
             
         Returns:
-            bool: True if the token was stored successfully
+            List[Token]: A list of tokens for the user with the given type
         """
         pass
     
     @abstractmethod
-    def get_verification_token(self, token):
+    def save(self, token: Token) -> Token:
         """
-        Get a verification token.
+        Save a token.
         
         Args:
-            token: The verification token
+            token: The token to save
             
         Returns:
-            dict: The token data or None if not found
+            Token: The saved token
         """
         pass
     
     @abstractmethod
-    def delete_verification_token(self, token):
+    def delete(self, token_id) -> bool:
         """
-        Delete a verification token.
+        Delete a token.
         
         Args:
-            token: The verification token
+            token_id: The ID of the token to delete
             
         Returns:
-            bool: True if the token was deleted
+            bool: True if the token was deleted, False otherwise
         """
         pass
     
     @abstractmethod
-    def store_password_reset_token(self, user_id, token, expiry, method='email'):
+    def delete_by_value(self, token_value) -> bool:
         """
-        Store a password reset token.
+        Delete a token by value.
+        
+        Args:
+            token_value: The value of the token to delete
+            
+        Returns:
+            bool: True if the token was deleted, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def delete_by_user_and_type(self, user_id, token_type) -> bool:
+        """
+        Delete all tokens for a user with a given type.
         
         Args:
             user_id: The ID of the user
-            token: The password reset token
-            expiry: The expiry datetime
-            method: The reset method (email or sms)
+            token_type: The type of token to delete
             
         Returns:
-            bool: True if the token was stored successfully
-        """
-        pass
-    
-    @abstractmethod
-    def get_password_reset_token(self, token):
-        """
-        Get a password reset token.
-        
-        Args:
-            token: The password reset token
-            
-        Returns:
-            dict: The token data or None if not found
-        """
-        pass
-    
-    @abstractmethod
-    def delete_password_reset_token(self, token):
-        """
-        Delete a password reset token.
-        
-        Args:
-            token: The password reset token
-            
-        Returns:
-            bool: True if the token was deleted
+            bool: True if the tokens were deleted, False otherwise
         """
         pass
 
@@ -234,7 +219,7 @@ class InvitationRepositoryInterface(ABC):
     """
     
     @abstractmethod
-    def get_by_id(self, invitation_id):
+    def get_by_id(self, invitation_id) -> Optional[Invitation]:
         """
         Get an invitation by ID.
         
@@ -247,20 +232,7 @@ class InvitationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_token(self, token):
-        """
-        Get an invitation by token.
-        
-        Args:
-            token: The token of the invitation to retrieve
-            
-        Returns:
-            Invitation: The invitation with the given token or None if not found
-        """
-        pass
-    
-    @abstractmethod
-    def get_by_email(self, email):
+    def get_by_email(self, email) -> Optional[Invitation]:
         """
         Get an invitation by email.
         
@@ -273,20 +245,33 @@ class InvitationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_company_id(self, company_id):
+    def get_by_token(self, token) -> Optional[Invitation]:
         """
-        Get all invitations for a company.
+        Get an invitation by token.
         
         Args:
-            company_id: The ID of the company
+            token: The token of the invitation to retrieve
             
         Returns:
-            List[Invitation]: A list of invitations for the company
+            Invitation: The invitation with the given token or None if not found
         """
         pass
     
     @abstractmethod
-    def save(self, invitation):
+    def get_by_sender_id(self, sender_id) -> List[Invitation]:
+        """
+        Get all invitations sent by a user.
+        
+        Args:
+            sender_id: The ID of the sender
+            
+        Returns:
+            List[Invitation]: A list of invitations sent by the user
+        """
+        pass
+    
+    @abstractmethod
+    def save(self, invitation: Invitation) -> Invitation:
         """
         Save an invitation.
         
@@ -299,7 +284,7 @@ class InvitationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def delete(self, invitation_id):
+    def delete(self, invitation_id) -> bool:
         """
         Delete an invitation.
         
@@ -320,7 +305,7 @@ class NotificationRepositoryInterface(ABC):
     """
     
     @abstractmethod
-    def get_by_id(self, notification_id):
+    def get_by_id(self, notification_id) -> Optional[Notification]:
         """
         Get a notification by ID.
         
@@ -333,12 +318,15 @@ class NotificationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def get_by_user_id(self, user_id):
+    def get_by_user_id(self, user_id, read=None, limit=None, offset=None) -> List[Notification]:
         """
         Get all notifications for a user.
         
         Args:
             user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+            limit: Maximum number of notifications to return
+            offset: Number of notifications to skip
             
         Returns:
             List[Notification]: A list of notifications for the user
@@ -346,25 +334,29 @@ class NotificationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def save(self, notification):
+    def create(self, user_id, title, message, type=NotificationType.INFO, link=None) -> Notification:
         """
-        Save a notification.
+        Create a notification.
         
         Args:
-            notification: The notification to save
+            user_id: The ID of the user
+            title: The notification title
+            message: The notification message
+            type: The notification type
+            link: Optional URL link
             
         Returns:
-            Notification: The saved notification
+            Notification: The created notification
         """
         pass
     
     @abstractmethod
-    def mark_as_read(self, notification_id):
+    def mark_as_read(self, notification_id) -> Notification:
         """
         Mark a notification as read.
         
         Args:
-            notification_id: The ID of the notification to mark as read
+            notification_id: The ID of the notification
             
         Returns:
             Notification: The updated notification
@@ -372,7 +364,7 @@ class NotificationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def mark_all_as_read(self, user_id):
+    def mark_all_as_read(self, user_id) -> int:
         """
         Mark all notifications for a user as read.
         
@@ -385,7 +377,7 @@ class NotificationRepositoryInterface(ABC):
         pass
     
     @abstractmethod
-    def delete(self, notification_id):
+    def delete(self, notification_id) -> bool:
         """
         Delete a notification.
         
@@ -394,5 +386,19 @@ class NotificationRepositoryInterface(ABC):
             
         Returns:
             bool: True if the notification was deleted, False otherwise
+        """
+        pass
+    
+    @abstractmethod
+    def delete_all_for_user(self, user_id, read=None) -> int:
+        """
+        Delete all notifications for a user.
+        
+        Args:
+            user_id: The ID of the user
+            read: Filter by read status (True, False, or None for all)
+            
+        Returns:
+            int: The number of notifications deleted
         """
         pass

@@ -35,6 +35,7 @@ class UserRepository(UserRepositoryInterface):
             return None
         
         return User(
+            id=user_orm.id,
             email=user_orm.email,
             phone_number=user_orm.phone_number,
             username=user_orm.username,
@@ -127,63 +128,43 @@ class UserRepository(UserRepositoryInterface):
 
     def save(self, user: User) -> User:
         """
-        Save a user.
+        Save a user, either creating a new one or updating an existing one.
 
         Args:
-            user: The user to save
+            user: The user to save.
 
         Returns:
-            User: The saved user
+            User: The saved user.
         """
-        # Check if the user already exists
-        user_orm = None
-        if hasattr(user, 'id') and user.id:
-            try:
-                user_orm = UserORM.objects.get(id=user.id)
-            except UserORM.DoesNotExist:
-                pass
-        
-        # If the user doesn't exist, create a new one
-        if not user_orm:
-            # If the user has a password_hash attribute, hash the password
-            password = None
-            if hasattr(user, 'password_hash') and user.password_hash:
-                password = make_password(user.password_hash)
-            
-            # Create the user
-            user_orm = UserORM.objects.create(
-                email=user.email,
-                phone_number=user.phone_number,
-                username=user.username,
-                first_name=user.first_name,
-                last_name=user.last_name,
-                is_active=user.is_active,
-                is_verified=user.is_verified,
-                company_id=user.company_id,
-                role=user.role,
-                password=password
-            )
+        COMMON_FIELDS = [
+            'email', 'phone_number', 'username', 'first_name',
+            'last_name', 'is_active', 'is_verified', 'company_id', 'role'
+        ]
+
+        # Check for existing user using filter().first() for cleaner existence check
+        existing_user = UserORM.objects.filter(id=user.id).first() if user.id else None
+
+        # Handle password hashing once for both create/update scenarios
+        hashed_password = None
+        if hasattr(user, 'password_hash') and user.password_hash:
+            hashed_password = make_password(user.password_hash)
+
+        if not existing_user:
+            # Create new user with dictionary unpacking
+            user_data = {field: getattr(user, field) for field in COMMON_FIELDS}
+            user_data['password'] = hashed_password
+            return UserORM.objects.create(**user_data)
         else:
-            # Update the user
-            user_orm.email = user.email
-            user_orm.phone_number = user.phone_number
-            user_orm.username = user.username
-            user_orm.first_name = user.first_name
-            user_orm.last_name = user.last_name
-            user_orm.is_active = user.is_active
-            user_orm.is_verified = user.is_verified
-            user_orm.company_id = user.company_id
-            user_orm.role = user.role
+            # Update existing user using dynamic field assignment
+            for field in COMMON_FIELDS:
+                setattr(existing_user, field, getattr(user, field))
             
-            # If the user has a password_hash attribute, hash the password
-            if hasattr(user, 'password_hash') and user.password_hash:
-                user_orm.password = make_password(user.password_hash)
+            # Only update password if new hash was provided
+            if hashed_password is not None:
+                existing_user.password = hashed_password
             
-            # Save the user
-            user_orm.save()
-        
-        # Return the domain entity
-        return self._to_domain_entity(user_orm)
+            existing_user.save()
+            return existing_user
 
     def update_password(self, user_id, new_password) -> User:
         """

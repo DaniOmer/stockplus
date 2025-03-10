@@ -5,7 +5,6 @@ This module contains the URL configuration for the user application.
 
 from django.urls import path
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
@@ -22,6 +21,7 @@ from stockplus.modules.user.interfaces.views.password_reset import (
     PasswordResetConfirmView,
 )
 from stockplus.modules.user.interfaces.views.profile import UserProfileView
+from stockplus.modules.user.interfaces.views.token import TokenView
 
 urlpatterns = [
     # Authentication
@@ -29,7 +29,6 @@ urlpatterns = [
     path('api/auth/login/', LoginView.as_view(), name='login'),
     
     # JWT Tokens
-    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     
@@ -44,4 +43,7 @@ urlpatterns = [
     
     # User Profile
     path('api/user/profile/', UserProfileView.as_view(), name='user-profile'),
+    
+    # Token Management
+    path('api/user/tokens/', TokenView.as_view(), name='token-management'),
 ]

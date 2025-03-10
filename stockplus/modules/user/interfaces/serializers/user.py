@@ -18,12 +18,7 @@ class UserSerializer(serializers.Serializer):
     is_verified = serializers.BooleanField(read_only=True)
     
     # Address fields
-    address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    complement = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    city = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    postal_code = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    state = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    country = serializers.CharField(required=True)  # Make country required
+    country = serializers.CharField(required=True)
     
     def create(self, validated_data):
         """
@@ -36,21 +31,12 @@ class UserSerializer(serializers.Serializer):
             User: The created user
         """
         user_service = self.context.get('user_service')
-        if not user_service:
-            raise ValueError('User service is required')
         
-        # Extract address data
-        address_data = {
-            'address': validated_data.pop('address', None),
-            'complement': validated_data.pop('complement', None),
-            'city': validated_data.pop('city', None),
-            'postal_code': validated_data.pop('postal_code', None),
-            'state': validated_data.pop('state', None),
-            'country': validated_data.pop('country', None)
-        }
+        # Extract country data
+        country = validated_data.pop('country', None)
         
         # Create the user domain entity
-        user_entity = user_service.create_user(
+        created_user = user_service.create_user(
             email=validated_data.get('email'),
             phone_number=validated_data.get('phone_number'),
             password=validated_data.get('password'),
@@ -58,24 +44,14 @@ class UserSerializer(serializers.Serializer):
             last_name=validated_data.get('last_name')
         )
         
-        # Get the ORM User instance
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        user_orm = User.objects.get(email=user_entity.email)
-        
         # Create user address if country is provided
-        if address_data['country']:
+        if country:
             UserAddress.objects.create(
-                user=user_orm,  # Use the ORM User instance
-                address=address_data['address'],
-                complement=address_data['complement'],
-                city=address_data['city'],
-                postal_code=address_data['postal_code'],
-                state=address_data['state'],
-                country=address_data['country']
+                user=created_user,
+                country=country
             )
         
-        return user_entity
+        return created_user
     
     def update(self, instance, validated_data):
         """
@@ -103,7 +79,7 @@ class UserSerializer(serializers.Serializer):
         }
         
         # Update the user domain entity
-        user_entity = user_service.update_user(
+        user= user_service.update_user(
             user_id=instance.id,
             email=validated_data.get('email', instance.email),
             phone_number=validated_data.get('phone_number', instance.phone_number),
@@ -113,17 +89,12 @@ class UserSerializer(serializers.Serializer):
         
         # Update the password if provided
         if 'password' in validated_data:
-            user_service.update_password(user_entity.id, validated_data['password'])
-        
-        # Get the ORM User instance
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-        user_orm = User.objects.get(id=user_entity.id)
+            user_service.update_password(user.id, validated_data['password'])
         
         # Update or create user address if country is provided
         if address_data['country']:
             user_address, created = UserAddress.objects.get_or_create(
-                user=user_orm,
+                user=user,
                 defaults={
                     'address': address_data['address'],
                     'complement': address_data['complement'],

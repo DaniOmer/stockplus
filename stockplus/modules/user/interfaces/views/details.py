@@ -6,7 +6,7 @@ This module contains the detail views for the user application.
 from rest_framework import generics, permissions
 
 from stockplus.modules.user.interfaces.serializers import UserProfileSerializer
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.application.user_service import UserService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
 
 

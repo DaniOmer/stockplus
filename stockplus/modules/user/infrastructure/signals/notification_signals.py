@@ -13,6 +13,9 @@ from stockplus.modules.shop.services import CustomerService
 from stockplus.modules.user.infrastructure.models import Invitation
 from stockplus.modules.messenger.infrastructure.utils import send_mail_message
 from stockplus.modules.user.infrastructure.utils import get_verification_data_missive, get_invitation_data_missive
+from stockplus.modules.user.application.invitation_service import InvitationService
+from stockplus.modules.user.infrastructure.repositories import InvitationRepository
+
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +29,9 @@ def send_activation_mail(sender, instance, created, **kwargs):
     if created:
         try:
             # Don't send activation email if the user was created from an invitation
-            if not Invitation.objects.filter(email=instance.email).exists():
+            invitation_service = InvitationService(InvitationRepository())
+            existing_invitation = invitation_service.get_invitation_by_email(instance.email)
+            if not existing_invitation:
                 data = get_verification_data_missive(instance)
                 if data:
                     send_mail_message(**data)

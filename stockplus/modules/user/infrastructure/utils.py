@@ -6,6 +6,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from stockplus.utils import setting
 from stockplus.modules.messenger.domain.entities import Missive
+from stockplus.modules.user.application.token_service import TokenService
+from stockplus.modules.user.infrastructure.repositories import TokenRepository
 
 def generate_verification_token(user):
     token = RefreshToken.for_user(user).access_token
@@ -24,9 +26,11 @@ def generate_verification_url(user):
     return None
 
 def get_verification_data_missive(user):
-    verification_url = generate_verification_url(user)
-    if verification_url is not None:
-        html_content = render_to_string('activation_mail.html', {'user': user, 'verification_url': str(verification_url)})
+    token_service = TokenService(TokenRepository())
+    token = token_service.create_verification_token(user.id)
+    if token is not None:
+        verification_code = token.token_value
+        html_content = render_to_string('activation_mail.html', {'user': user, 'verification_code': str(verification_code)})
         return {
             "subject": 'Bienvenue chez Stockplus',
             "target": user.email,
@@ -35,7 +39,6 @@ def get_verification_data_missive(user):
             "message": html_content,
         }
     return None
-
 
 def get_invitation_data_missive(invitation):
     sender = invitation.sender.first_name
@@ -50,13 +53,3 @@ def get_invitation_data_missive(invitation):
         message=html_content
     )
     return missive
-    # return {
-    #     "content_type": None,
-    #     "object_id": None,
-    #     "subject": f"{sender} vous invite à rejoindre Stockplus",
-    #     "html": html_content,
-    #     "txt": html_content,
-    #     "target": invitation.email,
-    #     "mode": "EMAIL",
-    #     "template": "invitation_mail.html"
-    # }

@@ -6,7 +6,7 @@ This module contains the authentication views for the user application.
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.application.user_service import UserService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
 from stockplus.modules.user.interfaces.serializers.user import UserSerializer
 
@@ -41,7 +41,6 @@ class RegisterView(generics.CreateAPIView):
         
         try:
             user = serializer.save()
-            
             return Response({
                 'message': 'User registered successfully. Please check your email to verify your account.',
                 'user': {

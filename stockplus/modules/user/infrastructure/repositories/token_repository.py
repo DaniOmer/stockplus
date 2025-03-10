@@ -1,159 +1,274 @@
 """
-Token repository implementation.
-This module contains the token repository implementation for user verification and password reset.
+Database token repository implementation.
+This module contains the database token repository implementation for the user application.
 """
 
 import logging
-from datetime import datetime, timedelta
-from django.core.cache import cache
-from django.conf import settings
+from datetime import datetime
+from django.utils import timezone
+from django.db import transaction
+
+from stockplus.modules.user.application.interfaces import ITokenRepository
+from stockplus.modules.user.domain.entities import Token, TokenType, TokenMethod
+from stockplus.modules.user.infrastructure.models.token_model import Token as TokenModel
+from stockplus.modules.user.infrastructure.models.user_model import User as UserModel
 
 logger = logging.getLogger(__name__)
 
-class TokenRepository:
+class TokenRepository(ITokenRepository):
     """
-    Token repository implementation.
+    Database token repository implementation.
     
-    This class implements the token repository using Django's cache system.
+    This class implements the token repository using the database.
     """
     
-    VERIFICATION_PREFIX = 'verification_token_'
-    PASSWORD_RESET_PREFIX = 'password_reset_token_'
-    
-    def store_verification_token(self, user_id, token, expiry, method='email'):
+    def get_by_value(self, token_value):
         """
-        Store a verification token.
+        Get a token by value.
+        
+        Args:
+            token_value: The value of the token to retrieve
+            
+        Returns:
+            Token: The token with the given value or None if not found
+        """
+        try:
+            token_model = TokenModel.objects.get(token_value=token_value)
+            return Token.from_model(token_model)
+        except TokenModel.DoesNotExist:
+            return None
+    
+    def get_by_email(self, email):
+        """
+        Get a token by email.
+        
+        Args:
+            email: The email of the token to retrieve
+            
+        Returns:
+            Token: The token with the given email or None if not found
+        """
+        try:
+            token_model = TokenModel.objects.get(email=email)
+            return Token.from_model(token_model)
+        except TokenModel.DoesNotExist:
+            return None
+    
+    def get_by_user_and_type(self, user_id, token_type):
+        """
+        Get all tokens for a user with a given type.
         
         Args:
             user_id: The ID of the user
-            token: The verification token
-            expiry: The expiry datetime
-            method: The verification method (email or sms)
+            token_type: The type of token to retrieve
             
         Returns:
-            bool: True if the token was stored successfully
+            List[Token]: A list of tokens for the user with the given type
         """
-        key = f"{self.VERIFICATION_PREFIX}{token}"
-        value = {
-            'user_id': user_id,
-            'method': method,
-            'expiry': expiry.timestamp()
-        }
+        token_models = TokenModel.objects.filter(
+            user_id=user_id,
+            token_type=token_type.value if isinstance(token_type, TokenType) else token_type
+        )
+        return [Token.from_model(token_model) for token_model in token_models]
+    
+    def save(self, token):
+        """
+        Save a token.
         
-        # Set the token in the cache with an expiry time
-        timeout = int((expiry - datetime.now()).total_seconds())
-        cache.set(key, value, timeout=timeout)
+        Args:
+            token: The token to save
+            
+        Returns:
+            Token: The saved token
+        """
+        with transaction.atomic():
+            # Get the user model
+            user_model = None
+            if token.user_id:
+                try:
+                    user_model = UserModel.objects.get(id=token.user_id)
+                except UserModel.DoesNotExist:
+                    logger.warning(f"User with ID {token.user_id} not found when saving token")
+            
+            # Create or update the token model
+            if token.id:
+                try:
+                    token_model = TokenModel.objects.get(id=token.id)
+                    token_model.token_value = token.token_value
+                    token_model.user = user_model
+                    token_model.token_type = token.token_type.value if isinstance(token.token_type, TokenType) else token.token_type
+                    token_model.method = token.method.value if isinstance(token.method, TokenMethod) else token.method
+                    token_model.expiry = token.expiry
+                    token_model.is_used = token.is_used
+                    token_model.email = token.email
+                    # No need to set date_update as it's auto-updated by Django's auto_now
+                    token_model.save()
+                except TokenModel.DoesNotExist:
+                    logger.warning(f"Token with ID {token.id} not found when updating")
+                    return None
+            else:
+                token_model = TokenModel.objects.create(
+                    token_value=token.token_value,
+                    user=user_model,
+                    token_type=token.token_type.value if isinstance(token.token_type, TokenType) else token.token_type,
+                    method=token.method.value if isinstance(token.method, TokenMethod) else token.method,
+                    expiry=token.expiry,
+                    is_used=token.is_used,
+                    email=token.email
+                )
+            
+            # Return the domain entity
+            return Token.from_model(token_model)
+    
+    def delete(self, token_id):
+        """
+        Delete a token.
         
+        Args:
+            token_id: The ID of the token to delete
+            
+        Returns:
+            bool: True if the token was deleted, False otherwise
+        """
+        try:
+            token_model = TokenModel.objects.get(id=token_id)
+            token_model.delete()
+            return True
+        except TokenModel.DoesNotExist:
+            logger.warning(f"Token with ID {token_id} not found when deleting")
+            return False
+    
+    def delete_by_value(self, token_value):
+        """
+        Delete a token by value.
+        
+        Args:
+            token_value: The value of the token to delete
+            
+        Returns:
+            bool: True if the token was deleted, False otherwise
+        """
+        try:
+            token_model = TokenModel.objects.get(token_value=token_value)
+            token_model.delete()
+            return True
+        except TokenModel.DoesNotExist:
+            logger.warning(f"Token with value {token_value} not found when deleting")
+            return False
+    
+    def delete_by_user_and_type(self, user_id, token_type):
+        """
+        Delete all tokens for a user with a given type.
+        
+        Args:
+            user_id: The ID of the user
+            token_type: The type of token to delete
+            
+        Returns:
+            bool: True if the tokens were deleted, False otherwise
+        """
+        token_models = TokenModel.objects.filter(
+            user_id=user_id,
+            token_type=token_type.value if isinstance(token_type, TokenType) else token_type
+        )
+        token_models.delete()
         return True
     
-    def get_verification_token(self, token):
+    def create_verification_token(self, user_id, method=TokenMethod.EMAIL):
+        """
+        Create a verification token.
+        
+        Args:
+            user_id: The ID of the user
+            method: The verification method
+            
+        Returns:
+            Token: The created token
+        """
+        token = Token(
+            user_id=user_id,
+            token_type=TokenType.VERIFICATION,
+            method=method
+        )
+        return self.save(token)
+    
+    def create_password_reset_token(self, user_id):
+        """
+        Create a password reset token.
+        
+        Args:
+            user_id: The ID of the user
+            
+        Returns:
+            Token: The created token
+        """
+        token = Token(
+            user_id=user_id,
+            token_type=TokenType.PASSWORD_RESET,
+            method=TokenMethod.EMAIL
+        )
+        return self.save(token)
+    
+    def create_invitation_token(self, user_id, email):
+        """
+        Create an invitation token.
+        
+        Args:
+            user_id: The ID of the user sending the invitation
+            email: The email of the invited user
+            
+        Returns:
+            Token: The created token
+        """
+        token = Token(
+            user_id=user_id,
+            token_type=TokenType.INVITATION,
+            method=TokenMethod.EMAIL,
+            email=email
+        )
+        return self.save(token)
+    
+    def get_verification_token(self, token_value):
         """
         Get a verification token.
         
         Args:
-            token: The verification token
+            token_value: The value of the token to retrieve
             
         Returns:
-            dict: The token data or None if not found
+            Token: The token with the given value or None if not found
         """
-        key = f"{self.VERIFICATION_PREFIX}{token}"
-        token_data = cache.get(key)
-        
-        if not token_data:
-            return None
-        
-        # Check if the token has expired
-        expiry = datetime.fromtimestamp(token_data['expiry'])
-        if expiry < datetime.now():
-            self.delete_verification_token(token)
-            return None
-        
-        return token_data
+        token = self.get_by_value(token_value)
+        if token and token.token_type == TokenType.VERIFICATION:
+            return token
+        return None
     
-    def delete_verification_token(self, token):
-        """
-        Delete a verification token.
-        
-        Args:
-            token: The verification token
-            
-        Returns:
-            bool: True if the token was deleted
-        """
-        key = f"{self.VERIFICATION_PREFIX}{token}"
-        cache.delete(key)
-        return True
-    
-    def store_password_reset_token(self, user_id, token, expiry, method='email'):
-        """
-        Store a password reset token.
-        
-        Args:
-            user_id: The ID of the user
-            token: The password reset token
-            expiry: The expiry datetime
-            method: The reset method (email or sms)
-            
-        Returns:
-            bool: True if the token was stored successfully
-        """
-        key = f"{self.PASSWORD_RESET_PREFIX}{token}"
-        value = {
-            'user_id': user_id,
-            'method': method,
-            'expiry': expiry.timestamp()
-        }
-        
-        # Set the token in the cache with an expiry time
-        timeout = int((expiry - datetime.now()).total_seconds())
-        cache.set(key, value, timeout=timeout)
-        
-        return True
-    
-    def get_password_reset_token(self, token):
+    def get_password_reset_token(self, token_value):
         """
         Get a password reset token.
         
         Args:
-            token: The password reset token
+            token_value: The value of the token to retrieve
             
         Returns:
-            dict: The token data or None if not found
+            Token: The token with the given value or None if not found
         """
-        key = f"{self.PASSWORD_RESET_PREFIX}{token}"
-        token_data = cache.get(key)
-        
-        if not token_data:
-            return None
-        
-        # Check if the token has expired
-        expiry = datetime.fromtimestamp(token_data['expiry'])
-        if expiry < datetime.now():
-            self.delete_password_reset_token(token)
-            return None
-        
-        return token_data
+        token = self.get_by_value(token_value)
+        if token and token.token_type == TokenType.PASSWORD_RESET:
+            return token
+        return None
     
-    def delete_password_reset_token(self, token):
+    def get_invitation_token(self, token_value):
         """
-        Delete a password reset token.
+        Get an invitation token.
         
         Args:
-            token: The password reset token
+            token_value: The value of the token to retrieve
             
         Returns:
-            bool: True if the token was deleted
+            Token: The token with the given value or None if not found
         """
-        key = f"{self.PASSWORD_RESET_PREFIX}{token}"
-        cache.delete(key)
-        return True
-
-
-def get_token_repository():
-    """
-    Get a token repository instance.
-    
-    Returns:
-        TokenRepository: A token repository instance
-    """
-    return TokenRepository()
+        token = self.get_by_value(token_value)
+        if token and token.token_type == TokenType.INVITATION:
+            return token
+        return None

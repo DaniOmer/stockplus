@@ -48,7 +48,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, phone_number, password, **extra_fields)
 
 
-class User(AbstractUser):
+class User(AbstractUser, Base):
     """
     Custom user model.
     """

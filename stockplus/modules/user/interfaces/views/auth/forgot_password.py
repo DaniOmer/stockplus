@@ -7,9 +7,9 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from datetime import datetime, timedelta
 
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.application.user_service import UserService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
-from stockplus.modules.user.infrastructure.repositories.token_repository import get_token_repository
+from stockplus.modules.user.infrastructure.repositories.token_repository import TokenRepository
 from stockplus.modules.user.interfaces.serializers import ForgotPasswordSerializer
 from stockplus.modules.user.domain.exceptions import UserNotFoundException
 from stockplus.modules import messenger
@@ -41,7 +41,7 @@ class ForgotPasswordView(generics.GenericAPIView):
         
         # Get the repositories
         user_service = UserService(UserRepository())
-        token_repository = get_token_repository()
+        token_repository = TokenRepository()
         
         try:
             # Find the user

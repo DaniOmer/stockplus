@@ -8,7 +8,6 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from stockplus.models.base import Base
-from stockplus.modules.user.domain.entities.notification import NotificationType
 
 
 class Notification(Base):
@@ -41,7 +40,7 @@ class Notification(Base):
     
     class Meta:
         db_table = 'stockplus_notification'
-        ordering = ['-date_create']
+        ordering = ['-created_at']
     
     def __str__(self):
         return f"{self.title} - {self.user.email}"

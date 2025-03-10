@@ -5,7 +5,7 @@ from rest_framework import status, permissions, parsers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.application.user_service import UserService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
 from stockplus.modules.user.domain.exceptions import UserNotFoundException
 

@@ -13,7 +13,6 @@ from stockplus.modules.user.application.interfaces import InvitationRepositoryIn
 from stockplus.modules.user.domain.exceptions import (
     InvitationNotFoundException,
     InvitationExpiredException,
-    InvitationAlreadyValidatedException,
     ValidationException,
 )
 
@@ -121,8 +120,6 @@ class InvitationService:
             role=role,
             token=token,
             expiry=expiry,
-            created_at=datetime.now(),
-            updated_at=datetime.now()
         )
         
         # Save the invitation

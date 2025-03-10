@@ -12,7 +12,7 @@ class Invitation:
     """
 
     def __init__(self, email=None, token=None, sender_id=None,
-                 status='PENDING', expires_at=None, created_at=None, updated_at=None):
+                 status='PENDING', expires_at=None):
         """
         Initialize a new Invitation instance.
 
@@ -23,16 +23,12 @@ class Invitation:
             sender_id: The ID of the sender
             status: The invitation status
             expires_at: When the invitation expires
-            created_at: When the invitation was created
-            updated_at: When the invitation was last updated
         """
         self.email = email
         self.token = token or str(uuid.uuid4())
         self.sender_id = sender_id
         self.status = status
         self.expires_at = expires_at or (datetime.now() + timedelta(days=7))
-        self.created_at = created_at or datetime.now()
-        self.updated_at = updated_at or datetime.now()
 
     def is_valid(self):
         """

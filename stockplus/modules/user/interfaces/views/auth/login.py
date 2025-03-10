@@ -7,7 +7,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from stockplus.modules.user.application.services import UserService
+from stockplus.modules.user.application.user_service import UserService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
 from stockplus.modules.user.interfaces.serializers.auth import LoginSerializer
 from stockplus.modules.user.domain.exceptions import (

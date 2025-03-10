@@ -24,21 +24,17 @@ class ResendVerificationEmailSerializer(serializers.Serializer):
 class PasswordResetRequestSerializer(serializers.Serializer):
     """
     Serializer for password reset request.
+    
+    Password reset is only available via email.
     """
-    email = serializers.EmailField(required=False)
-    phone_number = serializers.CharField(required=False)
-    reset_method = serializers.ChoiceField(choices=['email', 'sms'], default='email', required=False)
+    email = serializers.EmailField(required=True)
 
     def validate(self, data):
         """
-        Validate that either email or phone_number is provided.
+        Validate that email is provided.
         """
-        if not data.get('email') and not data.get('phone_number'):
-            raise serializers.ValidationError("Either email or phone_number must be provided")
-        
-        # If phone_number is provided, set reset_method to sms
-        if data.get('phone_number') and not data.get('email'):
-            data['reset_method'] = 'sms'
+        if not data.get('email'):
+            raise serializers.ValidationError("Email is required for password reset")
         
         return data
 
