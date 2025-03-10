@@ -4,8 +4,6 @@ This module contains the database token repository implementation for the user a
 """
 
 import logging
-from datetime import datetime
-from django.utils import timezone
 from django.db import transaction
 
 from stockplus.modules.user.application.interfaces import ITokenRepository

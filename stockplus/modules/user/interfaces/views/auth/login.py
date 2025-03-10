@@ -66,7 +66,10 @@ class LoginView(generics.GenericAPIView):
                     'phone_number': user.phone_number,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'is_verified': user.is_verified
+                    'role': user.role,
+                    'is_verified': user.is_verified,
+                    'is_disable': user.is_disable,
+                    'company_id': user.company_id,
                 },
             }, status=status.HTTP_200_OK)
         except UserNotFoundException as e:

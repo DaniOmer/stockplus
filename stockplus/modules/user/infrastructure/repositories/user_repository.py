@@ -3,7 +3,9 @@ User repository implementation.
 This module contains the user repository implementation.
 """
 
+
 from typing import List, Optional
+from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 
@@ -77,7 +79,7 @@ class UserRepository(UserRepositoryInterface):
         """
         try:
             user_orm = UserORM.objects.get(email=email)
-            return self._to_domain_entity(user_orm)
+            return user_orm
         except UserORM.DoesNotExist:
             return None
 
@@ -93,7 +95,7 @@ class UserRepository(UserRepositoryInterface):
         """
         try:
             user_orm = UserORM.objects.get(phone_number=phone_number)
-            return self._to_domain_entity(user_orm)
+            return user_orm
         except UserORM.DoesNotExist:
             return None
 
@@ -198,9 +200,29 @@ class UserRepository(UserRepositoryInterface):
         """
         try:
             user_orm = UserORM.objects.get(id=user_id)
-            return check_password(password, user_orm.password)
+            is_valid = check_password(password, user_orm.password)
+            if is_valid:
+                self.update_last_login(user_orm)
+            return is_valid
         except UserORM.DoesNotExist:
             return False
+        
+    def update_last_login(self, user_orm) -> User:
+        """
+        Update a user's last login timestamp.
+
+        Args:
+            user_id: The ID of the user to update
+
+        Returns:
+            User: The updated user
+        """
+        try:
+            user_orm.last_login = timezone.now()
+            user_orm.save()
+            return self._to_domain_entity(user_orm)
+        except UserORM.DoesNotExist:
+            return None
 
     def delete(self, user_id) -> bool:
         """
