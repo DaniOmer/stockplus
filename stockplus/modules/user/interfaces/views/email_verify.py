@@ -53,7 +53,7 @@ class EmailVerifyView(generics.GenericAPIView):
             
             if token_data.get('type') != 'verification':
                 return Response({
-                    'message': 'Invalid token type. This token is not for email verification.'
+                    'message': 'Invalid token type.'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Get the user

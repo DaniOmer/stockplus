@@ -365,9 +365,6 @@ class UserService:
         if not token:
             raise TokenInvalidException("Invalid or expired token")
         
-        # Delete the token
-        self.token_repository.delete_verification_token(token_value)
-        
         # Convert token to dict for backward compatibility
         return {
             'user_id': token.user_id,

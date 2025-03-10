@@ -2,10 +2,9 @@
 Token domain entity.
 This module contains the token domain entity for the user application.
 """
-
-from datetime import datetime, timedelta, timezone
-import secrets
+import uuid
 from enum import Enum
+from datetime import datetime, timedelta, timezone
 
 
 class TokenType(Enum):
@@ -72,9 +71,8 @@ class Token:
         Returns:
             str: The generated token
         """
-        # Use longer tokens for invitations
-        length = 8 if token_type == TokenType.INVITATION else 6
-        return ''.join(secrets.choice('0123456789') for _ in range(length))
+        token_length = 6 if token_type == TokenType.VERIFICATION else 15
+        return uuid.uuid4().hex[:token_length]
     
     def _get_default_expiry(self, token_type):
         """
