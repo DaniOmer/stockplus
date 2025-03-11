@@ -14,7 +14,7 @@ class Company:
     def __init__(self, denomination=None, legal_form=None, since=None,
                  site=None, effective=None, resume=None, registration_number=None,
                  tax_id=None, siren=None, siret=None, ifu=None, idu=None,
-                 is_active=True):
+                 is_active=True, id=None):
         """
         Initialize a new Company instance.
         
@@ -34,6 +34,7 @@ class Company:
             idu: The company's IDU number
             is_active: Whether the company is active
         """
+        self.id = id
         self.denomination = denomination
         self.legal_form = legal_form
         self.since = since

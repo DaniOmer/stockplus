@@ -7,11 +7,11 @@ from typing import List, Optional
 from django.db import transaction
 
 from stockplus.modules.company.domain.entities.company_entity import Company
-from stockplus.modules.company.application.interfaces import CompanyRepositoryInterface
+from stockplus.modules.company.application.interfaces import ICompanyRepository
 from stockplus.modules.company.infrastructure.models import Company as CompanyORM
 
 
-class CompanyRepository(CompanyRepositoryInterface):
+class CompanyRepository(ICompanyRepository):
     """
     Implementation of the company repository interface using Django ORM.
     """

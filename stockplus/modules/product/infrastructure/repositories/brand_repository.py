@@ -80,7 +80,7 @@ class BrandRepository(IBrandRepository):
             company_id=brand.company_id,
             is_disable=not brand.is_active
         )
-        return self._to_domain(orm_brand)
+        return orm_brand
     
     @transaction.atomic
     def update(self, brand: BrandDomain) -> BrandDomain:
@@ -107,7 +107,7 @@ class BrandRepository(IBrandRepository):
         orm_brand.is_disable = not brand.is_active
         orm_brand.save()
         
-        return self._to_domain(orm_brand)
+        return orm_brand
     
     def delete(self, brand_id: int) -> None:
         """

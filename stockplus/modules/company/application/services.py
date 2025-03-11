@@ -12,7 +12,7 @@ from stockplus.modules.company.domain.exceptions import (
     ValidationException
 )
 from stockplus.modules.company.application.interfaces import (
-    CompanyRepositoryInterface,
+    ICompanyRepository,
 )
 
 
@@ -24,7 +24,7 @@ class CompanyService:
     to access and manipulate company data, and enforces business rules.
     """
     
-    def __init__(self, company_repository: CompanyRepositoryInterface):
+    def __init__(self, company_repository: ICompanyRepository):
         """
         Initialize a new CompanyService instance.
         

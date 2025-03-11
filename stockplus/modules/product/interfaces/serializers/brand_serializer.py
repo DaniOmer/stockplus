@@ -5,7 +5,7 @@ from stockplus.modules.product.domain.entities import Brand
 from stockplus.modules.product.infrastructure.models import Brand as BrandORM
 
 
-class BrandSerializer(serializers.Serializer):
+class BrandSerializer(serializers.ModelSerializer):
     """
     Serializer for the brand model.
     """

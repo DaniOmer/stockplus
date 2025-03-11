@@ -1,25 +1,29 @@
 from typing import List, Optional
 
-from stockplus.modules.product.application.interfaces import (
-    IBrandRepository, IProductCategoryRepository, 
-    IProductRepository
+from stockplus.modules.product.domain.entities import (
+    Brand, Product, ProductCategory, ProductFeature, 
+    ProductVariant
 )
 from stockplus.modules.product.domain.exceptions import (
     BrandNotFoundError, ProductCategoryNotFoundError, 
     ProductNotFoundError,DuplicateBrandError, 
     DuplicateProductCategoryError, DuplicateProductError
 )
-from stockplus.modules.product.domain.entities import (
-    Brand, Product, ProductCategory, ProductFeature, 
-    ProductVariant
+from stockplus.modules.product.application.interfaces import (
+    IBrandRepository, IProductCategoryRepository, 
+    IProductRepository
 )
+from stockplus.modules.company.domain.exceptions import CompanyNotFoundException
+from stockplus.modules.company.application.interfaces import ICompanyRepository
+from stockplus.modules.company.application.services import CompanyService
 
 class BrandService:
     """
     Service for managing brands.
     """
-    def __init__(self, brand_repository: IBrandRepository):
+    def __init__(self, brand_repository: IBrandRepository, company_repository: ICompanyRepository):
         self.brand_repository = brand_repository
+        self.company_service = CompanyService(company_repository)
     
     def get_brand(self, brand_id: int) -> Brand:
         """
@@ -71,6 +75,11 @@ class BrandService:
         Raises:
             DuplicateBrandError: If a brand with the same name already exists.
         """
+        # Check if the company exists
+        company = self.company_service.get_company_by_id(company_id)
+        if not company:
+            raise CompanyNotFoundException("The given company does not exist")
+        
         # Check if a brand with the same name already exists
         existing_brands = self.get_company_brands(company_id)
         if any(b.name == name for b in existing_brands):

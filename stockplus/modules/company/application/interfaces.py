@@ -8,8 +8,7 @@ from typing import Optional
 
 from stockplus.modules.company.domain.entities.company_entity import Company
 
-
-class CompanyRepositoryInterface(ABC):
+class ICompanyRepository(ABC):
     """
     Interface for the company repository.
     
