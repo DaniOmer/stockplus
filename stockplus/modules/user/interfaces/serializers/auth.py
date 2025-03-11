@@ -5,13 +5,11 @@ This module contains the authentication serializers for the user application.
 
 from rest_framework import serializers
 
-
 class EmailVerifySerializer(serializers.Serializer):
     """
     Serializer for email verification.
     """
     token = serializers.CharField(required=True)
-
 
 class ResendVerificationEmailSerializer(serializers.Serializer):
     """
@@ -19,7 +17,6 @@ class ResendVerificationEmailSerializer(serializers.Serializer):
     """
     email = serializers.EmailField(required=True)
     verification_method = serializers.ChoiceField(choices=['email', 'sms'], default='email', required=False)
-
 
 class PasswordResetRequestSerializer(serializers.Serializer):
     """
@@ -34,34 +31,23 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         Validate that email is provided.
         """
         if not data.get('email'):
-            raise serializers.ValidationError("Email is required for password reset")
+            raise serializers.ValidationError("Email is required to request password reset")
         
         return data
 
-
-class PasswordResetVerifySerializer(serializers.Serializer):
+class PasswordResetConfirmSerializer(serializers.Serializer):
     """
     Serializer for password reset verification.
     """
     token = serializers.CharField(required=True)
-
-
-class PasswordResetConfirmSerializer(serializers.Serializer):
-    """
-    Serializer for password reset confirmation.
-    """
-    token = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True, min_length=8)
-    confirm_password = serializers.CharField(required=True)
 
-    def validate(self, data):
-        """
-        Validate that the passwords match.
-        """
-        if data['new_password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords do not match")
-        return data
-
+class PasswordUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for changing a user's password.
+    """
+    old_password = serializers.CharField(required=True, min_length=8)
+    new_password = serializers.CharField(required=True, min_length=8)
 
 class LoginSerializer(serializers.Serializer):
     """
@@ -78,8 +64,3 @@ class LoginSerializer(serializers.Serializer):
         if not data.get('email') and not data.get('phone_number'):
             raise serializers.ValidationError("Either email or phone_number must be provided")
         return data
-
-
-# Aliases for backward compatibility
-ForgotPasswordSerializer = PasswordResetRequestSerializer
-ResetPasswordSerializer = PasswordResetConfirmSerializer

@@ -8,12 +8,12 @@ from stockplus.modules.user.interfaces.serializers.profile import UserProfileSer
 from stockplus.modules.user.interfaces.serializers.invitation import InvitationSerializer
 from stockplus.modules.user.interfaces.serializers.auth import (
     LoginSerializer,
-    ForgotPasswordSerializer,
-    ResetPasswordSerializer,
+    PasswordUpdateSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
     EmailVerifySerializer,
     ResendVerificationEmailSerializer
 )
-from stockplus.modules.user.interfaces.serializers.password import ChangePasswordSerializer
 from stockplus.modules.user.interfaces.serializers.notification import (
     NotificationSerializer,
     NotificationListSerializer,
@@ -26,11 +26,11 @@ __all__ = [
     UserProfileSerializer,
     InvitationSerializer,
     LoginSerializer,
-    ForgotPasswordSerializer,
-    ResetPasswordSerializer,
+    PasswordUpdateSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
     EmailVerifySerializer,
     ResendVerificationEmailSerializer,
-    ChangePasswordSerializer,
     NotificationSerializer,
     NotificationListSerializer,
     NotificationCreateSerializer

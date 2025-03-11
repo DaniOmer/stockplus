@@ -331,7 +331,7 @@ class UserService:
         # Save the user
         return self.user_repository.save(user)
     
-    def _generate_verification_token(self, user_id, method='email') -> str:
+    def generate_verification_token(self, user_id, method='email') -> str:
         """
         Generate a verification token for a user.
         
@@ -343,7 +343,7 @@ class UserService:
             str: The verification token
         """
         # Use the token service to generate and store a token
-        return self.token_service.create_invitation_token(user_id, method)
+        return self.token_service.create_verification_token(user_id, method)
     
     def validate_verification_token(self, token_value) -> Dict[str, Any]:
         """

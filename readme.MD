@@ -42,3 +42,5 @@ pip install git+https://github.com/sendinblue/APIv3-python-library.git
 ```bash
     docker compose -f compose.dev.yaml up -d
 ```
+
+Penser à une logique pour soit supprimer le token ayant le même type que le nouveau à générer pour un même user si existe soit ...

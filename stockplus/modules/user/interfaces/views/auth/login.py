@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from stockplus.modules.user.application.user_service import UserService
-from stockplus.modules.user.infrastructure.repositories import UserRepository
+from stockplus.modules.user.infrastructure.repositories import UserRepository, TokenRepository
 from stockplus.modules.user.interfaces.serializers.auth import LoginSerializer
 from stockplus.modules.user.domain.exceptions import (
     UserNotFoundException,
@@ -41,7 +41,9 @@ class LoginView(generics.GenericAPIView):
         password = serializer.validated_data.get('password')
         
         # Create the user service
-        user_service = UserService(UserRepository())
+        token_repository = TokenRepository()
+        user_repository = UserRepository()
+        user_service = UserService(user_repository, token_repository)
         
         try:
             # Authenticate the user

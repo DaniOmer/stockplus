@@ -15,10 +15,10 @@ from stockplus.modules.user.interfaces.views.email_verify import (
     EmailVerifyView,
     ResendVerificationEmailView,
 )
-from stockplus.modules.user.interfaces.views.password_reset import (
+from stockplus.modules.user.interfaces.views.auth import (
     PasswordResetRequestView,
-    PasswordResetVerifyView,
     PasswordResetConfirmView,
+    PasswordUpdateView,
 )
 from stockplus.modules.user.interfaces.views.profile import UserProfileView
 from stockplus.modules.user.interfaces.views.token import TokenView
@@ -37,8 +37,8 @@ urlpatterns = [
     path('api/auth/email-verify/resend/', ResendVerificationEmailView.as_view(), name='email-verify-resend'),
     
     # Password Reset
-    path('api/auth/password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
-    path('api/auth/password-reset/verify/', PasswordResetVerifyView.as_view(), name='password-reset-verify'),
+    path('api/auth/password-update/', PasswordUpdateView.as_view(), name='password-update'),
+    path('api/auth/password-reset/request/', PasswordResetRequestView.as_view(), name='password-reset-request'),
     path('api/auth/password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
     
     # User Profile

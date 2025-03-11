@@ -4,11 +4,13 @@ This module contains the email verification views for the user application.
 """
 
 import logging
+
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from stockplus.modules.user.application.token_service import TokenType
 from stockplus.modules.user.application.user_service import UserService
+from stockplus.modules.user.infrastructure.utils import get_verification_data_missive
 from stockplus.modules.user.infrastructure.repositories import UserRepository, TokenRepository
 from stockplus.modules.user.interfaces.serializers.auth import EmailVerifySerializer, ResendVerificationEmailSerializer
 from stockplus.modules.messenger.infrastructure.utils import send_mail_message, send_sms_message
@@ -118,7 +120,9 @@ class ResendVerificationEmailView(generics.GenericAPIView):
         verification_method = serializer.validated_data.get('verification_method', 'email')
         
         # Create the user service
-        user_service = UserService(UserRepository())
+        user_repository = UserRepository()
+        token_repository = TokenRepository()
+        user_service = UserService(user_repository, token_repository)
         
         try:
             # Get the user
@@ -137,36 +141,12 @@ class ResendVerificationEmailView(generics.GenericAPIView):
                 }, status=status.HTTP_200_OK)
 
             # Generate a verification token
-            token = user_service._generate_verification_token(user.id, method=verification_method)
+            token = user_service.generate_verification_token(user.id, method=verification_method)
             
             # Send the verification code
             if verification_method == 'email':
-                if not user.email:
-                    return Response({
-                        'message': 'User does not have an email address'
-                    }, status=status.HTTP_400_BAD_REQUEST)
-                    
-                # Render the email template with the token
-                from django.template.loader import render_to_string
-                from django.urls import reverse
-                from django.conf import settings
-                
-                verification_link = reverse('email-verify')
-                verification_url = f"{settings.FRONTEND_URL}{verification_link}?token={token}"
-                html_content = render_to_string('verification_email.html', {
-                    'user': user,
-                    'verification_url': verification_url,
-                    'token': token
-                })
-                
-                send_mail_message(
-                    subject='Verify Your Email',
-                    target=user.email,
-                    template='verification_email.html',
-                    html=html_content,
-                    message=f'Your verification code is: {token}'
-                )
-                
+                data = get_verification_data_missive(user)
+                send_mail_message(**data)
                 logger.info(f"Verification email sent to: {user.email}")
             elif verification_method == 'sms':
                 if not user.phone_number:

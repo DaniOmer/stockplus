@@ -38,14 +38,15 @@
       .content p {
         margin-bottom: 20px;
       }
-      .activation-button {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #4caf50;
-        color: white;
-        text-decoration: none;
-        border-radius: 5px;
+      .activation-code {
+        font-size: 24px;
         font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        margin: 20px 0;
+        letter-spacing: 5px;
       }
       .footer {
         text-align: center;
@@ -70,11 +71,17 @@
           Pour activer votre compte, veuillez saisir le code suivant dans
           l'application :
         </p>
-        <p
-          style="text-align: center; font-size: 22px; text-transform: uppercase"
-        >
-          {{verification_code}}
-        </p>
+        <div class="activation-code">
+          <p
+            style="
+              text-align: center;
+              font-size: 22px;
+              text-transform: uppercase;
+            "
+          >
+            {{verification_code}}
+          </p>
+        </div>
         <p>
           Si vous n'avez pas créé de compte sur Stockplus, ignorez simplement
           cet email.

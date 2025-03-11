@@ -1,20 +1,20 @@
 """
 Password views for the user application.
 """
+from rest_framework import generics
 from rest_framework import status, permissions
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from stockplus.modules.user.interfaces.serializers.password import ChangePasswordSerializer
+from stockplus.modules.user.interfaces.serializers import PasswordUpdateSerializer
 from stockplus.modules.user.application.user_service import UserService
-from stockplus.modules.user.infrastructure.repositories import UserRepository
+from stockplus.modules.user.infrastructure.repositories import UserRepository, TokenRepository
 from stockplus.modules.user.domain.exceptions import UserNotFoundException
 
-
-class ChangePasswordView(APIView):
+class PasswordUpdateView(generics.GenericAPIView):
     """
     API endpoint for changing a user's password.
     """
+    serializer_class = PasswordUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
@@ -27,23 +27,24 @@ class ChangePasswordView(APIView):
         Returns:
             Response: The HTTP response
         """
-        serializer = ChangePasswordSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        user_service = UserService(UserRepository())
+        # Get the user service
+        user_repository = UserRepository()
+        token_repository = TokenRepository()
+        user_service = UserService(user_repository, token_repository)
         
         try:
             # Verify current password
-            user = user_service.authenticate_user(
+            user = user_service.authenticate(
                 email=request.user.email,
-                password=serializer.validated_data['current_password']
+                password=serializer.validated_data['old_password']
             )
             
             if not user:
                 return Response(
-                    {'error': 'Current password is incorrect'},
+                    {'error': 'Old password is incorrect'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             

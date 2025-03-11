@@ -40,6 +40,19 @@ def get_verification_data_missive(user):
         }
     return None
 
+def get_password_reset_data_missive(user, token):
+    code = token.token_value
+    reset_password_url = f"{settings.FRONTEND_URL}/reset-password?token={str(code)}"
+    html_content = render_to_string('password_reset_email.html', {'user': user, 'reset_password_url': str(reset_password_url)})
+    return {
+        "subject": 'Reinitialiser votre mot de passe chez Stockplus',
+        "target": user.email,
+            "template": 'password_reset_email.html',
+        "html": html_content,
+        "message": html_content,
+    }
+    return None
+
 def get_invitation_data_missive(invitation):
     sender = invitation.sender.first_name
     invitation_link = reverse('user-create-from-invitation')
