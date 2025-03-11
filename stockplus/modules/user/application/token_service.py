@@ -106,7 +106,7 @@ class TokenService:
         
         # Check if the token exists
         if not token:
-            raise TokenInvalidException("Invalid token")
+            raise TokenInvalidException("Token not found")
         
         # Check if the token is valid
         if token.is_used:
@@ -164,6 +164,15 @@ class TokenService:
         # Combine all tokens
         return verification_tokens + password_reset_tokens + invitation_tokens
     
+    def delete_token(self, token_id) -> None:
+        """
+        Delete a token by ID.
+        
+        Args:
+            token_id: The ID of the token to delete
+        """
+        self.token_repository.delete(token_id)
+    
     def delete_expired_tokens(self) -> int:
         """
         Delete all expired tokens.
@@ -171,6 +180,13 @@ class TokenService:
         Returns:
             int: The number of tokens deleted
         """
-        # This would be implemented in a real application
-        # For now, we'll just return 0
-        return 0
+        # Get all expired tokens
+        expired_tokens = self.token_repository.get_expired_tokens()
+        
+        # Delete the expired tokens
+        deleted_count = 0
+        for token in expired_tokens:
+            self.token_repository.delete(token.id)
+            deleted_count += 1
+        
+        return deleted_count

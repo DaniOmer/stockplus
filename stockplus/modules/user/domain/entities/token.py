@@ -87,7 +87,7 @@ class Token:
         now = datetime.now(timezone.utc)
         if token_type == TokenType.VERIFICATION:
             # 24 hours for verification tokens
-            return now + timedelta(hours=24)
+            return now + timedelta(minutes=15)
         elif token_type == TokenType.PASSWORD_RESET:
             # 1 hour for password reset tokens
             return now + timedelta(hours=1)
@@ -105,7 +105,7 @@ class Token:
         Returns:
             bool: True if the token has expired, False otherwise
         """
-        return datetime.now() > self.expiry
+        return datetime.now(timezone.utc) > self.expiry
     
     def is_valid(self):
         """

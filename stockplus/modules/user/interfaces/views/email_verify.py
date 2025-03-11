@@ -7,8 +7,9 @@ import logging
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
+from stockplus.modules.user.application.token_service import TokenType
 from stockplus.modules.user.application.user_service import UserService
-from stockplus.modules.user.infrastructure.repositories import UserRepository
+from stockplus.modules.user.infrastructure.repositories import UserRepository, TokenRepository
 from stockplus.modules.user.interfaces.serializers.auth import EmailVerifySerializer, ResendVerificationEmailSerializer
 from stockplus.modules.messenger.infrastructure.utils import send_mail_message, send_sms_message
 from stockplus.modules.user.domain.exceptions import (
@@ -45,15 +46,17 @@ class EmailVerifyView(generics.GenericAPIView):
         token = serializer.validated_data['token']
         
         # Create the user service
-        user_service = UserService(UserRepository())
+        user_repository = UserRepository()
+        token_repository = TokenRepository()
+        user_service = UserService(user_repository, token_repository)
         
         try:
             # Verify the token
-            token_data = user_service.verify_token(token)
-            
-            if token_data.get('type') != 'verification':
+            token_data = user_service.validate_verification_token(token)
+            if token_data.get('type') != TokenType.VERIFICATION.value:
                 return Response({
-                    'message': 'Invalid token type.'
+                    'message': 'Invalid token type.',
+                    'error_code': 'invalid_token_type'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
             # Get the user
@@ -71,18 +74,20 @@ class EmailVerifyView(generics.GenericAPIView):
         except UserNotFoundException as e:
             logger.warning(f"Email verification failed: User not found. Token: {token}")
             return Response({
-                'message': 'User not found. The account may have been deleted.'
+                'message': 'User not found. The account may have been deleted.',
+                'error_code': e.error_code
             }, status=status.HTTP_404_NOT_FOUND)
         except (TokenInvalidException, TokenExpiredException) as e:
             logger.warning(f"Email verification failed: {str(e)}. Token: {token}")
             return Response({
                 'message': str(e),
-                'error_code': 'invalid_token' if isinstance(e, TokenInvalidException) else 'expired_token'
+                'error_code': e.error_code,
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Email verification failed with unexpected error: {str(e)}", exc_info=True)
             return Response({
-                'message': 'An unexpected error occurred. Please try again later.'
+                'message': f'An unexpected error occurred. Please try again later.',
+                'error_code': 'unexpected_error'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

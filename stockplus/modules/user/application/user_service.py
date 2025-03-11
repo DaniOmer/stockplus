@@ -7,13 +7,12 @@ import logging
 from typing import List, Optional, Dict, Any
 
 from stockplus.modules.user.domain.entities import User
-from stockplus.modules.user.application.interfaces import UserRepositoryInterface
+from stockplus.modules.user.application.interfaces import UserRepositoryInterface, ITokenRepository
 from stockplus.modules.user.domain.exceptions import (
     UserNotFoundException,
     InvalidCredentialsException,
-    TokenInvalidException,
 )
-from stockplus.modules.user.infrastructure.repositories.token_repository import TokenRepository
+from stockplus.modules.user.application.token_service import TokenService, TokenType
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ class UserService:
     to access and manipulate user data and enforces business rules.
     """
     
-    def __init__(self, user_repository: UserRepositoryInterface):
+    def __init__(self, user_repository: UserRepositoryInterface, token_repository: ITokenRepository):
         """
         Initialize a new UserService instance.
         
@@ -34,8 +33,9 @@ class UserService:
             user_repository: The user repository to use
             token_repository: The token repository to use (optional)
         """
+        # REMINDER TO REFACTOR AND GIVE TOKEN_SERVICE AS ARGUMENT INSTEAD OF TOKEN_REPOSITORY
         self.user_repository = user_repository
-        self.token_repository = TokenRepository()
+        self.token_service = TokenService(token_repository)
     
     def get_user_by_id(self, user_id) -> Optional[User]:
         """
@@ -342,10 +342,10 @@ class UserService:
         Returns:
             str: The verification token
         """
-        # Use the token repository to generate and store a token
-        return self.token_repository.create_verification_token(user_id, method=method)
+        # Use the token service to generate and store a token
+        return self.token_service.create_invitation_token(user_id, method)
     
-    def verify_token(self, token_value) -> Dict[str, Any]:
+    def validate_verification_token(self, token_value) -> Dict[str, Any]:
         """
         Verify a token.
         
@@ -360,10 +360,7 @@ class UserService:
             TokenExpiredException: If the token has expired
         """
         # Get the token
-        token = self.token_repository.get_verification_token(token_value)
-        
-        if not token:
-            raise TokenInvalidException("Invalid or expired token")
+        token = self.token_service.use_token(token_value, TokenType.VERIFICATION)
         
         # Convert token to dict for backward compatibility
         return {
@@ -395,8 +392,8 @@ class UserService:
         if not user:
             raise UserNotFoundException("User not found")
         
-        # Use the token repository to generate and store a token
-        return self.token_repository.store_password_reset_token(user.id)
+        # Use the token repository to create a token
+        return self.token_service.create_password_reset_token(user.id)
     
     def verify_password_reset_token(self, token_value) -> Dict[str, Any]:
         """
@@ -413,13 +410,11 @@ class UserService:
             TokenExpiredException: If the token has expired
         """
         # Get the token
-        token = self.token_repository.get_password_reset_token(token_value)
-        
-        if not token:
-            raise TokenInvalidException("Invalid or expired token")
+        token = self.token_service.use_token(token_value, TokenType.PASSWORD_RESET)
         
         # Convert token to dict for backward compatibility
         return {
+            'id': token.id,
             'user_id': token.user_id,
             'method': token.method,
             'type': token.token_type.value
@@ -453,8 +448,5 @@ class UserService:
         
         # Update the password
         user = self.user_repository.update_password(user_id, new_password)
-        
-        # Delete the token
-        self.token_repository.delete_password_reset_token(token_value)
         
         return user

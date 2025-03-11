@@ -7,7 +7,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from stockplus.modules.user.application.user_service import UserService
-from stockplus.modules.user.infrastructure.repositories import UserRepository
+from stockplus.modules.user.infrastructure.repositories import UserRepository, TokenRepository
 from stockplus.modules.user.interfaces.serializers.user import UserSerializer
 
 
@@ -23,7 +23,9 @@ class RegisterView(generics.CreateAPIView):
         Add the user service to the serializer context.
         """
         context = super().get_serializer_context()
-        context['user_service'] = UserService(UserRepository())
+        user_repository = UserRepository()
+        token_repository = TokenRepository()
+        context['user_service'] = UserService(user_repository, token_repository)
         return context
 
     def create(self, request, *args, **kwargs):
