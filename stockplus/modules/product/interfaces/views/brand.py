@@ -75,7 +75,7 @@ class BrandViewSet(viewsets.ModelViewSet):
                 },
                 status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def update(self, request, *args, **kwargs):
         """

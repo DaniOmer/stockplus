@@ -10,25 +10,17 @@ from stockplus.modules.company.domain.exceptions import (
     CompanyAlreadyExistsException,
     ValidationException
 )
+from stockplus.modules.company.infrastructure.models import Company
 
 
-class CompanySerializer(serializers.Serializer):
+class CompanySerializer(serializers.ModelSerializer):
     """
     Serializer for the Company model.
     """
-    denomination = serializers.CharField()
-    legal_form = serializers.CharField()
-    since = serializers.DateField(required=False, allow_null=True)
-    site = serializers.URLField(required=False, allow_null=True)
-    effective = serializers.IntegerField(required=False, allow_null=True)
-    resume = serializers.CharField(required=False, allow_null=True)
-    registration_number = serializers.CharField(required=False, allow_null=True)
-    tax_id = serializers.CharField(required=False, allow_null=True)
-    siren = serializers.CharField(required=False, allow_null=True)
-    siret = serializers.CharField(required=False, allow_null=True)
-    ifu = serializers.CharField(required=False, allow_null=True)
-    idu = serializers.CharField(required=False, allow_null=True)
-    is_active = serializers.BooleanField(read_only=True)
+    class Meta:
+        model = Company
+        fields = ['id', 'denomination', 'legal_form', 'since', 'site', 'effective', 'resume', 'registration_number', 'tax_id','siren','siret', 'ifu', 'idu', 'is_disable',]
+        read_only_fields = ['id']
     
     def create(self, validated_data):
         """
@@ -45,22 +37,11 @@ class CompanySerializer(serializers.Serializer):
             CompanyAlreadyExistsException: If a company with the given denomination or registration number already exists
         """
         company_service = self.context['company_service']
+        user = self.context.get('request').user if 'request' in self.context else None
         
         try:
-            company = company_service.create_company(
-                denomination=validated_data['denomination'],
-                legal_form=validated_data['legal_form'],
-                since=validated_data.get('since'),
-                site=validated_data.get('site'),
-                effective=validated_data.get('effective'),
-                resume=validated_data.get('resume'),
-                registration_number=validated_data.get('registration_number'),
-                tax_id=validated_data.get('tax_id'),
-                siren=validated_data.get('siren'),
-                siret=validated_data.get('siret'),
-                ifu=validated_data.get('ifu'),
-                idu=validated_data.get('idu')
-            )
+            # Pass the validated data directly to the service
+            company = company_service.create_company(data=validated_data, user=user)
             return company
         except (ValidationException, CompanyAlreadyExistsException) as e:
             raise serializers.ValidationError(str(e))
@@ -79,27 +60,35 @@ class CompanySerializer(serializers.Serializer):
         company_service = self.context['company_service']
         
         try:
-            # Update general information
-            company = company_service.update_company_info(
-                company_id=instance.id,
-                denomination=validated_data.get('denomination'),
-                since=validated_data.get('since'),
-                site=validated_data.get('site'),
-                effective=validated_data.get('effective'),
-                resume=validated_data.get('resume'),
-                legal_form=validated_data.get('legal_form')
-            )
+            # Split the data into general info and identifiers
+            general_info = {}
+            identifiers = {}
             
-            # Update identifiers
-            company = company_service.update_company_identifiers(
-                company_id=instance.id,
-                registration_number=validated_data.get('registration_number'),
-                tax_id=validated_data.get('tax_id'),
-                siren=validated_data.get('siren'),
-                siret=validated_data.get('siret'),
-                ifu=validated_data.get('ifu'),
-                idu=validated_data.get('idu')
-            )
+            # General info fields
+            for field in ['denomination', 'since', 'site', 'effective', 'resume', 'legal_form']:
+                if field in validated_data:
+                    general_info[field] = validated_data.get(field)
+            
+            # Identifier fields
+            for field in ['registration_number', 'tax_id', 'siren', 'siret', 'ifu', 'idu']:
+                if field in validated_data:
+                    identifiers[field] = validated_data.get(field)
+            
+            # Update general information if there are any changes
+            if general_info:
+                company = company_service.update_company_info(
+                    company_id=instance.id,
+                    **general_info
+                )
+            else:
+                company = instance
+            
+            # Update identifiers if there are any changes
+            if identifiers:
+                company = company_service.update_company_identifiers(
+                    company_id=instance.id,
+                    **identifiers
+                )
             
             return company
         except (ValidationException, CompanyAlreadyExistsException, CompanyNotFoundException) as e:

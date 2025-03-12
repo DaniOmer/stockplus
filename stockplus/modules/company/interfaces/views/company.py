@@ -11,11 +11,12 @@ from stockplus.permissions import base_permissions
 
 from stockplus.modules.company.interfaces.serializers import CompanySerializer
 from stockplus.modules.company.application.services import CompanyService
-from stockplus.modules.company.infrastructure.repositories.company_repository import CompanyRepository
+from stockplus.modules.company.infrastructure.repositories import CompanyRepository
 from stockplus.modules.company.domain.exceptions import (
     CompanyNotFoundException,
+    CompanyAlreadyExistsException,
+    ValidationException,
 )
-
 
 class CompanyCreateView(generics.CreateAPIView):
     """
@@ -33,9 +34,59 @@ class CompanyCreateView(generics.CreateAPIView):
         """
         context = super().get_serializer_context()
         context['company_service'] = CompanyService(
-            CompanyRepository(),
+            CompanyRepository()
         )
+        # The request is already added by DRF's get_serializer_context
         return context
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new company.
+        
+        Args:
+            request: The request
+
+        Returns:
+            Response: The response
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            company = serializer.save()
+            return Response({
+                'message': 'Company created successfully.',
+                'company': {
+                    'id': company.id,
+                    'denomination': company.denomination,
+                    'legal_form': company.legal_form,
+                    'since': company.since,
+                    'site': company.site,
+                    'effective': company.effective,
+                    'resume': company.resume,
+                    'registration_number': company.registration_number,
+                }
+            }, status=status.HTTP_201_CREATED)
+        except ValidationException as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'validation_error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'value_error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except CompanyAlreadyExistsException as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'company_exists'
+            }, status=status.HTTP_409_CONFLICT)
+        except Exception as e:
+            return Response({
+                'message': f"An error occurred: {str(e)}",
+                'error_type': 'server_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CompanyDetailView(generics.RetrieveUpdateAPIView):
@@ -78,6 +129,44 @@ class CompanyDetailView(generics.RetrieveUpdateAPIView):
             CompanyRepository(),
         )
         return context
+    
+    def update(self, request, *args, **kwargs):
+        """
+        Update a company.
+        
+        Args:
+            request: The request
+            
+        Returns:
+            Response: The response
+        """
+        try:
+            return super().update(request, *args, **kwargs)
+        except ValidationException as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'validation_error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except ValueError as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'value_error'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except CompanyAlreadyExistsException as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'company_exists'
+            }, status=status.HTTP_409_CONFLICT)
+        except CompanyNotFoundException as e:
+            return Response({
+                'message': str(e),
+                'error_type': 'company_not_found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'message': f"An error occurred: {str(e)}",
+                'error_type': 'server_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CompanyActivateView(APIView):
@@ -104,9 +193,20 @@ class CompanyActivateView(APIView):
         try:
             company = company_service.activate_company(pk)
             serializer = CompanySerializer(company)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'message': 'Company activated successfully.',
+                'company': serializer.data
+            }, status=status.HTTP_200_OK)
         except CompanyNotFoundException as e:
-            return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                'message': str(e),
+                'error_type': 'company_not_found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'message': f"An error occurred: {str(e)}",
+                'error_type': 'server_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CompanyDeactivateView(APIView):
@@ -133,6 +233,17 @@ class CompanyDeactivateView(APIView):
         try:
             company = company_service.deactivate_company(pk)
             serializer = CompanySerializer(company)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'message': 'Company deactivated successfully.',
+                'company': serializer.data
+            }, status=status.HTTP_200_OK)
         except CompanyNotFoundException as e:
-            return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({
+                'message': str(e),
+                'error_type': 'company_not_found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'message': f"An error occurred: {str(e)}",
+                'error_type': 'server_error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

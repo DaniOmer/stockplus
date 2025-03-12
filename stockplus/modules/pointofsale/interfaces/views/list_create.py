@@ -100,7 +100,7 @@ class PointOfSaleListCreateView(generics.ListCreateAPIView):
         queryset = self.get_queryset()
         if not queryset:
             return Response(
-                {"detail": "Please provide your company information to continue."},
+                {"message": "Please provide your company information to continue."},
                 status=status.HTTP_400_BAD_REQUEST
             )
         serializer = PointOfSaleSerializer(queryset, many=True)

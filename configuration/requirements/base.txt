@@ -1,3 +1,4 @@
+annotated-types==0.7.0
 asgiref==3.8.1
 attrs==24.2.0
 certifi==2024.7.4
@@ -26,6 +27,8 @@ packaging==24.1
 pillow==10.4.0
 psycopg2==2.9.9
 pycparser==2.22
+pydantic==2.10.6
+pydantic_core==2.27.2
 PyJWT==2.9.0
 python-barcode==0.15.1
 python-dateutil==2.9.0.post0

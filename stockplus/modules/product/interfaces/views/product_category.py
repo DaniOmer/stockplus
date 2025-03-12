@@ -73,7 +73,7 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
             
             return Response(result_serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def update(self, request, *args, **kwargs):
         """
@@ -106,9 +106,9 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
             
             return Response(result_serializer.data)
         except ProductCategoryNotFoundError:
-            return Response({"detail": "Product category not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Product category not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
     def destroy(self, request, *args, **kwargs):
         """
@@ -125,6 +125,6 @@ class ProductCategoryViewSet(viewsets.ModelViewSet):
             service.delete_category(instance.id)
             return Response(status=status.HTTP_204_NO_CONTENT)
         except ProductCategoryNotFoundError:
-            return Response({"detail": "Product category not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"message": "Product category not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)

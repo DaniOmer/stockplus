@@ -54,7 +54,7 @@ class SetDefaultPointOfSaleView(APIView):
             updated_point_of_sale = service.set_default_point_of_sale(pk)
             
             return Response(
-                {"detail": f"Point of sale '{updated_point_of_sale.name}' set as default."},
+                {"message": f"Point of sale '{updated_point_of_sale.name}' set as default."},
                 status=status.HTTP_200_OK
             )
         except PointOfSaleNotFoundError:

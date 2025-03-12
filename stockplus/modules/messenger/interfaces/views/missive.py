@@ -67,7 +67,7 @@ class MissiveViewSet(viewsets.ViewSet):
         missive = self.messenger_service.get_missive_by_id(pk)
         if not missive:
             return Response(
-                {"detail": f"Missive with ID {pk} not found"},
+                {"message": f"Missive with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -97,12 +97,12 @@ class MissiveViewSet(viewsets.ViewSet):
                     )
                 else:
                     return Response(
-                        {"detail": "Failed to send email"},
+                        {"message": "Failed to send email"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
             except Exception as e:
                 return Response(
-                    {"detail": str(e)},
+                    {"message": str(e)},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         
@@ -131,12 +131,12 @@ class MissiveViewSet(viewsets.ViewSet):
                     )
                 else:
                     return Response(
-                        {"detail": "Failed to send SMS"},
+                        {"message": "Failed to send SMS"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
             except Exception as e:
                 return Response(
-                    {"detail": str(e)},
+                    {"message": str(e)},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         
@@ -150,7 +150,7 @@ class MissiveViewSet(viewsets.ViewSet):
         missive = self.messenger_service.get_missive_by_id(pk)
         if not missive:
             return Response(
-                {"detail": f"Missive with ID {pk} not found"},
+                {"message": f"Missive with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -165,17 +165,17 @@ class MissiveViewSet(viewsets.ViewSet):
                 return Response(MissiveSerializer(missive).data)
             else:
                 return Response(
-                    {"detail": "Failed to resend missive"},
+                    {"message": "Failed to resend missive"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         except InvalidMissiveStatusException as e:
             return Response(
-                {"detail": str(e)},
+                {"message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return Response(
-                {"detail": str(e)},
+                {"message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -189,12 +189,12 @@ class MissiveViewSet(viewsets.ViewSet):
             return Response(status_info)
         except MissiveNotFoundException:
             return Response(
-                {"detail": f"Missive with ID {pk} not found"},
+                {"message": f"Missive with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
             return Response(
-                {"detail": str(e)},
+                {"message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
     
@@ -206,7 +206,7 @@ class MissiveViewSet(viewsets.ViewSet):
         missive = self.messenger_service.get_missive_by_id(pk)
         if not missive:
             return Response(
-                {"detail": f"Missive with ID {pk} not found"},
+                {"message": f"Missive with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
@@ -227,11 +227,11 @@ class MissiveViewSet(viewsets.ViewSet):
                 return Response(status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response(
-                    {"detail": f"Missive with ID {pk} not found"},
+                    {"message": f"Missive with ID {pk} not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
         except Exception as e:
             return Response(
-                {"detail": str(e)},
+                {"message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

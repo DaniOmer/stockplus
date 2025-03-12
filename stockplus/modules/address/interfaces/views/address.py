@@ -48,14 +48,14 @@ class UserAddressViewSet(viewsets.ViewSet):
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user
         if address.user_id != request.user.id:
             return Response(
-                {"detail": "You do not have permission to access this address"},
+                {"message": "You do not have permission to access this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -104,14 +104,14 @@ class UserAddressViewSet(viewsets.ViewSet):
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user
         if address.user_id != request.user.id:
             return Response(
-                {"detail": "You do not have permission to modify this address"},
+                {"message": "You do not have permission to modify this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -148,14 +148,14 @@ class UserAddressViewSet(viewsets.ViewSet):
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user
         if address.user_id != request.user.id:
             return Response(
-                {"detail": "You do not have permission to delete this address"},
+                {"message": "You do not have permission to delete this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -183,14 +183,14 @@ class UserAddressViewSet(viewsets.ViewSet):
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user
         if address.user_id != request.user.id:
             return Response(
-                {"detail": "You do not have permission to modify this address"},
+                {"message": "You do not have permission to modify this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -225,7 +225,7 @@ class CompanyAddressViewSet(viewsets.ViewSet):
         """
         if not request.user.company_id:
             return Response(
-                {"detail": "You are not associated with any company"},
+                {"message": "You are not associated with any company"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -239,21 +239,21 @@ class CompanyAddressViewSet(viewsets.ViewSet):
         """
         if not request.user.company_id:
             return Response(
-                {"detail": "You are not associated with any company"},
+                {"message": "You are not associated with any company"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user's company
         if address.company_id != request.user.company_id:
             return Response(
-                {"detail": "You do not have permission to access this address"},
+                {"message": "You do not have permission to access this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -266,7 +266,7 @@ class CompanyAddressViewSet(viewsets.ViewSet):
         """
         if not request.user.company_id:
             return Response(
-                {"detail": "You are not associated with any company"},
+                {"message": "You are not associated with any company"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -294,21 +294,21 @@ class CompanyAddressViewSet(viewsets.ViewSet):
         """
         if not request.user.company_id:
             return Response(
-                {"detail": "You are not associated with any company"},
+                {"message": "You are not associated with any company"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user's company
         if address.company_id != request.user.company_id:
             return Response(
-                {"detail": "You do not have permission to modify this address"},
+                {"message": "You do not have permission to modify this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
@@ -335,21 +335,21 @@ class CompanyAddressViewSet(viewsets.ViewSet):
         """
         if not request.user.company_id:
             return Response(
-                {"detail": "You are not associated with any company"},
+                {"message": "You are not associated with any company"},
                 status=status.HTTP_403_FORBIDDEN
             )
         
         address = self.address_service.get_address_by_id(pk)
         if not address:
             return Response(
-                {"detail": f"Address with ID {pk} not found"},
+                {"message": f"Address with ID {pk} not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         
         # Check if the address belongs to the current user's company
         if address.company_id != request.user.company_id:
             return Response(
-                {"detail": "You do not have permission to delete this address"},
+                {"message": "You do not have permission to delete this address"},
                 status=status.HTTP_403_FORBIDDEN
             )
         

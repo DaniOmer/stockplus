@@ -75,13 +75,13 @@ class PointOfSaleAddCollaboratorView(generics.GenericAPIView):
         try:
             service.add_collaborator(point_of_sale.id, collaborator_id)
             return Response(
-                {"detail": "Collaborator added successfully."},
+                {"message": "Collaborator added successfully."},
                 status=status.HTTP_200_OK
             )
         except PointOfSaleNotFoundError:
             raise NotFound("Point of sale not found.")
         except CollaboratorNotFoundError as e:
             return Response(
-                {"detail": str(e)},
+                {"message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
