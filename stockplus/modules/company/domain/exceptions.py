@@ -2,18 +2,7 @@
 Domain exceptions for the company application.
 This module contains the domain exceptions for the company application.
 """
-
-class DomainException(Exception):
-    """Base exception with configurable error type"""
-    status_code = 400
-    error_type = 'domain_error'
-    errors = []
-    
-    def __init__(self, message=None, **kwargs):
-        self.message = message or self.default_message
-        self.errors = kwargs.get('errors', self.errors)
-        super().__init__(self.message)
-
+from stockplus.domain.exceptions import DomainException
 
 class CompanyNotFoundException(DomainException):
     """
