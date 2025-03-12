@@ -66,7 +66,7 @@ class CompanyRepository(ICompanyRepository):
             'siret': company.siret,
             'ifu': company.ifu,
             'idu': company.idu,
-            'is_disable': not company.is_active
+            'is_disable': company.is_disable,
         }
 
     def _to_domain(self, company_orm: CompanyORM) -> Company:
@@ -84,5 +84,5 @@ class CompanyRepository(ICompanyRepository):
             siret=company_orm.siret,
             ifu=company_orm.ifu,
             idu=company_orm.idu,
-            is_active=not company_orm.is_disable
+            is_disable=company_orm.is_disable
         )

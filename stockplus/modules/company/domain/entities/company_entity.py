@@ -14,7 +14,7 @@ class Company:
     def __init__(self, denomination=None, legal_form=None, since=None,
                  site=None, effective=None, resume=None, registration_number=None,
                  tax_id=None, siren=None, siret=None, ifu=None, idu=None,
-                 is_active=True, id=None):
+                 is_disable=True, id=None):
         """
         Initialize a new Company instance.
         
@@ -32,7 +32,7 @@ class Company:
             siret: The company's SIRET number (French companies)
             ifu: The company's IFU number
             idu: The company's IDU number
-            is_active: Whether the company is active
+            is_disable: Whether the company is active
         """
         self.id = id
         self.denomination = denomination
@@ -47,7 +47,7 @@ class Company:
         self.siret = siret
         self.ifu = ifu
         self.idu = idu
-        self.is_active = is_active
+        self.is_disable = is_disable
     
     def update_info(self, denomination=None, since=None, site=None,
                    effective=None, resume=None, legal_form=None):
@@ -74,6 +74,10 @@ class Company:
             self.resume = resume
         if legal_form is not None:
             self.legal_form = legal_form
+
+    @property
+    def pk(self):
+        return self.id
     
     def update_identifiers(self, registration_number=None, tax_id=None,
                           siren=None, siret=None, ifu=None, idu=None):
@@ -105,10 +109,10 @@ class Company:
         """
         Activate the company.
         """
-        self.is_active = True
+        self.is_disable = False
     
     def deactivate(self):
         """
         Deactivate the company.
         """
-        self.is_active = False
+        self.is_disable = True

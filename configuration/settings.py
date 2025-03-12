@@ -218,7 +218,7 @@ USER_ROLE_INVITE = 'collaborator'
 """
 User permissions settings
 """
-from stockplus.permissions import IsManager
+from stockplus.infrastructure.permissions import IsManager
 INVITATION_PERMISSION = IsManager
 ADDITIONAL_CRUD_PERMISSIONS = ['stockplus.modules.user.permissions.IsSelf', 'stockplus.permissions.IsManager']
 
@@ -254,6 +254,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ), 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'stockplus.infrastructure.api.exceptions.custom_exception_handler',
 }
 
 """

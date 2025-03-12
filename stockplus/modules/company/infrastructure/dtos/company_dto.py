@@ -102,9 +102,15 @@ class CompanyCreateDTO(CompanyBaseDTO):
     pass
 
 
-class CompanyUpdateInfoDTO(BaseModel):
+class CompanyUpdateDTO(CompanyBaseDTO):
     """
     DTO for updating company general information.
+    """
+    pass
+
+class CompanyPartialUpdateDTO(CompanyBaseDTO):
+    """
+    DTO for partially updating company general information.
     """
     denomination: Optional[NameStr] = Field(
         None, description="Company name (letters, numbers, spaces, and basic punctuation only)"
@@ -112,33 +118,3 @@ class CompanyUpdateInfoDTO(BaseModel):
     legal_form: Optional[LegalFormStr] = Field(
         None, description="Legal form of the company (letters, numbers, spaces, hyphens, and dots only)"
     )
-    since: Optional[date] = Field(None, description="Date the company was founded")
-    site: Optional[HttpUrl] = Field(None, description="Company website URL")
-    effective: Optional[int] = Field(None, ge=0, description="Number of employees (must be positive)")
-    resume: Optional[str] = Field(None, max_length=10000, description="Company description")
-    
-    @field_validator('effective')
-    def validate_effective(cls, v):
-        if v is not None and v < 0:
-            raise ValueError('Number of employees must be positive')
-        return v
-    
-    model_config = {
-        "extra": "forbid",  # Forbid extra fields to prevent data injection
-    }
-
-
-class CompanyUpdateIdentifiersDTO(BaseModel):
-    """
-    DTO for updating company identifiers.
-    """
-    registration_number: Optional[IdentifierStr] = Field(None, max_length=100, description="Company registration number")
-    tax_id: Optional[IdentifierStr] = Field(None, max_length=100, description="Company tax ID")
-    siren: Optional[SirenStr] = Field(None, description="SIREN number (French companies)")
-    siret: Optional[SiretStr] = Field(None, description="SIRET number (French companies)")
-    ifu: Optional[IdentifierStr] = Field(None, max_length=100, description="IFU number")
-    idu: Optional[IdentifierStr] = Field(None, max_length=100, description="IDU number")
-    
-    model_config = {
-        "extra": "forbid",  # Forbid extra fields to prevent data injection
-    }

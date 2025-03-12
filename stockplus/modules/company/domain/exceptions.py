@@ -3,45 +3,46 @@ Domain exceptions for the company application.
 This module contains the domain exceptions for the company application.
 """
 
-
 class DomainException(Exception):
-    """
-    Base exception for all domain exceptions.
-    """
-    pass
+    """Base exception with configurable error type"""
+    status_code = 400
+    error_type = 'domain_error'
+    errors = []
+    
+    def __init__(self, message=None, **kwargs):
+        self.message = message or self.default_message
+        self.errors = kwargs.get('errors', self.errors)
+        super().__init__(self.message)
 
 
 class CompanyNotFoundException(DomainException):
     """
     Exception raised when a company is not found.
     """
-    def __init__(self, message="Company not found"):
-        self.message = message
-        super().__init__(self.message)
-
+    status_code = 404
+    error_type = 'company_not_found'
+    default_message = "Company not found"
 
 class CompanyAlreadyExistsException(DomainException):
     """
     Exception raised when a company already exists.
     """
-    def __init__(self, message="Company already exists"):
-        self.message = message
-        super().__init__(self.message)
-
+    status_code = 409
+    error_type = 'company_already_exists'
+    default_message = "Company already exists"
 
 class CompanyAddressNotFoundException(DomainException):
     """
     Exception raised when a company address is not found.
     """
-    def __init__(self, message="Company address not found"):
-        self.message = message
-        super().__init__(self.message)
-
+    status_code = 404
+    error_type = 'company_address_not_found'
+    default_message = "Company address not found"
 
 class ValidationException(DomainException):
     """
     Exception raised when validation fails.
     """
-    def __init__(self, message="Validation failed"):
-        self.message = message
-        super().__init__(self.message)
+    status_code = 400
+    error_type = 'validation_error'
+    default_message = "Validation failed"

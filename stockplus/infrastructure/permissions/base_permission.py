@@ -1,18 +1,6 @@
-from rest_framework.permissions import BasePermission
-
-class IsManager(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.groups.filter(name='Manager').exists()
-
-class IsCollaborator(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.groups.filter(name='Collaborator').exists()
-
-
-from django.conf import settings
-
 from importlib import import_module
 
+from django.conf import settings
 from django.conf import settings
 from rest_framework.permissions import IsAuthenticated
 
