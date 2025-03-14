@@ -10,7 +10,7 @@ from stockplus.modules.collaborator.infrastructure.models import (
     CollaboratorRole,
     CollaboratorPermission,
 )
-from stockplus.modules.user.interfaces.serializers.user import UserSerializer
+from stockplus.modules.user.interfaces.serializers.user import UserCreateSerializer
 from stockplus.modules.pointofsale.interfaces.serializers.pos_serializer import PointOfSaleSerializer
 
 
@@ -70,7 +70,7 @@ class CollaboratorSerializer(serializers.ModelSerializer):
     """
     Serializer for collaborators.
     """
-    user_details = UserSerializer(source='user', read_only=True)
+    user_details = UserCreateSerializer(source='user', read_only=True)
     role_details = CollaboratorRoleSerializer(source='role', read_only=True)
     points_of_sale_details = PointOfSaleSerializer(source='points_of_sale', many=True, read_only=True)
     pos_ids = serializers.PrimaryKeyRelatedField(

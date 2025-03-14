@@ -1,10 +1,8 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 
 from stockplus.models.base import Base
 from stockplus.fields import RichTextField
 
-User = get_user_model()
 class Company(Base):
     search_fields = ['denomination']
     denomination = models.CharField(max_length=255)

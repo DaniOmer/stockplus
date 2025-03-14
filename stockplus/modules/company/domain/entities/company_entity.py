@@ -49,6 +49,10 @@ class Company:
         self.idu = idu
         self.is_disable = is_disable
     
+    @property
+    def pk(self):
+        return self.id
+    
     def update_info(self, denomination=None, since=None, site=None,
                    effective=None, resume=None, legal_form=None):
         """
@@ -74,10 +78,6 @@ class Company:
             self.resume = resume
         if legal_form is not None:
             self.legal_form = legal_form
-
-    @property
-    def pk(self):
-        return self.id
     
     def update_identifiers(self, registration_number=None, tax_id=None,
                           siren=None, siret=None, ifu=None, idu=None):
