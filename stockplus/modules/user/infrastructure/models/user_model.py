@@ -4,12 +4,11 @@ This module contains django user model implementation.
 """
 
 from django.db import models
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
 
 from stockplus.models.base import Base
-
+from stockplus.modules.company.infrastructure.models import Company
 
 class UserManager(BaseUserManager):
     """
@@ -80,9 +79,13 @@ class User(AbstractUser, Base):
         default=False,
         help_text=_('Designates whether this user has verified their account.'),
     )
-    # Suppression temporaire de la relation ForeignKey pour éviter les imports circulaires
-    # Nous utiliserons uniquement company_id pour la relation
-    company_id = models.IntegerField(null=True, blank=True)
+    company = models.ForeignKey(
+        Company,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text=_('The company this user belongs to.'),
+    )
     role = models.CharField(
         _('role'),
         max_length=50,
@@ -137,7 +140,7 @@ class User(AbstractUser, Base):
         """
         Assign the user to a company.
         """
-        self.company_id = company_id
+        self.company = company_id
         self.role = role
 
     def remove_from_company(self):

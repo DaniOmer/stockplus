@@ -1,41 +1,113 @@
 """
-User repository implementation.
-This module contains the user repository implementation.
+Repository implementation for the user domain.
+This module contains the Django ORM implementation of the user repository.
 """
 
-
-from typing import List, Optional
+from typing import Optional, Dict, Any, List
+from django.db import transaction
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password, check_password
 
-from stockplus.modules.user.domain.entities import User
-from stockplus.modules.user.application.interfaces import (
-    UserRepositoryInterface,
-)
-
+from stockplus.modules.user.domain.entities.user import User
+from stockplus.modules.user.application.interfaces import IUserRepository
+from stockplus.modules.user.domain.exceptions import ValidationException
 UserORM = get_user_model()
 
-class UserRepository(UserRepositoryInterface):
+class UserRepository(IUserRepository):
     """
-    User repository implementation.
-
-    This class implements the UserRepositoryInterface using Django ORM.
+    Django ORM implementation of the user repository.
+    Implements CRUD operations for User domain entities.
     """
 
-    def _to_domain_entity(self, user_orm) -> User:
-        """
-        Convert a User ORM model to a User domain entity.
+    def get_by_id(self, user_id: int, raw: bool = False) -> Optional[User]:
+        return self._get_user_by(id=user_id, raw=raw)
 
-        Args:
-            user_orm: The User ORM model to convert
+    def get_by_email(self, email: str, raw: bool = False) -> Optional[User]:
+        return self._get_user_by(email=email, raw=raw)
 
-        Returns:
-            User: The User domain entity
-        """
-        if not user_orm:
-            return None
+    def get_by_phone_number(self, phone_number: str, raw: bool = False) -> Optional[User]:
+        return self._get_user_by(phone_number=phone_number, raw=raw)
+
+    def get_by_username(self, username: str, raw: bool = False) -> Optional[User]:
+        return self._get_user_by(username=username, raw=raw)
+
+    def get_by_company_id(self, company_id: int, raw: bool = False) -> List[User]:
+        try:
+            users = UserORM.objects.filter(company_id=company_id)
+            return [self._to_domain(user) for user in users] if raw else users
+        except Exception:
+            return []
+
+    @transaction.atomic
+    def save(self, user: User) -> User:
+        user_data = self._create_orm_mapping(user)
+
+        try:
+            # Handle password separately to ensure proper hashing
+            if hasattr(user, 'password_hash') and user.password_hash:
+                user_data["password"] = make_password(user.password_hash)
         
+            user_orm, _ = UserORM.objects.update_or_create(
+                id=user.id or None,
+                defaults=user_data
+            )
+            return self._to_domain(user_orm)
+        except Exception as e:
+            print(e)
+            raise ValidationException(str(e))
+        
+    def update_password(self, user_id: int, new_password: str) -> Optional[User]:
+        try:
+            user_orm = UserORM.objects.get(id=user_id)
+            user_orm.password = make_password(new_password)
+            user_orm.save(update_fields=['password', 'updated_at'])
+            return self._to_domain(user_orm)
+        except UserORM.DoesNotExist:
+            return None
+
+    def verify_password(self, user_id: int, password: str) -> bool:
+        try:
+            user_orm = UserORM.objects.get(id=user_id)
+            is_valid = check_password(password, user_orm.password)
+            if is_valid:
+                self._update_last_login(user_orm)
+            return is_valid
+        except UserORM.DoesNotExist:
+            return False
+        
+    def _update_last_login(self, user_orm: UserORM) -> None:
+        user_orm.last_login = timezone.now()
+        user_orm.save(update_fields=['last_login'])
+
+    @transaction.atomic
+    def delete(self, user_id: int) -> bool:
+        deleted, _ = UserORM.objects.filter(id=user_id).delete()
+        return deleted > 0
+    
+    def _get_user_by(self, raw=True, **kwargs: Any) -> Optional[User]:
+        try:
+            if raw:
+                return UserORM.objects.get(**kwargs)
+            else:
+                return self._to_domain(UserORM.objects.get(**kwargs))
+        except (UserORM.DoesNotExist, ValueError, TypeError):
+            return None
+    
+    def _create_orm_mapping(self, user: User) -> Dict[str, Any]:
+        return {
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "username": user.username,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "is_active": user.is_active,
+            "is_verified": user.is_verified,
+            "company_id": user.company_id,
+            "role": user.role,
+        }
+        
+    def _to_domain(self, user_orm: UserORM) -> User:
         return User(
             id=user_orm.id,
             email=user_orm.email,
@@ -50,193 +122,3 @@ class UserRepository(UserRepositoryInterface):
             created_at=user_orm.date_joined,
             updated_at=user_orm.date_joined
         )
-
-    def get_by_id(self, user_id) -> Optional[User]:
-        """
-        Get a user by ID.
-
-        Args:
-            user_id: The ID of the user to retrieve
-
-        Returns:
-            User: The user with the given ID or None if not found
-        """
-        try:
-            user_orm = UserORM.objects.get(id=user_id)
-            return self._to_domain_entity(user_orm)
-        except UserORM.DoesNotExist:
-            return None
-
-    def get_by_email(self, email) -> Optional[User]:
-        """
-        Get a user by email.
-
-        Args:
-            email: The email of the user to retrieve
-
-        Returns:
-            User: The user with the given email or None if not found
-        """
-        try:
-            user_orm = UserORM.objects.get(email=email)
-            return user_orm
-        except UserORM.DoesNotExist:
-            return None
-
-    def get_by_phone_number(self, phone_number) -> Optional[User]:
-        """
-        Get a user by phone number.
-
-        Args:
-            phone_number: The phone number of the user to retrieve
-
-        Returns:
-            User: The user with the given phone number or None if not found
-        """
-        try:
-            user_orm = UserORM.objects.get(phone_number=phone_number)
-            return user_orm
-        except UserORM.DoesNotExist:
-            return None
-
-    def get_by_username(self, username) -> Optional[User]:
-        """
-        Get a user by username.
-
-        Args:
-            username: The username of the user to retrieve
-
-        Returns:
-            User: The user with the given username or None if not found
-        """
-        try:
-            user_orm = UserORM.objects.get(username=username)
-            return self._to_domain_entity(user_orm)
-        except UserORM.DoesNotExist:
-            return None
-
-    def get_by_company_id(self, company_id) -> List[User]:
-        """
-        Get all users for a company.
-
-        Args:
-            company_id: The ID of the company
-
-        Returns:
-            List[User]: A list of users for the company
-        """
-        user_orms = UserORM.objects.filter(company_id=company_id)
-        return [self._to_domain_entity(user_orm) for user_orm in user_orms]
-
-    def save(self, user: User) -> User:
-        """
-        Save a user, either creating a new one or updating an existing one.
-
-        Args:
-            user: The user to save.
-
-        Returns:
-            User: The saved user.
-        """
-        COMMON_FIELDS = [
-            'email', 'phone_number', 'username', 'first_name',
-            'last_name', 'is_active', 'is_verified', 'company_id', 'role'
-        ]
-
-        # Check for existing user using filter().first() for cleaner existence check
-        existing_user = UserORM.objects.filter(id=user.id).first() if user.id else None
-
-        # Handle password hashing once for both create/update scenarios
-        hashed_password = None
-        if hasattr(user, 'password_hash') and user.password_hash:
-            hashed_password = make_password(user.password_hash)
-
-        if not existing_user:
-            # Create new user with dictionary unpacking
-            user_data = {field: getattr(user, field) for field in COMMON_FIELDS}
-            user_data['password'] = hashed_password
-            return UserORM.objects.create(**user_data)
-        else:
-            # Update existing user using dynamic field assignment
-            for field in COMMON_FIELDS:
-                setattr(existing_user, field, getattr(user, field))
-            
-            # Only update password if new hash was provided
-            if hashed_password is not None:
-                existing_user.password = hashed_password
-            
-            existing_user.save()
-            return existing_user
-
-    def update_password(self, user_id, new_password) -> User:
-        """
-        Update a user's password.
-
-        Args:
-            user_id: The ID of the user to update
-            new_password: The new password
-
-        Returns:
-            User: The updated user
-        """
-        try:
-            user_orm = UserORM.objects.get(id=user_id)
-            user_orm.password = make_password(new_password)
-            user_orm.save()
-            return self._to_domain_entity(user_orm)
-        except UserORM.DoesNotExist:
-            return None
-
-    def verify_password(self, user_id, password) -> bool:
-        """
-        Verify a user's password.
-
-        Args:
-            user_id: The ID of the user
-            password: The password to verify
-
-        Returns:
-            bool: True if the password is correct, False otherwise
-        """
-        try:
-            user_orm = UserORM.objects.get(id=user_id)
-            is_valid = check_password(password, user_orm.password)
-            if is_valid:
-                self.update_last_login(user_orm)
-            return is_valid
-        except UserORM.DoesNotExist:
-            return False
-        
-    def update_last_login(self, user_orm) -> User:
-        """
-        Update a user's last login timestamp.
-
-        Args:
-            user_id: The ID of the user to update
-
-        Returns:
-            User: The updated user
-        """
-        try:
-            user_orm.last_login = timezone.now()
-            user_orm.save()
-            return self._to_domain_entity(user_orm)
-        except UserORM.DoesNotExist:
-            return None
-
-    def delete(self, user_id) -> bool:
-        """
-        Delete a user.
-
-        Args:
-            user_id: The ID of the user to delete
-
-        Returns:
-            bool: True if the user was deleted, False otherwise
-        """
-        try:
-            user_orm = UserORM.objects.get(id=user_id)
-            user_orm.delete()
-            return True
-        except UserORM.DoesNotExist:
-            return False

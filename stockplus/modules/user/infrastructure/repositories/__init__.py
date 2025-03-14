@@ -5,12 +5,10 @@ This package contains repositories implementations for the user application.
 
 from stockplus.modules.user.infrastructure.repositories.user_repository import UserRepository
 from stockplus.modules.user.infrastructure.repositories.invitation_repository import InvitationRepository
-from stockplus.modules.user.infrastructure.repositories.notification_repository import NotificationRepository
 from stockplus.modules.user.infrastructure.repositories.token_repository import TokenRepository
 
 __all__ = [
-    UserRepository,
-    InvitationRepository,
-    NotificationRepository,
-    TokenRepository
+    'UserRepository',
+    'InvitationRepository',
+    'TokenRepository',
 ]

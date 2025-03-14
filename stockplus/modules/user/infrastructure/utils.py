@@ -6,8 +6,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from stockplus.utils import setting
 from stockplus.modules.messenger.domain.entities import Missive
-from stockplus.modules.user.application.token_service import TokenService
+from stockplus.modules.user.application.services import TokenService
 from stockplus.modules.user.infrastructure.repositories import TokenRepository
+
+def generate_jwt_access_and_refresh_token(user):
+    token = RefreshToken.for_user(user)
+    return {
+        'access': str(token.access_token),
+        'refresh': str(token),
+    }
 
 def generate_verification_token(user):
     token = RefreshToken.for_user(user).access_token
@@ -51,7 +58,6 @@ def get_password_reset_data_missive(user, token):
         "html": html_content,
         "message": html_content,
     }
-    return None
 
 def get_invitation_data_missive(invitation):
     sender = invitation.sender.first_name

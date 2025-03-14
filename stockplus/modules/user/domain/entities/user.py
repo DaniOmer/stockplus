@@ -5,7 +5,7 @@ This module contains the domain models for the user application.
 
 import secrets
 from datetime import datetime, timedelta
-
+from typing import Any, Optional
 
 class User:
     """
@@ -15,7 +15,7 @@ class User:
     def __init__(self, email=None, phone_number=None, username=None,
                  first_name=None, last_name=None, password_hash=None,
                  is_active=True, is_verified=False, company_id=None, role=None,
-                 created_at=None, updated_at=None, id=None):
+                 created_at=None, updated_at=None, id=None, django_user=None):
         """
         Initialize a new User instance.
 
@@ -33,6 +33,7 @@ class User:
             role: The user's role in the company
             created_at: When the user was created
             updated_at: When the user was last updated
+            django_user: The Django ORM user object (optional)
         """
         self.id = id
         self.email = email
@@ -49,6 +50,13 @@ class User:
         self.updated_at = updated_at or datetime.now()
         self.verification_tokens = {}
         self.password_reset_tokens = {}
+        
+        # Store a reference to the Django ORM object for integration with Django-specific features
+        self._django_user = django_user
+        
+    @property
+    def pk(self):
+        return self.id
 
     def verify(self):
         """
@@ -203,3 +211,13 @@ class User:
         """
         if token in self.password_reset_tokens:
             del self.password_reset_tokens[token]
+
+    @property
+    def django_user(self) -> Optional[Any]:
+        """
+        Get the underlying Django user ORM object if available.
+        
+        Returns:
+            The Django user ORM object or None if not available
+        """
+        return self._django_user

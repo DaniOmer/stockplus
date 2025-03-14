@@ -6,10 +6,10 @@ This module contains the invitation service for the user application.
 import logging
 import secrets
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
 from stockplus.modules.user.domain.entities.invitation import Invitation
-from stockplus.modules.user.application.interfaces import InvitationRepositoryInterface
+from stockplus.modules.user.application.interfaces import IInvitationRepository
 from stockplus.modules.user.domain.exceptions import (
     InvitationNotFoundException,
     InvitationExpiredException,
@@ -27,7 +27,7 @@ class InvitationService:
     to access and manipulate invitation data and enforces business rules.
     """
     
-    def __init__(self, invitation_repository: InvitationRepositoryInterface):
+    def __init__(self, invitation_repository: IInvitationRepository):
         """
         Initialize a new InvitationService instance.
         

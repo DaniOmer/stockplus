@@ -1,18 +1,20 @@
 """
-User application services.
+Application services for the user application.
 This module contains the application services for the user application.
 """
 
 import logging
 from typing import List, Optional, Dict, Any
 
-from stockplus.modules.user.domain.entities import User
-from stockplus.modules.user.application.interfaces import UserRepositoryInterface, ITokenRepository
+from stockplus.modules.user.domain.entities.user import User
 from stockplus.modules.user.domain.exceptions import (
     UserNotFoundException,
     InvalidCredentialsException,
+    UserAlreadyExistsException,
+    ValidationException,
 )
-from stockplus.modules.user.application.token_service import TokenService, TokenType
+from stockplus.modules.user.application.interfaces import IUserRepository
+from stockplus.modules.user.application.services import TokenService, TokenType
 
 logger = logging.getLogger(__name__)
 
@@ -25,19 +27,23 @@ class UserService:
     to access and manipulate user data and enforces business rules.
     """
     
-    def __init__(self, user_repository: UserRepositoryInterface, token_repository: ITokenRepository):
+    def __init__(
+        self, 
+        user_repository: IUserRepository, 
+        token_service: TokenService,
+    ):
         """
         Initialize a new UserService instance.
         
         Args:
             user_repository: The user repository to use
-            token_repository: The token repository to use (optional)
+            token_service: The token service to use
+            jwt_token_service: The JWT token service to use
         """
-        # REMINDER TO REFACTOR AND GIVE TOKEN_SERVICE AS ARGUMENT INSTEAD OF TOKEN_REPOSITORY
         self.user_repository = user_repository
-        self.token_service = TokenService(token_repository)
+        self.token_service = token_service
     
-    def get_user_by_id(self, user_id) -> Optional[User]:
+    def get_user_by_id(self, user_id: int) -> Optional[User]:
         """
         Get a user by ID.
         
@@ -49,7 +55,7 @@ class UserService:
         """
         return self.user_repository.get_by_id(user_id)
     
-    def get_user_by_email(self, email) -> Optional[User]:
+    def get_user_by_email(self, email: str) -> Optional[User]:
         """
         Get a user by email.
         
@@ -61,7 +67,7 @@ class UserService:
         """
         return self.user_repository.get_by_email(email)
     
-    def get_user_by_phone_number(self, phone_number) -> Optional[User]:
+    def get_user_by_phone_number(self, phone_number: str) -> Optional[User]:
         """
         Get a user by phone number.
         
@@ -73,7 +79,7 @@ class UserService:
         """
         return self.user_repository.get_by_phone_number(phone_number)
     
-    def get_users_by_company_id(self, company_id) -> List[User]:
+    def get_users_by_company_id(self, company_id: int) -> List[User]:
         """
         Get all users for a company.
         
@@ -101,17 +107,18 @@ class UserService:
             User: The created user
             
         Raises:
-            ValueError: If neither email nor phone_number is provided
+            ValidationException: If neither email nor phone_number is provided
+            UserAlreadyExistsException: If a user with the given email or phone number already exists
         """
         if not email and not phone_number:
-            raise ValueError("Either email or phone_number must be provided")
+            raise ValidationException("Either email or phone_number must be provided")
         
         # Check if a user with the given email or phone number already exists
         if email and self.user_repository.get_by_email(email):
-            raise ValueError(f"A user with email {email} already exists")
+            raise UserAlreadyExistsException(f"A user with email {email} already exists")
         
         if phone_number and self.user_repository.get_by_phone_number(phone_number):
-            raise ValueError(f"A user with phone number {phone_number} already exists")
+            raise UserAlreadyExistsException(f"A user with phone number {phone_number} already exists")
         
         # Create a new user entity
         user = User(
@@ -144,15 +151,24 @@ class UserService:
             
         Raises:
             UserNotFoundException: If the user is not found
+            UserAlreadyExistsException: If a user with the given email or phone number already exists
         """
         user = self.user_repository.get_by_id(user_id)
         if not user:
             raise UserNotFoundException(f"User with ID {user_id} not found")
         
-        # Update the user entity
-        if email is not None:
+        # Check if a user with the given email already exists
+        if email is not None and email != user.email:
+            existing_user = self.user_repository.get_by_email(email)
+            if existing_user and existing_user.id != user.id:
+                raise UserAlreadyExistsException(f"A user with email {email} already exists")
             user.email = email
-        if phone_number is not None:
+            
+        # Check if a user with the given phone number already exists
+        if phone_number is not None and phone_number != user.phone_number:
+            existing_user = self.user_repository.get_by_phone_number(phone_number)
+            if existing_user and existing_user.id != user.id:
+                raise UserAlreadyExistsException(f"A user with phone number {phone_number} already exists")
             user.phone_number = phone_number
         if first_name is not None:
             user.first_name = first_name
@@ -249,9 +265,9 @@ class UserService:
         user = None
         
         if email:
-            user = self.user_repository.get_by_email(email)
+            user = self.user_repository.get_by_email(email=email, raw=True)
         elif phone_number:
-            user = self.user_repository.get_by_phone_number(phone_number)
+            user = self.user_repository.get_by_phone_number(phone_number=phone_number, raw=True)
         
         if not user:
             raise InvalidCredentialsException("Invalid credentials")
@@ -385,7 +401,7 @@ class UserService:
         """
         # Password reset is only via email
         if not email:
-            raise ValueError("Email is required for password reset")
+            raise ValidationException("Email is required for password reset")
         
         user = self.user_repository.get_by_email(email)
         
@@ -449,4 +465,23 @@ class UserService:
         # Update the password
         user = self.user_repository.update_password(user_id, new_password)
         
+        return user
+    
+    def login(self, email=None, phone_number=None, password=None) -> dict:
+        """
+        Login a user and generate JWT tokens.
+        
+        Args:
+            email: The user's email address
+            phone_number: The user's phone number
+            password: The user's password
+            
+        Returns:
+            dict: A dictionary containing the access and refresh tokens
+            
+        Raises:
+            InvalidCredentialsException: If the credentials are invalid
+        """
+        # Authenticate the user
+        user = self.authenticate(email=email, phone_number=phone_number, password=password)
         return user

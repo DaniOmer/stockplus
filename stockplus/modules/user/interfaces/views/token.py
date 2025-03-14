@@ -8,9 +8,8 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from stockplus.modules.user.domain.entities import TokenType, TokenMethod
-from stockplus.modules.user.application.token_service import TokenService
 from stockplus.modules.user.infrastructure.repositories import TokenRepository
-from stockplus.modules.user.application.user_service import UserService
+from stockplus.modules.user.application.services import UserService, TokenService
 from stockplus.modules.user.infrastructure.repositories import UserRepository
 from stockplus.modules.user.interfaces.serializers.token import (
     TokenSerializer,

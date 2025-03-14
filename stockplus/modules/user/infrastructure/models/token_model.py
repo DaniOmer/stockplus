@@ -6,6 +6,7 @@ This module contains the token model for the user application.
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+
 from stockplus.models.base import Base
 
 class Token(Base):

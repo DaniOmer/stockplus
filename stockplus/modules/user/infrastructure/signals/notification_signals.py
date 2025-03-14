@@ -13,7 +13,7 @@ from stockplus.modules.shop.services import CustomerService
 from stockplus.modules.user.infrastructure.models import Invitation
 from stockplus.modules.messenger.infrastructure.utils import send_mail_message
 from stockplus.modules.user.infrastructure.utils import get_verification_data_missive, get_invitation_data_missive
-from stockplus.modules.user.application.invitation_service import InvitationService
+from stockplus.modules.user.application.services import InvitationService
 from stockplus.modules.user.infrastructure.repositories import InvitationRepository
 
 

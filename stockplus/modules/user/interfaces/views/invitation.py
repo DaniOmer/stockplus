@@ -7,7 +7,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 
 from stockplus.modules.user.interfaces.serializers import InvitationSerializer
-from stockplus.modules.user.application.invitation_service import InvitationService
+from stockplus.modules.user.application.services import InvitationService
 from stockplus.modules.user.infrastructure.repositories import InvitationRepository
 from stockplus.modules.user.domain.exceptions import (
     InvitationNotFoundException,
