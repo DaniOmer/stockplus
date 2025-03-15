@@ -21,9 +21,9 @@ class UserBaseSerializer(BaseSerializer, serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'phone_number', 'first_name', 
-            'last_name', 'is_verified', 'is_active',
+            'last_name', 'is_verified', 'is_active', 'avatar',
         ]
-        read_only_fields = ['id', 'is_verified', 'is_active', 'company_id']
+        read_only_fields = ['id', 'is_verified', 'is_active', 'company_id', 'avatar']
     
     def is_valid(self, raise_exception=False):
         try:

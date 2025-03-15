@@ -7,11 +7,12 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .views import UserViewSet, AuthViewSet
+from .views import UserViewSet, AuthViewSet, AvatarViewSet
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'auth', AuthViewSet, basename='auth')
+router.register(r'users/avatar', AvatarViewSet, basename='avatar')
 
 urlpatterns = [
     path('api/', include(router.urls)),

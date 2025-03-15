@@ -104,7 +104,6 @@ class UserViewSet(ResponseFormatterMixin, viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         
-        print("Request data ", request.data)
         # Create serializer with the instance and data
         serializer = self.get_serializer(
             instance, 
@@ -118,7 +117,6 @@ class UserViewSet(ResponseFormatterMixin, viewsets.ModelViewSet):
             user_id=request.user.id,
             **serializer.validated_data
         )
-        print("User updated successfully ", user)
         
         return self.format_response(
             data=UserBaseSerializer(user).data,

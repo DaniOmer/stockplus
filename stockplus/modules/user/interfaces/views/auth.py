@@ -22,6 +22,7 @@ from stockplus.modules.user.interfaces.serializers import (
     PasswordResetConfirmSerializer,
     PasswordUpdateSerializer,
 )
+from stockplus.modules.company.interfaces.serializers import CompanyBaseSerializer
 from stockplus.modules.user.infrastructure.utils import generate_jwt_access_and_refresh_token, blacklist_token
 
 class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
@@ -93,7 +94,7 @@ class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
             {
                 'user': {
                     **UserBaseSerializer(user).data,
-                    'company': user.company
+                    'company': CompanyBaseSerializer(user.company).data
                 },
                 **tokens,
             },

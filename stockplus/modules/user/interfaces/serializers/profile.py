@@ -17,7 +17,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'id', 'email', 'phone_number', 'first_name', 'last_name',
             'is_verified', 'company_id', 'role', 'avatar'
         ]
-        read_only_fields = ['id', 'is_verified', 'company_id', 'role']
+        read_only_fields = ['id', 'is_verified', 'company_id', 'role', 'avatar']
     
     def update(self, instance, validated_data):
         """

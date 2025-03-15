@@ -186,6 +186,7 @@ class UserService:
             setattr(user, key, value)
         
         # Save the user
+        print("User updated successfully ", user)
         return self.user_repository.save(user)
     
     def verify_user(self, user_id) -> User:
@@ -470,6 +471,83 @@ class UserService:
         
         # Update the password
         user = self.user_repository.update_password(user_id, new_password)
+        
+        return user
+    
+    def upload_avatar(self, user, avatar_file) -> User:
+        """
+        Upload a new avatar for a user.
+        
+        Args:
+            user: The user object
+            avatar_file: The avatar file to upload
+            
+        Returns:
+            User: The updated user
+            
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        # Get the user by ID
+        user_id = user.id
+        user_obj = self.user_repository.get_by_id(user_id)
+        if not user_obj:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+        
+        # Delete the old avatar if it exists
+        if user.avatar:
+            user.avatar.delete(save=False)
+        
+        # Set the new avatar
+        user.avatar = avatar_file
+        user.save()
+        
+        return user
+    
+    def get_avatar_url(self, user_id) -> Optional[str]:
+        """
+        Get the URL of a user's avatar.
+        
+        Args:
+            user_id: The ID of the user
+            
+        Returns:
+            Optional[str]: The URL of the avatar or None if the user has no avatar
+            
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+        
+        if not user.avatar:
+            return None
+        
+        return user.avatar.url
+    
+    def remove_avatar(self, user_id) -> User:
+        """
+        Remove a user's avatar.
+        
+        Args:
+            user_id: The ID of the user
+            
+        Returns:
+            User: The updated user
+            
+        Raises:
+            UserNotFoundException: If the user is not found
+        """
+        user = self.user_repository.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundException(f"User with ID {user_id} not found")
+        
+        # Delete the avatar if it exists
+        if user.avatar:
+            user.avatar.delete(save=False)
+            user.avatar = None
+            user.save()
         
         return user
     

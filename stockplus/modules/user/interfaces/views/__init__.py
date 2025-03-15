@@ -1,16 +1,10 @@
 """
 Views for the user application.
-This module exports all views for the user application.
+This module contains the views for the user application.
 """
 
-from stockplus.modules.user.interfaces.views.user import UserViewSet
-from stockplus.modules.user.interfaces.views.auth import AuthViewSet
-from stockplus.modules.user.interfaces.views.invitation import InvitationCreateView, InvitationValidateView
+from .user import UserViewSet
+from .auth import AuthViewSet
+from .avatar import AvatarViewSet
 
-
-__all__ = [
-    'UserViewSet',
-    'AuthViewSet',
-    'InvitationCreateView',
-    'InvitationValidateView',
-]
+__all__ = ['UserViewSet', 'AuthViewSet', 'AvatarViewSet']
