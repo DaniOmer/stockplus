@@ -32,6 +32,6 @@ class ValidationException(DomainException):
     """
     Exception raised when validation fails.
     """
-    status_code = 400
-    error_type = 'validation_error'
+    status_code = 422
+    error_type = 'validation_failed'
     default_message = "Validation failed"

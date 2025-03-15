@@ -1,4 +1,5 @@
 from stockplus.modules.company.interfaces.serializers.company import (
+    CompanyBaseSerializer,
     CompanyCreateSerializer, 
     CompanyUpdateSerializer, 
     CompanyStatusSerializer,
@@ -6,6 +7,7 @@ from stockplus.modules.company.interfaces.serializers.company import (
 )
 
 __all__ = [
+    'CompanyBaseSerializer',
     'CompanyCreateSerializer', 
     'CompanyUpdateSerializer', 
     'CompanyStatusSerializer',
