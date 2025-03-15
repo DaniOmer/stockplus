@@ -7,7 +7,6 @@ from stockplus.modules.user.interfaces.serializers.user import (
     UserBaseSerializer,
     UserCreateSerializer,
     UserUpdateSerializer,
-    UserPasswordUpdateSerializer,
 )
 
 from stockplus.modules.user.interfaces.serializers.auth import (
@@ -23,12 +22,15 @@ from stockplus.modules.user.interfaces.serializers.invitation import (
     InvitationSerializer,
 )
 
+from stockplus.modules.user.interfaces.serializers.logout import (
+    LogoutSerializer,
+)
+
 __all__ = [
     # User serializers
     'UserBaseSerializer',
     'UserCreateSerializer',
     'UserUpdateSerializer',
-    'UserPasswordUpdateSerializer',
     
     # Auth serializers
     'EmailVerifySerializer',
@@ -37,6 +39,7 @@ __all__ = [
     'PasswordResetConfirmSerializer',
     'PasswordUpdateSerializer',
     'LoginSerializer',
+    'LogoutSerializer',
     
     # Invitation serializers
     'InvitationSerializer',

@@ -20,6 +20,13 @@ class UserRepository(IUserRepository):
     Implements CRUD operations for User domain entities.
     """
 
+    def get_all(self, raw: bool = False) -> List[User]:
+        """
+        Get all users.
+        """
+        users = UserORM.objects.all()
+        return [self._to_domain(user) for user in users] if raw else users
+
     def get_by_id(self, user_id: int, raw: bool = False) -> Optional[User]:
         return self._get_user_by(id=user_id, raw=raw)
 

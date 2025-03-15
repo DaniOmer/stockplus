@@ -9,7 +9,7 @@ from typing_extensions import Annotated, Optional
 
 # Validation patterns
 NAME_PATTERN = r'^[a-zA-Z\s\-\']+$'
-PHONE_PATTERN = r'^\+?[1-9]\d{1,14}$'
+PHONE_PATTERN = r'^\+?[0-9]\d{1,14}$'
 # Simplified password pattern without lookahead
 PASSWORD_PATTERN = r'^[A-Za-z\d@$!%*#?&,;]{7,}$'
 
@@ -67,7 +67,6 @@ class UserCreateDTO(UserBaseDTO):
     DTO for creating a new user.
     """
     password: PasswordStr = Field(..., description="User's password")
-    # country: str = Field(..., min_length=2, max_length=2, description="User's country code (ISO 2)")
     
     @field_validator('password')
     def validate_password_strength(cls, v):
@@ -100,7 +99,7 @@ class UserUpdateDTO(UserBaseDTO):
     first_name: Optional[NameStr] = Field(None, description="User's first name")
     last_name: Optional[NameStr] = Field(None, description="User's last name")
     phone_number: Optional[PhoneStr] = Field(None, description="User's phone number")
-    country: Optional[str] = Field(None, min_length=2, max_length=2, description="User's country code (ISO 2)")
+    # country: Optional[str] = Field(None, min_length=2, max_length=2, description="User's country code (ISO 2)")
 
 class UserPasswordUpdateDTO(BaseModel):
     """
@@ -127,114 +126,3 @@ class UserPasswordUpdateDTO(BaseModel):
     model_config = {
         "extra": "forbid",
     }
-
-# class UserVerificationDTO(BaseModel):
-#     """
-#     DTO for user verification.
-#     """
-#     token: str = Field(..., description="Verification token")
-    
-#     model_config = {
-#         "extra": "forbid",  # Forbid extra fields to prevent data injection
-#     }
-
-# class PasswordResetRequestDTO(BaseModel):
-#     """
-#     DTO for password reset request.
-#     """
-#     email: Optional[EmailStr] = Field(None, description="User's email address")
-#     phone_number: Optional[PhoneStr] = Field(None, description="User's phone number")
-    
-#     @field_validator('email', 'phone_number')
-#     def validate_reset_method(cls, v, info):
-#         field_name = info.field_name
-#         return v
-    
-#     model_config = {
-#         "extra": "forbid",  # Forbid extra fields to prevent data injection
-#     }
-
-# class PasswordResetConfirmDTO(BaseModel):
-#     """
-#     DTO for password reset confirmation.
-#     """
-#     token: TokenStr = Field(..., description="Reset token")
-#     new_password: str = Field(
-#         ...,
-#         min_length=8,
-#         description="New password"
-#     )
-
-#     @field_validator('new_password')
-#     def validate_password_strength(cls, v):
-#         """Validate that the password meets strength requirements."""
-#         has_letter = any(c.isalpha() for c in v)
-#         has_digit = any(c.isdigit() for c in v)
-#         valid_chars = all(c.isalnum() or c in '@$!%*#?&' for c in v)
-        
-#         if not has_letter:
-#             raise ValueError('Password must contain at least one letter')
-#         if not has_digit:
-#             raise ValueError('Password must contain at least one digit')
-#         if not valid_chars:
-#             raise ValueError('Password contains invalid characters. Only alphanumeric and @$!%*#?& are allowed')
-            
-#         return v
-
-#     model_config = {
-#         "extra": "forbid",
-#     }
-
-# class EmailVerifyDTO(BaseModel):
-#     """
-#     DTO for email verification.
-#     """
-#     token: TokenStr = Field(..., description="Verification token")
-
-# class ResendVerificationEmailDTO(BaseModel):
-#     """
-#     DTO for resending verification email.
-#     """
-#     email: EmailStr = Field(..., description="User's email address")
-#     verification_method: str = Field(
-#         default="email",
-#         pattern="^(email|sms)$",
-#         description="Verification method (email or sms)"
-#     )
-
-# class PasswordResetRequestDTO(BaseModel):
-#     """
-#     DTO for password reset request.
-#     """
-#     email: EmailStr = Field(..., description="User's email address")
-
-# class PasswordResetConfirmDTO(BaseModel):
-#     """
-#     DTO for password reset confirmation.
-#     """
-#     token: TokenStr = Field(..., description="Reset token")
-#     new_password: str = Field(
-#         ...,
-#         min_length=8,
-#         description="New password"
-#     )
-
-#     @field_validator('new_password')
-#     def validate_password_strength(cls, v):
-#         """Validate that the password meets strength requirements."""
-#         has_letter = any(c.isalpha() for c in v)
-#         has_digit = any(c.isdigit() for c in v)
-#         valid_chars = all(c.isalnum() or c in '@$!%*#?&' for c in v)
-        
-#         if not has_letter:
-#             raise ValueError('Password must contain at least one letter')
-#         if not has_digit:
-#             raise ValueError('Password must contain at least one digit')
-#         if not valid_chars:
-#             raise ValueError('Password contains invalid characters. Only alphanumeric and @$!%*#?& are allowed')
-            
-#         return v
-
-#     model_config = {
-#         "extra": "forbid",
-#     } 

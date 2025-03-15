@@ -14,7 +14,6 @@ from stockplus.modules.user.infrastructure.models import User
 from stockplus.modules.user.infrastructure.dtos import (
     UserCreateDTO,
     UserUpdateDTO,
-    UserPasswordUpdateDTO,
 )
 
 class UserBaseSerializer(BaseSerializer, serializers.ModelSerializer):
@@ -22,9 +21,9 @@ class UserBaseSerializer(BaseSerializer, serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'phone_number', 'first_name', 
-            'last_name', 'is_verified', 'is_active'
+            'last_name', 'is_verified', 'is_active',
         ]
-        read_only_fields = ['id', 'is_verified', 'is_active']
+        read_only_fields = ['id', 'is_verified', 'is_active', 'company_id']
     
     def is_valid(self, raise_exception=False):
         try:
@@ -55,11 +54,5 @@ class UserUpdateSerializer(UserBaseSerializer):
         try:
             return UserUpdateDTO(**attrs).model_dump(exclude_none=True)
         except PydanticValidationError as e:
+            print("PydanticValidationError ", e.errors())
             raise ValidationException("Could not validate user data", errors=e.errors())
-
-class UserPasswordUpdateSerializer(serializers.Serializer):
-    def validate(self, attrs):
-        try:
-            return UserPasswordUpdateDTO(**attrs).model_dump(exclude_none=True)
-        except PydanticValidationError as e:
-            raise ValidationException("Could not validate password data", errors=e.errors())

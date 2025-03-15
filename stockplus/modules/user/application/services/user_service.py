@@ -42,6 +42,12 @@ class UserService:
         """
         self.user_repository = user_repository
         self.token_service = token_service
+
+    def get_all_users(self) -> List[User]:
+        """
+        Get all users.
+        """
+        return self.user_repository.get_all()
     
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         """

@@ -15,13 +15,14 @@ from stockplus.modules.user.interfaces.serializers import (
     UserBaseSerializer,
     UserCreateSerializer,
     LoginSerializer,
+    LogoutSerializer,
     EmailVerifySerializer,
     ResendVerificationEmailSerializer,
     PasswordResetRequestSerializer,
     PasswordResetConfirmSerializer,
     PasswordUpdateSerializer,
 )
-from stockplus.modules.user.infrastructure.utils import generate_jwt_access_and_refresh_token
+from stockplus.modules.user.infrastructure.utils import generate_jwt_access_and_refresh_token, blacklist_token
 
 class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
     """
@@ -41,6 +42,8 @@ class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
             return UserCreateSerializer
         elif self.action == 'login':
             return LoginSerializer
+        elif self.action == 'logout':
+            return LogoutSerializer
         elif self.action == 'verify_email':
             return EmailVerifySerializer
         elif self.action == 'resend_verification':
@@ -88,7 +91,10 @@ class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
         tokens = generate_jwt_access_and_refresh_token(user)
         return Response(
             {
-                'user': UserBaseSerializer(user).data,
+                'user': {
+                    **UserBaseSerializer(user).data,
+                    'company': user.company
+                },
                 **tokens,
             },
             status=status.HTTP_200_OK
@@ -170,4 +176,19 @@ class AuthViewSet(ResponseFormatterMixin, viewsets.ViewSet):
         return self.format_response(
             message="Password updated successfully",
             status=status.HTTP_200_OK
-        ) 
+        )
+    
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        """
+        Logout user by blacklisting the refresh token.
+        """
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        blacklist_token(serializer.validated_data['refresh_token'])
+
+        return self.format_response(
+            message="Logged out successfully",
+            status=status.HTTP_200_OK
+        )

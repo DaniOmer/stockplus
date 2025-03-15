@@ -3,6 +3,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 from stockplus.utils import setting
 from stockplus.modules.messenger.domain.entities import Missive
@@ -15,6 +16,16 @@ def generate_jwt_access_and_refresh_token(user):
         'access': str(token.access_token),
         'refresh': str(token),
     }
+
+def blacklist_token(token):
+    try:
+        # Find the outstanding token
+        token_obj = OutstandingToken.objects.get(token=token)
+        # Create a blacklisted token that references the outstanding token
+        BlacklistedToken.objects.create(token=token_obj)
+    except OutstandingToken.DoesNotExist:
+        # Token doesn't exist, nothing to blacklist
+        pass
 
 def generate_verification_token(user):
     token = RefreshToken.for_user(user).access_token
